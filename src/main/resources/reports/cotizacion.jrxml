@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport name="cotizacion" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail"
+              columnWidth="545" leftMargin="25" rightMargin="25" topMargin="25" bottomMargin="25">
+
+    <parameter name="LOGO" class="java.io.InputStream"/>
+    <parameter name="NUMERO_COTIZACION" class="java.lang.String"/>
+    <parameter name="FECHA_COTIZACION" class="java.lang.String"/>
+    <parameter name="ESTADO" class="java.lang.String"/>
+    <parameter name="CLIENTE" class="java.lang.String"/>
+    <parameter name="DIRECCION" class="java.lang.String"/>
+    <parameter name="TELEFONO" class="java.lang.String"/>
+    <parameter name="TIPO_EVENTO" class="java.lang.String"/>
+    <parameter name="FECHA_EVENTO" class="java.lang.String"/>
+
+    <field name="tipo" class="java.lang.String"/>
+    <field name="descripcion" class="java.lang.String"/>
+    <field name="especificaciones" class="java.lang.String"/>
+    <field name="cantidad" class="java.lang.Double"/>
+    <field name="precioUnitario" class="java.lang.Double"/>
+    <field name="subtotal" class="java.lang.Double"/>
+
+    <variable name="TOTAL" calculation="Sum" class="java.lang.Double">
+        <expression><![CDATA[$F{subtotal}]]></expression>
+    </variable>
+
+    <title height="255">
+        <!-- Logo -->
+        <element kind="image" x="0" y="5" width="150" height="110" scaleImage="RetainShape"
+                 hImageAlign="Left" vImageAlign="Middle">
+            <expression><![CDATA[$P{LOGO}]]></expression>
+        </element>
+        <!-- Nombre empresa -->
+        <element kind="staticText" x="245" y="18" width="300" height="26" forecolor="#22366B"
+                 fontName="SansSerif" fontSize="19.0" bold="true" hTextAlign="Right" vTextAlign="Middle">
+            <text><![CDATA[Eventos Caná]]></text>
+        </element>
+        <element kind="staticText" x="245" y="44" width="300" height="16" forecolor="#22366B"
+                 fontName="SansSerif" fontSize="10.0" bold="true" hTextAlign="Right">
+            <text><![CDATA[Alquifiestas & Floristería]]></text>
+        </element>
+        <element kind="staticText" x="245" y="62" width="300" height="14" forecolor="#666666"
+                 fontName="SansSerif" fontSize="8.0" hTextAlign="Right">
+            <text><![CDATA[Decoración y renta para toda clase de eventos]]></text>
+        </element>
+
+        <!-- Barra dorada -->
+        <element kind="rectangle" x="0" y="122" width="545" height="4" forecolor="#F2B134" backcolor="#F2B134">
+            <pen lineWidth="0.0"/>
+        </element>
+
+        <!-- Titulo y numero -->
+        <element kind="staticText" x="0" y="132" width="300" height="30" forecolor="#22366B"
+                 fontName="SansSerif" fontSize="23.0" bold="true" vTextAlign="Middle">
+            <text><![CDATA[COTIZACIÓN]]></text>
+        </element>
+        <element kind="textField" x="300" y="132" width="245" height="16" forecolor="#22366B"
+                 fontName="SansSerif" fontSize="11.0" bold="true" hTextAlign="Right" vTextAlign="Middle">
+            <expression><![CDATA["No. " + $P{NUMERO_COTIZACION}]]></expression>
+        </element>
+        <element kind="textField" x="300" y="148" width="245" height="14" forecolor="#444444"
+                 fontName="SansSerif" fontSize="9.0" hTextAlign="Right">
+            <expression><![CDATA["Estado: " + $P{ESTADO}]]></expression>
+        </element>
+
+        <!-- Caja de datos cliente / evento -->
+        <element kind="rectangle" x="0" y="168" width="545" height="80" radius="4"
+                 forecolor="#22366B" backcolor="#F4F6FB" mode="Opaque">
+            <pen lineWidth="0.8" lineColor="#22366B"/>
+        </element>
+
+        <!-- Columna izquierda -->
+        <element kind="staticText" x="12" y="178" width="70" height="14" forecolor="#22366B"
+                 fontName="SansSerif" fontSize="9.0" bold="true">
+            <text><![CDATA[Cliente:]]></text>
+        </element>
+        <element kind="textField" x="84" y="178" width="180" height="14" fontName="SansSerif" fontSize="9.0" textAdjust="StretchHeight">
+            <expression><![CDATA[$P{CLIENTE}]]></expression>
+        </element>
+        <element kind="staticText" x="12" y="200" width="70" height="14" forecolor="#22366B"
+                 fontName="SansSerif" fontSize="9.0" bold="true">
+            <text><![CDATA[Teléfono:]]></text>
+        </element>
+        <element kind="textField" x="84" y="200" width="180" height="14" fontName="SansSerif" fontSize="9.0">
+            <expression><![CDATA[$P{TELEFONO}]]></expression>
+        </element>
+        <element kind="staticText" x="12" y="222" width="70" height="14" forecolor="#22366B"
+                 fontName="SansSerif" fontSize="9.0" bold="true">
+            <text><![CDATA[Dirección:]]></text>
+        </element>
+        <element kind="textField" x="84" y="222" width="180" height="18" fontName="SansSerif" fontSize="9.0" textAdjust="StretchHeight">
+            <expression><![CDATA[$P{DIRECCION}]]></expression>
+        </element>
+
+        <!-- Columna derecha -->
+        <element kind="staticText" x="290" y="178" width="110" height="14" forecolor="#22366B"
+                 fontName="SansSerif" fontSize="9.0" bold="true">
+            <text><![CDATA[Fecha cotización:]]></text>
+        </element>
+        <element kind="textField" x="402" y="178" width="131" height="14" fontName="SansSerif" fontSize="9.0">
+            <expression><![CDATA[$P{FECHA_COTIZACION}]]></expression>
+        </element>
+        <element kind="staticText" x="290" y="200" width="110" height="14" forecolor="#22366B"
+                 fontName="SansSerif" fontSize="9.0" bold="true">
+            <text><![CDATA[Tipo de evento:]]></text>
+        </element>
+        <element kind="textField" x="402" y="200" width="131" height="14" fontName="SansSerif" fontSize="9.0" textAdjust="StretchHeight">
+            <expression><![CDATA[$P{TIPO_EVENTO}]]></expression>
+        </element>
+        <element kind="staticText" x="290" y="222" width="110" height="14" forecolor="#22366B"
+                 fontName="SansSerif" fontSize="9.0" bold="true">
+            <text><![CDATA[Fecha del evento:]]></text>
+        </element>
+        <element kind="textField" x="402" y="222" width="131" height="14" fontName="SansSerif" fontSize="9.0" textAdjust="StretchHeight">
+            <expression><![CDATA[$P{FECHA_EVENTO}]]></expression>
+        </element>
+    </title>
+
+    <columnHeader height="24">
+        <element kind="rectangle" x="0" y="0" width="545" height="22" forecolor="#22366B" backcolor="#22366B">
+            <pen lineWidth="0.0"/>
+        </element>
+        <element kind="staticText" mode="Transparent" x="6" y="0" width="70" height="22" forecolor="#FFFFFF"
+                 fontName="SansSerif" fontSize="9.0" bold="true" vTextAlign="Middle">
+            <text><![CDATA[Tipo]]></text>
+        </element>
+        <element kind="staticText" mode="Transparent" x="76" y="0" width="244" height="22" forecolor="#FFFFFF"
+                 fontName="SansSerif" fontSize="9.0" bold="true" vTextAlign="Middle">
+            <text><![CDATA[Descripción]]></text>
+        </element>
+        <element kind="staticText" mode="Transparent" x="320" y="0" width="55" height="22" forecolor="#FFFFFF"
+                 fontName="SansSerif" fontSize="9.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+            <text><![CDATA[Cant.]]></text>
+        </element>
+        <element kind="staticText" mode="Transparent" x="375" y="0" width="85" height="22" forecolor="#FFFFFF"
+                 fontName="SansSerif" fontSize="9.0" bold="true" hTextAlign="Right" vTextAlign="Middle">
+            <text><![CDATA[P. Unitario]]></text>
+        </element>
+        <element kind="staticText" mode="Transparent" x="460" y="0" width="85" height="22" forecolor="#FFFFFF"
+                 fontName="SansSerif" fontSize="9.0" bold="true" hTextAlign="Right" vTextAlign="Middle">
+            <text><![CDATA[Subtotal]]></text>
+        </element>
+    </columnHeader>
+
+    <detail>
+        <band height="18">
+            <element kind="textField" x="6" y="0" width="70" height="16" positionType="Float"
+                     fontName="SansSerif" fontSize="8.0" vTextAlign="Top">
+                <expression><![CDATA[$F{tipo}]]></expression>
+            </element>
+            <element kind="textField" x="76" y="0" width="244" height="16" positionType="Float"
+                     fontName="SansSerif" fontSize="8.0" vTextAlign="Top" textAdjust="StretchHeight">
+                <expression><![CDATA[$F{descripcion} + ($F{especificaciones} != null && $F{especificaciones}.trim().length() > 0 ? "\n" + $F{especificaciones} : "")]]></expression>
+            </element>
+            <element kind="textField" x="320" y="0" width="55" height="16" positionType="Float" pattern="#,##0.##"
+                     fontName="SansSerif" fontSize="8.0" hTextAlign="Center" vTextAlign="Top">
+                <expression><![CDATA[$F{cantidad}]]></expression>
+            </element>
+            <element kind="textField" x="375" y="0" width="85" height="16" positionType="Float" pattern="Q #,##0.00"
+                     fontName="SansSerif" fontSize="8.0" hTextAlign="Right" vTextAlign="Top">
+                <expression><![CDATA[$F{precioUnitario}]]></expression>
+            </element>
+            <element kind="textField" x="460" y="0" width="85" height="16" positionType="Float" pattern="Q #,##0.00"
+                     fontName="SansSerif" fontSize="8.0" bold="true" hTextAlign="Right" vTextAlign="Top">
+                <expression><![CDATA[$F{subtotal}]]></expression>
+            </element>
+            <element kind="line" x="0" y="17" width="545" height="1" positionType="Float" forecolor="#DDDDDD">
+                <pen lineWidth="0.5" lineColor="#DDDDDD"/>
+            </element>
+        </band>
+    </detail>
+
+    <summary height="92">
+        <element kind="rectangle" x="335" y="8" width="210" height="26" radius="4" forecolor="#22366B" backcolor="#22366B" mode="Opaque">
+            <pen lineWidth="0.0"/>
+        </element>
+        <element kind="staticText" mode="Transparent" x="347" y="8" width="90" height="26" forecolor="#FFFFFF"
+                 fontName="SansSerif" fontSize="12.0" bold="true" vTextAlign="Middle">
+            <text><![CDATA[TOTAL]]></text>
+        </element>
+        <element kind="textField" mode="Transparent" x="437" y="8" width="98" height="26" forecolor="#FFFFFF"
+                 fontName="SansSerif" fontSize="12.0" bold="true" pattern="Q #,##0.00" hTextAlign="Right" vTextAlign="Middle">
+            <expression><![CDATA[$V{TOTAL}]]></expression>
+        </element>
+        <element kind="staticText" x="0" y="50" width="545" height="14" forecolor="#666666"
+                 fontName="SansSerif" fontSize="8.0" italic="true">
+            <text><![CDATA[Precios expresados en Quetzales (Q). Esta cotización tiene una validez de 15 días a partir de la fecha de emisión.]]></text>
+        </element>
+        <element kind="staticText" x="0" y="64" width="545" height="14" forecolor="#666666"
+                 fontName="SansSerif" fontSize="8.0" italic="true">
+            <text><![CDATA[Los precios pueden variar según disponibilidad y condiciones finales del evento.]]></text>
+        </element>
+    </summary>
+
+    <pageFooter height="28">
+        <element kind="line" x="0" y="4" width="545" height="1" forecolor="#F2B134">
+            <pen lineWidth="1.0" lineColor="#F2B134"/>
+        </element>
+        <element kind="textField" x="0" y="8" width="200" height="14" forecolor="#888888"
+                 fontName="SansSerif" fontSize="7.0" pattern="dd/MM/yyyy HH:mm">
+            <expression><![CDATA[new java.util.Date()]]></expression>
+        </element>
+        <element kind="staticText" x="200" y="8" width="145" height="14" forecolor="#888888"
+                 fontName="SansSerif" fontSize="7.0" hTextAlign="Center">
+            <text><![CDATA[Eventos Caná]]></text>
+        </element>
+        <element kind="textField" x="345" y="8" width="165" height="14" forecolor="#888888"
+                 fontName="SansSerif" fontSize="7.0" hTextAlign="Right">
+            <expression><![CDATA["Página " + $V{PAGE_NUMBER} + " de "]]></expression>
+        </element>
+        <element kind="textField" x="512" y="8" width="33" height="14" forecolor="#888888"
+                 fontName="SansSerif" fontSize="7.0" evaluationTime="Report" hTextAlign="Left">
+            <expression><![CDATA[$V{PAGE_NUMBER}]]></expression>
+        </element>
+    </pageFooter>
+
+</jasperReport>

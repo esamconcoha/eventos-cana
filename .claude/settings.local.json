@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./mvnw.cmd -q compile)",
+      "Bash(./mvnw.cmd -q -o compile)",
+      "Bash(python -c ' *)",
+      "Bash(pip install *)",
+      "Bash(mkdir -p \"C:/Users/conco/OneDrive/Escritorio/Cana/DESARROLLO/CANA/src/main/resources/reports\" && cp \"C:/Users/conco/Downloads/logo.png\" \"C:/Users/conco/OneDrive/Escritorio/Cana/DESARROLLO/CANA/src/main/resources/reports/logo.png\" && ls -la \"C:/Users/conco/OneDrive/Escritorio/Cana/DESARROLLO/CANA/src/main/resources/reports\")",
+      "Bash(\"C:/Program Files/JetBrains/IntelliJ IDEA 2025.2.2/jbr/bin/java.exe\" -version)",
+      "Bash(cd \"C:/Users/conco/OneDrive/Escritorio/Cana/DESARROLLO/CANA\")",
+      "Bash(export JAVA_HOME=\"C:/Users/conco/.jdks/ms-21.0.8\")",
+      "Bash(./mvnw.cmd -q -o clean compile)",
+      "Bash(./mvnw.cmd -o compile)",
+      "Bash(./mvnw.cmd -q -o dependency:build-classpath -Dmdep.outputFile=cp.txt)",
+      "Bash(./mvnw.cmd -o org.apache.maven.plugins:maven-dependency-plugin:build-classpath -Dmdep.outputFile=cp.txt)",
+      "Read(//c/Users/conco/.m2/repository/**)"
+    ],
+    "additionalDirectories": [
+      "C:/Users/conco/OneDrive/Escritorio/Cana/DESARROLLO/FRONTEND"
+    ]
+  }
+}

@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport name="entrega" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail"
+              columnWidth="545" leftMargin="25" rightMargin="25" topMargin="25" bottomMargin="25">
+
+    <parameter name="LOGO" class="java.io.InputStream"/>
+    <parameter name="NUMERO_ENTREGA" class="java.lang.String"/>
+    <parameter name="ESTADO" class="java.lang.String"/>
+    <parameter name="CLIENTE" class="java.lang.String"/>
+    <parameter name="DIRECCION" class="java.lang.String"/>
+    <parameter name="FECHA_ENTREGA" class="java.lang.String"/>
+    <parameter name="FECHA_EMISION" class="java.lang.String"/>
+
+    <field name="tipo" class="java.lang.String"/>
+    <field name="descripcion" class="java.lang.String"/>
+    <field name="especificaciones" class="java.lang.String"/>
+    <field name="cantidad" class="java.lang.Double"/>
+
+    <title height="250">
+        <!-- Logo -->
+        <element kind="image" x="0" y="5" width="150" height="110" scaleImage="RetainShape"
+                 hImageAlign="Left" vImageAlign="Middle">
+            <expression><![CDATA[$P{LOGO}]]></expression>
+        </element>
+        <!-- Nombre empresa -->
+        <element kind="staticText" x="245" y="18" width="300" height="26" forecolor="#22366B"
+                 fontName="SansSerif" fontSize="19.0" bold="true" hTextAlign="Right" vTextAlign="Middle">
+            <text><![CDATA[Eventos Caná]]></text>
+        </element>
+        <element kind="staticText" x="245" y="44" width="300" height="16" forecolor="#22366B"
+                 fontName="SansSerif" fontSize="10.0" bold="true" hTextAlign="Right">
+            <text><![CDATA[Alquifiestas & Floristería]]></text>
+        </element>
+        <element kind="staticText" x="245" y="62" width="300" height="14" forecolor="#666666"
+                 fontName="SansSerif" fontSize="8.0" hTextAlign="Right">
+            <text><![CDATA[Decoración y renta para toda clase de eventos]]></text>
+        </element>
+
+        <!-- Barra dorada -->
+        <element kind="rectangle" x="0" y="122" width="545" height="4" forecolor="#F2B134" backcolor="#F2B134">
+            <pen lineWidth="0.0"/>
+        </element>
+
+        <!-- Titulo y numero -->
+        <element kind="staticText" x="0" y="132" width="340" height="30" forecolor="#22366B"
+                 fontName="SansSerif" fontSize="19.0" bold="true" vTextAlign="Middle">
+            <text><![CDATA[CONSTANCIA DE ENTREGA]]></text>
+        </element>
+        <element kind="textField" x="340" y="132" width="205" height="16" forecolor="#22366B"
+                 fontName="SansSerif" fontSize="11.0" bold="true" hTextAlign="Right" vTextAlign="Middle">
+            <expression><![CDATA["Pedido " + $P{NUMERO_ENTREGA}]]></expression>
+        </element>
+        <element kind="textField" x="340" y="148" width="205" height="14" forecolor="#444444"
+                 fontName="SansSerif" fontSize="9.0" hTextAlign="Right">
+            <expression><![CDATA["Estado: " + $P{ESTADO}]]></expression>
+        </element>
+
+        <!-- Caja de datos cliente / entrega -->
+        <element kind="rectangle" x="0" y="172" width="545" height="68" radius="4"
+                 forecolor="#22366B" backcolor="#F4F6FB" mode="Opaque">
+            <pen lineWidth="0.8" lineColor="#22366B"/>
+        </element>
+
+        <!-- Columna izquierda -->
+        <element kind="staticText" x="12" y="182" width="70" height="14" forecolor="#22366B"
+                 fontName="SansSerif" fontSize="9.0" bold="true">
+            <text><![CDATA[Cliente:]]></text>
+        </element>
+        <element kind="textField" x="84" y="182" width="180" height="14" fontName="SansSerif" fontSize="9.0" textAdjust="StretchHeight">
+            <expression><![CDATA[$P{CLIENTE}]]></expression>
+        </element>
+        <element kind="staticText" x="12" y="208" width="70" height="14" forecolor="#22366B"
+                 fontName="SansSerif" fontSize="9.0" bold="true">
+            <text><![CDATA[Dirección:]]></text>
+        </element>
+        <element kind="textField" x="84" y="208" width="180" height="24" fontName="SansSerif" fontSize="9.0" textAdjust="StretchHeight">
+            <expression><![CDATA[$P{DIRECCION}]]></expression>
+        </element>
+
+        <!-- Columna derecha -->
+        <element kind="staticText" x="290" y="182" width="115" height="14" forecolor="#22366B"
+                 fontName="SansSerif" fontSize="9.0" bold="true">
+            <text><![CDATA[Fecha de entrega:]]></text>
+        </element>
+        <element kind="textField" x="407" y="182" width="126" height="14" fontName="SansSerif" fontSize="9.0">
+            <expression><![CDATA[$P{FECHA_ENTREGA}]]></expression>
+        </element>
+        <element kind="staticText" x="290" y="208" width="115" height="14" forecolor="#22366B"
+                 fontName="SansSerif" fontSize="9.0" bold="true">
+            <text><![CDATA[Fecha de emisión:]]></text>
+        </element>
+        <element kind="textField" x="407" y="208" width="126" height="14" fontName="SansSerif" fontSize="9.0">
+            <expression><![CDATA[$P{FECHA_EMISION}]]></expression>
+        </element>
+    </title>
+
+    <columnHeader height="24">
+        <element kind="rectangle" x="0" y="0" width="545" height="22" forecolor="#22366B" backcolor="#22366B">
+            <pen lineWidth="0.0"/>
+        </element>
+        <element kind="staticText" mode="Transparent" x="6" y="0" width="80" height="22" forecolor="#FFFFFF"
+                 fontName="SansSerif" fontSize="9.0" bold="true" vTextAlign="Middle">
+            <text><![CDATA[Tipo]]></text>
+        </element>
+        <element kind="staticText" mode="Transparent" x="86" y="0" width="359" height="22" forecolor="#FFFFFF"
+                 fontName="SansSerif" fontSize="9.0" bold="true" vTextAlign="Middle">
+            <text><![CDATA[Descripción]]></text>
+        </element>
+        <element kind="staticText" mode="Transparent" x="445" y="0" width="94" height="22" forecolor="#FFFFFF"
+                 fontName="SansSerif" fontSize="9.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+            <text><![CDATA[Cantidad]]></text>
+        </element>
+    </columnHeader>
+
+    <detail>
+        <band height="20">
+            <element kind="textField" x="6" y="0" width="80" height="16" positionType="Float"
+                     fontName="SansSerif" fontSize="8.0" vTextAlign="Top">
+                <expression><![CDATA[$F{tipo}]]></expression>
+            </element>
+            <element kind="textField" x="86" y="0" width="359" height="16" positionType="Float"
+                     fontName="SansSerif" fontSize="8.0" vTextAlign="Top" textAdjust="StretchHeight">
+                <expression><![CDATA[$F{descripcion} + ($F{especificaciones} != null && $F{especificaciones}.trim().length() > 0 ? "\n" + $F{especificaciones} : "")]]></expression>
+            </element>
+            <element kind="textField" x="445" y="0" width="94" height="16" positionType="Float" pattern="#,##0.##"
+                     fontName="SansSerif" fontSize="8.0" hTextAlign="Center" vTextAlign="Top">
+                <expression><![CDATA[$F{cantidad}]]></expression>
+            </element>
+            <element kind="line" x="0" y="19" width="545" height="1" positionType="Float" forecolor="#DDDDDD">
+                <pen lineWidth="0.5" lineColor="#DDDDDD"/>
+            </element>
+        </band>
+    </detail>
+
+    <summary height="190">
+        <!-- Nota de conformidad -->
+        <element kind="staticText" x="0" y="10" width="545" height="28" forecolor="#444444"
+                 fontName="SansSerif" fontSize="9.0">
+            <text><![CDATA[Recibí de Eventos Caná, en conformidad y a mi entera satisfacción, los artículos y servicios detallados en esta constancia.]]></text>
+        </element>
+
+        <!-- Firma: entregado por -->
+        <element kind="line" x="25" y="110" width="215" height="1" forecolor="#22366B">
+            <pen lineWidth="0.8" lineColor="#22366B"/>
+        </element>
+        <element kind="staticText" x="25" y="114" width="215" height="14" forecolor="#22366B"
+                 fontName="SansSerif" fontSize="8.0" bold="true" hTextAlign="Center">
+            <text><![CDATA[Entregado por (Eventos Caná)]]></text>
+        </element>
+
+        <!-- Firma: recibido por -->
+        <element kind="line" x="305" y="110" width="215" height="1" forecolor="#22366B">
+            <pen lineWidth="0.8" lineColor="#22366B"/>
+        </element>
+        <element kind="staticText" x="305" y="114" width="215" height="14" forecolor="#22366B"
+                 fontName="SansSerif" fontSize="8.0" bold="true" hTextAlign="Center">
+            <text><![CDATA[Recibido por (nombre y firma)]]></text>
+        </element>
+        <element kind="staticText" x="305" y="138" width="215" height="14" forecolor="#666666"
+                 fontName="SansSerif" fontSize="8.0">
+            <text><![CDATA[Nombre: ______________________________]]></text>
+        </element>
+        <element kind="staticText" x="305" y="156" width="215" height="14" forecolor="#666666"
+                 fontName="SansSerif" fontSize="8.0">
+            <text><![CDATA[DPI / documento: ____________________]]></text>
+        </element>
+        <element kind="staticText" x="305" y="174" width="215" height="14" forecolor="#666666"
+                 fontName="SansSerif" fontSize="8.0">
+            <text><![CDATA[Fecha: ______________________________]]></text>
+        </element>
+    </summary>
+
+    <pageFooter height="28">
+        <element kind="line" x="0" y="4" width="545" height="1" forecolor="#F2B134">
+            <pen lineWidth="1.0" lineColor="#F2B134"/>
+        </element>
+        <element kind="textField" x="0" y="8" width="200" height="14" forecolor="#888888"
+                 fontName="SansSerif" fontSize="7.0" pattern="dd/MM/yyyy HH:mm">
+            <expression><![CDATA[new java.util.Date()]]></expression>
+        </element>
+        <element kind="staticText" x="200" y="8" width="145" height="14" forecolor="#888888"
+                 fontName="SansSerif" fontSize="7.0" hTextAlign="Center">
+            <text><![CDATA[Eventos Caná]]></text>
+        </element>
+        <element kind="textField" x="345" y="8" width="165" height="14" forecolor="#888888"
+                 fontName="SansSerif" fontSize="7.0" hTextAlign="Right">
+            <expression><![CDATA["Página " + $V{PAGE_NUMBER} + " de "]]></expression>
+        </element>
+        <element kind="textField" x="512" y="8" width="33" height="14" forecolor="#888888"
+                 fontName="SansSerif" fontSize="7.0" evaluationTime="Report" hTextAlign="Left">
+            <expression><![CDATA[$V{PAGE_NUMBER}]]></expression>
+        </element>
+    </pageFooter>
+
+</jasperReport>

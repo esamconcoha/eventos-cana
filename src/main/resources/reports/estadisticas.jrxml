@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport name="estadisticas" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail"
+              columnWidth="545" leftMargin="25" rightMargin="25" topMargin="25" bottomMargin="25">
+
+    <parameter name="LOGO" class="java.io.InputStream"/>
+    <parameter name="PERIODO" class="java.lang.String"/>
+    <parameter name="FECHA_EMISION" class="java.lang.String"/>
+
+    <!-- Indicadores de cabecera: cuatro por fila, dos filas. -->
+    <parameter name="K1_LABEL" class="java.lang.String"/>
+    <parameter name="K1_VALOR" class="java.lang.String"/>
+    <parameter name="K1_NOTA" class="java.lang.String"/>
+    <parameter name="K2_LABEL" class="java.lang.String"/>
+    <parameter name="K2_VALOR" class="java.lang.String"/>
+    <parameter name="K2_NOTA" class="java.lang.String"/>
+    <parameter name="K3_LABEL" class="java.lang.String"/>
+    <parameter name="K3_VALOR" class="java.lang.String"/>
+    <parameter name="K3_NOTA" class="java.lang.String"/>
+    <parameter name="K4_LABEL" class="java.lang.String"/>
+    <parameter name="K4_VALOR" class="java.lang.String"/>
+    <parameter name="K4_NOTA" class="java.lang.String"/>
+    <parameter name="K5_LABEL" class="java.lang.String"/>
+    <parameter name="K5_VALOR" class="java.lang.String"/>
+    <parameter name="K5_NOTA" class="java.lang.String"/>
+    <parameter name="K6_LABEL" class="java.lang.String"/>
+    <parameter name="K6_VALOR" class="java.lang.String"/>
+    <parameter name="K6_NOTA" class="java.lang.String"/>
+    <parameter name="K7_LABEL" class="java.lang.String"/>
+    <parameter name="K7_VALOR" class="java.lang.String"/>
+    <parameter name="K7_NOTA" class="java.lang.String"/>
+    <parameter name="K8_LABEL" class="java.lang.String"/>
+    <parameter name="K8_VALOR" class="java.lang.String"/>
+    <parameter name="K8_NOTA" class="java.lang.String"/>
+
+    <!-- Graficas ya rasterizadas por GraficoUtil. -->
+    <parameter name="GRAFICO_INGRESOS" class="java.awt.Image"/>
+    <parameter name="GRAFICO_TIPOS" class="java.awt.Image"/>
+    <parameter name="GRAFICO_CARTERA" class="java.awt.Image"/>
+    <parameter name="GRAFICO_ARTICULOS" class="java.awt.Image"/>
+    <parameter name="TITULO_ARTICULOS" class="java.lang.String"/>
+
+    <!-- Una fila de tabla. La seccion agrupa; los encabezados viajan en la fila
+         porque cada seccion tiene columnas distintas. -->
+    <field name="seccion" class="java.lang.String"/>
+    <field name="encabezado1" class="java.lang.String"/>
+    <field name="encabezado2" class="java.lang.String"/>
+    <field name="encabezado3" class="java.lang.String"/>
+    <field name="encabezado4" class="java.lang.String"/>
+    <field name="encabezado5" class="java.lang.String"/>
+    <field name="titulo" class="java.lang.String"/>
+    <field name="subtitulo" class="java.lang.String"/>
+    <field name="valor1" class="java.lang.String"/>
+    <field name="valor2" class="java.lang.String"/>
+    <field name="valor3" class="java.lang.String"/>
+
+    <!-- keepTogether evita que el titulo de una seccion quede solo al pie de una
+         pagina; reprintHeaderOnEachPage repite las columnas cuando una seccion
+         larga (la cartera) se parte entre paginas. -->
+    <group name="seccion" keepTogether="true" reprintHeaderOnEachPage="true">
+        <expression><![CDATA[$F{seccion}]]></expression>
+        <groupHeader>
+            <band height="38">
+                <element kind="textField" x="0" y="6" width="545" height="16" forecolor="#22366B"
+                         fontName="SansSerif" fontSize="12.0" bold="true" vTextAlign="Middle">
+                    <expression><![CDATA[$F{seccion}]]></expression>
+                </element>
+                <element kind="rectangle" x="0" y="24" width="545" height="14"
+                         forecolor="#F1F5F9" backcolor="#F1F5F9" mode="Opaque">
+                    <pen lineWidth="0.0"/>
+                </element>
+                <element kind="textField" x="4" y="24" width="196" height="14" forecolor="#64748B"
+                         fontName="SansSerif" fontSize="7.5" bold="true" vTextAlign="Middle">
+                    <expression><![CDATA[$F{encabezado1}]]></expression>
+                </element>
+                <element kind="textField" x="200" y="24" width="111" height="14" forecolor="#64748B"
+                         fontName="SansSerif" fontSize="7.5" bold="true" vTextAlign="Middle">
+                    <expression><![CDATA[$F{encabezado2}]]></expression>
+                </element>
+                <element kind="textField" x="315" y="24" width="66" height="14" forecolor="#64748B"
+                         fontName="SansSerif" fontSize="7.5" bold="true" hTextAlign="Right" vTextAlign="Middle">
+                    <expression><![CDATA[$F{encabezado3}]]></expression>
+                </element>
+                <element kind="textField" x="381" y="24" width="76" height="14" forecolor="#64748B"
+                         fontName="SansSerif" fontSize="7.5" bold="true" hTextAlign="Right" vTextAlign="Middle">
+                    <expression><![CDATA[$F{encabezado4}]]></expression>
+                </element>
+                <element kind="textField" x="461" y="24" width="80" height="14" forecolor="#64748B"
+                         fontName="SansSerif" fontSize="7.5" bold="true" hTextAlign="Right" vTextAlign="Middle">
+                    <expression><![CDATA[$F{encabezado5}]]></expression>
+                </element>
+            </band>
+        </groupHeader>
+    </group>
+
+    <!-- La altura no es libre: Jasper exige que title + group header + footer +
+         margenes quepan en la primera pagina (842). No subir de 718. -->
+    <title height="718">
+        <!-- Encabezado institucional -->
+        <element kind="image" x="0" y="0" width="120" height="58" scaleImage="RetainShape"
+                 hImageAlign="Left" vImageAlign="Middle">
+            <expression><![CDATA[$P{LOGO}]]></expression>
+        </element>
+        <element kind="staticText" x="245" y="4" width="300" height="24" forecolor="#22366B"
+                 fontName="SansSerif" fontSize="17.0" bold="true" hTextAlign="Right" vTextAlign="Middle">
+            <text><![CDATA[Eventos Caná]]></text>
+        </element>
+        <element kind="staticText" x="245" y="28" width="300" height="14" forecolor="#22366B"
+                 fontName="SansSerif" fontSize="9.0" bold="true" hTextAlign="Right">
+            <text><![CDATA[Alquifiestas & Floristería]]></text>
+        </element>
+        <element kind="staticText" x="245" y="42" width="300" height="12" forecolor="#666666"
+                 fontName="SansSerif" fontSize="7.5" hTextAlign="Right">
+            <text><![CDATA[Decoración y renta para toda clase de eventos]]></text>
+        </element>
+
+        <element kind="rectangle" x="0" y="62" width="545" height="3" forecolor="#F2B134" backcolor="#F2B134">
+            <pen lineWidth="0.0"/>
+        </element>
+
+        <element kind="staticText" x="0" y="72" width="330" height="26" forecolor="#22366B"
+                 fontName="SansSerif" fontSize="17.0" bold="true" vTextAlign="Middle">
+            <text><![CDATA[REPORTE ESTADÍSTICO]]></text>
+        </element>
+        <element kind="textField" x="330" y="72" width="215" height="14" forecolor="#22366B"
+                 fontName="SansSerif" fontSize="9.5" bold="true" hTextAlign="Right" vTextAlign="Middle">
+            <expression><![CDATA["Periodo: " + $P{PERIODO}]]></expression>
+        </element>
+        <element kind="textField" x="330" y="86" width="215" height="12" forecolor="#666666"
+                 fontName="SansSerif" fontSize="7.5" hTextAlign="Right">
+            <expression><![CDATA["Emitido: " + $P{FECHA_EMISION}]]></expression>
+        </element>
+        <element kind="staticText" x="0" y="100" width="545" height="11" forecolor="#94A3B8"
+                 fontName="SansSerif" fontSize="7.0">
+            <text><![CDATA[Los montos corresponden a pedidos no cancelados cuya fecha de evento cae dentro del periodo. Cobrado es neto de devoluciones.]]></text>
+        </element>
+
+        <!-- ── Indicadores, fila 1 ── -->
+        <element kind="rectangle" x="0" y="116" width="134" height="42" radius="4"
+                 forecolor="#E2E8F0" backcolor="#F8FAFC" mode="Opaque">
+            <pen lineWidth="0.5" lineColor="#E2E8F0"/>
+        </element>
+        <element kind="textField" x="6" y="120" width="122" height="10" forecolor="#64748B"
+                 fontName="SansSerif" fontSize="6.5" bold="true">
+            <expression><![CDATA[$P{K1_LABEL}]]></expression>
+        </element>
+        <element kind="textField" x="6" y="130" width="122" height="18" forecolor="#22366B"
+                 fontName="SansSerif" fontSize="13.0" bold="true" vTextAlign="Middle">
+            <expression><![CDATA[$P{K1_VALOR}]]></expression>
+        </element>
+        <element kind="textField" x="6" y="147" width="122" height="9" forecolor="#94A3B8"
+                 fontName="SansSerif" fontSize="6.0">
+            <expression><![CDATA[$P{K1_NOTA}]]></expression>
+        </element>
+
+        <element kind="rectangle" x="137" y="116" width="134" height="42" radius="4"
+                 forecolor="#E2E8F0" backcolor="#F8FAFC" mode="Opaque">
+            <pen lineWidth="0.5" lineColor="#E2E8F0"/>
+        </element>
+        <element kind="textField" x="143" y="120" width="122" height="10" forecolor="#64748B"
+                 fontName="SansSerif" fontSize="6.5" bold="true">
+            <expression><![CDATA[$P{K2_LABEL}]]></expression>
+        </element>
+        <element kind="textField" x="143" y="130" width="122" height="18" forecolor="#22366B"
+                 fontName="SansSerif" fontSize="13.0" bold="true" vTextAlign="Middle">
+            <expression><![CDATA[$P{K2_VALOR}]]></expression>
+        </element>
+        <element kind="textField" x="143" y="147" width="122" height="9" forecolor="#94A3B8"
+                 fontName="SansSerif" fontSize="6.0">
+            <expression><![CDATA[$P{K2_NOTA}]]></expression>
+        </element>
+
+        <element kind="rectangle" x="274" y="116" width="134" height="42" radius="4"
+                 forecolor="#E2E8F0" backcolor="#F8FAFC" mode="Opaque">
+            <pen lineWidth="0.5" lineColor="#E2E8F0"/>
+        </element>
+        <element kind="textField" x="280" y="120" width="122" height="10" forecolor="#64748B"
+                 fontName="SansSerif" fontSize="6.5" bold="true">
+            <expression><![CDATA[$P{K3_LABEL}]]></expression>
+        </element>
+        <element kind="textField" x="280" y="130" width="122" height="18" forecolor="#22366B"
+                 fontName="SansSerif" fontSize="13.0" bold="true" vTextAlign="Middle">
+            <expression><![CDATA[$P{K3_VALOR}]]></expression>
+        </element>
+        <element kind="textField" x="280" y="147" width="122" height="9" forecolor="#94A3B8"
+                 fontName="SansSerif" fontSize="6.0">
+            <expression><![CDATA[$P{K3_NOTA}]]></expression>
+        </element>
+
+        <element kind="rectangle" x="411" y="116" width="134" height="42" radius="4"
+                 forecolor="#E2E8F0" backcolor="#F8FAFC" mode="Opaque">
+            <pen lineWidth="0.5" lineColor="#E2E8F0"/>
+        </element>
+        <element kind="textField" x="417" y="120" width="122" height="10" forecolor="#64748B"
+                 fontName="SansSerif" fontSize="6.5" bold="true">
+            <expression><![CDATA[$P{K4_LABEL}]]></expression>
+        </element>
+        <element kind="textField" x="417" y="130" width="122" height="18" forecolor="#B45309"
+                 fontName="SansSerif" fontSize="13.0" bold="true" vTextAlign="Middle">
+            <expression><![CDATA[$P{K4_VALOR}]]></expression>
+        </element>
+        <element kind="textField" x="417" y="147" width="122" height="9" forecolor="#94A3B8"
+                 fontName="SansSerif" fontSize="6.0">
+            <expression><![CDATA[$P{K4_NOTA}]]></expression>
+        </element>
+
+        <!-- ── Indicadores, fila 2 ── -->
+        <element kind="rectangle" x="0" y="162" width="134" height="42" radius="4"
+                 forecolor="#E2E8F0" backcolor="#F8FAFC" mode="Opaque">
+            <pen lineWidth="0.5" lineColor="#E2E8F0"/>
+        </element>
+        <element kind="textField" x="6" y="166" width="122" height="10" forecolor="#64748B"
+                 fontName="SansSerif" fontSize="6.5" bold="true">
+            <expression><![CDATA[$P{K5_LABEL}]]></expression>
+        </element>
+        <element kind="textField" x="6" y="176" width="122" height="18" forecolor="#22366B"
+                 fontName="SansSerif" fontSize="13.0" bold="true" vTextAlign="Middle">
+            <expression><![CDATA[$P{K5_VALOR}]]></expression>
+        </element>
+        <element kind="textField" x="6" y="193" width="122" height="9" forecolor="#94A3B8"
+                 fontName="SansSerif" fontSize="6.0">
+            <expression><![CDATA[$P{K5_NOTA}]]></expression>
+        </element>
+
+        <element kind="rectangle" x="137" y="162" width="134" height="42" radius="4"
+                 forecolor="#E2E8F0" backcolor="#F8FAFC" mode="Opaque">
+            <pen lineWidth="0.5" lineColor="#E2E8F0"/>
+        </element>
+        <element kind="textField" x="143" y="166" width="122" height="10" forecolor="#64748B"
+                 fontName="SansSerif" fontSize="6.5" bold="true">
+            <expression><![CDATA[$P{K6_LABEL}]]></expression>
+        </element>
+        <element kind="textField" x="143" y="176" width="122" height="18" forecolor="#22366B"
+                 fontName="SansSerif" fontSize="13.0" bold="true" vTextAlign="Middle">
+            <expression><![CDATA[$P{K6_VALOR}]]></expression>
+        </element>
+        <element kind="textField" x="143" y="193" width="122" height="9" forecolor="#94A3B8"
+                 fontName="SansSerif" fontSize="6.0">
+            <expression><![CDATA[$P{K6_NOTA}]]></expression>
+        </element>
+
+        <element kind="rectangle" x="274" y="162" width="134" height="42" radius="4"
+                 forecolor="#E2E8F0" backcolor="#F8FAFC" mode="Opaque">
+            <pen lineWidth="0.5" lineColor="#E2E8F0"/>
+        </element>
+        <element kind="textField" x="280" y="166" width="122" height="10" forecolor="#64748B"
+                 fontName="SansSerif" fontSize="6.5" bold="true">
+            <expression><![CDATA[$P{K7_LABEL}]]></expression>
+        </element>
+        <element kind="textField" x="280" y="176" width="122" height="18" forecolor="#22366B"
+                 fontName="SansSerif" fontSize="13.0" bold="true" vTextAlign="Middle">
+            <expression><![CDATA[$P{K7_VALOR}]]></expression>
+        </element>
+        <element kind="textField" x="280" y="193" width="122" height="9" forecolor="#94A3B8"
+                 fontName="SansSerif" fontSize="6.0">
+            <expression><![CDATA[$P{K7_NOTA}]]></expression>
+        </element>
+
+        <element kind="rectangle" x="411" y="162" width="134" height="42" radius="4"
+                 forecolor="#E2E8F0" backcolor="#F8FAFC" mode="Opaque">
+            <pen lineWidth="0.5" lineColor="#E2E8F0"/>
+        </element>
+        <element kind="textField" x="417" y="166" width="122" height="10" forecolor="#64748B"
+                 fontName="SansSerif" fontSize="6.5" bold="true">
+            <expression><![CDATA[$P{K8_LABEL}]]></expression>
+        </element>
+        <element kind="textField" x="417" y="176" width="122" height="18" forecolor="#22366B"
+                 fontName="SansSerif" fontSize="13.0" bold="true" vTextAlign="Middle">
+            <expression><![CDATA[$P{K8_VALOR}]]></expression>
+        </element>
+        <element kind="textField" x="417" y="193" width="122" height="9" forecolor="#94A3B8"
+                 fontName="SansSerif" fontSize="6.0">
+            <expression><![CDATA[$P{K8_NOTA}]]></expression>
+        </element>
+
+        <!-- ── Ingresos por mes ── -->
+        <element kind="staticText" x="0" y="214" width="545" height="14" forecolor="#22366B"
+                 fontName="SansSerif" fontSize="11.0" bold="true" vTextAlign="Middle">
+            <text><![CDATA[Facturación y cobranza por mes]]></text>
+        </element>
+        <element kind="image" x="0" y="230" width="545" height="150" scaleImage="RetainShape"
+                 hImageAlign="Left" vImageAlign="Top">
+            <expression><![CDATA[$P{GRAFICO_INGRESOS}]]></expression>
+        </element>
+
+        <!-- ── Composición ── -->
+        <element kind="staticText" x="0" y="390" width="265" height="14" forecolor="#22366B"
+                 fontName="SansSerif" fontSize="11.0" bold="true" vTextAlign="Middle">
+            <text><![CDATA[Eventos por tipo]]></text>
+        </element>
+        <element kind="image" x="0" y="406" width="265" height="135" scaleImage="RetainShape"
+                 hImageAlign="Left" vImageAlign="Top">
+            <expression><![CDATA[$P{GRAFICO_TIPOS}]]></expression>
+        </element>
+
+        <element kind="staticText" x="280" y="390" width="265" height="14" forecolor="#22366B"
+                 fontName="SansSerif" fontSize="11.0" bold="true" vTextAlign="Middle">
+            <text><![CDATA[Saldo por cobrar según estado de pago]]></text>
+        </element>
+        <element kind="image" x="280" y="406" width="265" height="135" scaleImage="RetainShape"
+                 hImageAlign="Left" vImageAlign="Top">
+            <expression><![CDATA[$P{GRAFICO_CARTERA}]]></expression>
+        </element>
+
+        <!-- ── Artículos más rentados ── -->
+        <element kind="textField" x="0" y="553" width="545" height="14" forecolor="#22366B"
+                 fontName="SansSerif" fontSize="11.0" bold="true" vTextAlign="Middle">
+            <expression><![CDATA[$P{TITULO_ARTICULOS}]]></expression>
+        </element>
+        <element kind="image" x="0" y="569" width="545" height="145" scaleImage="RetainShape"
+                 hImageAlign="Left" vImageAlign="Top">
+            <expression><![CDATA[$P{GRAFICO_ARTICULOS}]]></expression>
+        </element>
+    </title>
+
+    <detail>
+        <band height="15">
+            <element kind="textField" x="4" y="0" width="196" height="15" forecolor="#1F2937"
+                     fontName="SansSerif" fontSize="8.0" vTextAlign="Middle">
+                <expression><![CDATA[$F{titulo}]]></expression>
+            </element>
+            <element kind="textField" x="200" y="0" width="111" height="15" forecolor="#6B7280"
+                     fontName="SansSerif" fontSize="7.5" vTextAlign="Middle">
+                <expression><![CDATA[$F{subtitulo}]]></expression>
+            </element>
+            <element kind="textField" x="315" y="0" width="66" height="15" forecolor="#1F2937"
+                     fontName="SansSerif" fontSize="8.0" hTextAlign="Right" vTextAlign="Middle">
+                <expression><![CDATA[$F{valor1}]]></expression>
+            </element>
+            <element kind="textField" x="381" y="0" width="76" height="15" forecolor="#1F2937"
+                     fontName="SansSerif" fontSize="8.0" hTextAlign="Right" vTextAlign="Middle">
+                <expression><![CDATA[$F{valor2}]]></expression>
+            </element>
+            <element kind="textField" x="461" y="0" width="80" height="15" forecolor="#1F2937"
+                     fontName="SansSerif" fontSize="8.0" bold="true" hTextAlign="Right" vTextAlign="Middle">
+                <expression><![CDATA[$F{valor3}]]></expression>
+            </element>
+            <element kind="line" x="0" y="14" width="545" height="1" forecolor="#EEF2F7">
+                <pen lineWidth="0.5"/>
+            </element>
+        </band>
+    </detail>
+
+    <pageFooter height="24">
+        <element kind="line" x="0" y="4" width="545" height="1" forecolor="#E2E8F0">
+            <pen lineWidth="0.5"/>
+        </element>
+        <element kind="staticText" x="0" y="8" width="330" height="12" forecolor="#94A3B8"
+                 fontName="SansSerif" fontSize="7.0">
+            <text><![CDATA[Eventos Caná · Reporte estadístico generado por el sistema interno]]></text>
+        </element>
+        <!-- Dos campos: el total de paginas solo se conoce al final (Master), el
+             numero actual no. Un solo campo con evaluationTime="Master" imprimiria
+             el total en todas las paginas. -->
+        <element kind="textField" x="330" y="8" width="180" height="12" forecolor="#94A3B8"
+                 fontName="SansSerif" fontSize="7.0" hTextAlign="Right">
+            <expression><![CDATA["Página " + $V{PAGE_NUMBER} + " de"]]></expression>
+        </element>
+        <element kind="textField" x="510" y="8" width="35" height="12" forecolor="#94A3B8"
+                 fontName="SansSerif" fontSize="7.0" hTextAlign="Left" evaluationTime="Master">
+            <expression><![CDATA[" " + $V{PAGE_NUMBER}]]></expression>
+        </element>
+    </pageFooter>
+
+</jasperReport>
