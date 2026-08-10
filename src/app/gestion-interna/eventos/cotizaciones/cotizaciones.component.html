@@ -1,0 +1,646 @@
+<div class="space-y-6">
+
+  <!-- Encabezado -->
+  <div class="flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <div class="page-header-icon">
+        <span class="material-icons text-[22px]">request_quote</span>
+      </div>
+      <div>
+        <h1 class="font-serif italic text-3xl text-gray-900">Cotizaciones</h1>
+        <p class="text-sm text-grayMedium mt-1">Seguimiento de propuestas y contratos</p>
+      </div>
+    </div>
+    <button (click)="mostrarForm = true"
+      class="btn-primary">
+      <span class="material-icons text-[18px]">add</span>
+      Nueva cotización
+    </button>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       FORMULARIO NUEVA COTIZACIÓN
+  ══════════════════════════════════════════════════════ -->
+  @if (mostrarForm) {
+    <div class="surface-card p-6 space-y-6">
+
+      <div class="flex items-center gap-2">
+        <span class="material-icons text-blue-500">request_quote</span>
+        <h2 class="font-montserrat text-lg font-semibold text-gray-800">
+          {{ cotizacionEditando ? 'Modificar cotización' : 'Nueva cotización' }}
+        </h2>
+        @if (cotizacionEditando) {
+          <p class="text-xs text-amber-600 mt-0.5">
+            {{ cotizacionEditando.codigoCotizacion }} · al guardar se regenera el documento
+          </p>
+        }
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="guardar()" class="space-y-6">
+
+        <!-- ── Datos del cliente ── -->
+        <div>
+          <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Datos del cliente</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            <div class="flex flex-col gap-1">
+              <label class="field-label">Nombre del cliente <span class="text-red-500">*</span></label>
+              <input formControlName="nombreClienteCotizacion" type="text"
+                class="field-input"
+                [class.border-red-400]="campoInvalido('nombreClienteCotizacion')"
+                maxlength="100" placeholder="Nombre completo">
+              @if (campoInvalido('nombreClienteCotizacion')) {
+                <span class="text-xs text-red-500">Campo requerido</span>
+              }
+            </div>
+
+            <div class="flex flex-col gap-1">
+              <label class="field-label">Teléfono <span class="text-red-500">*</span></label>
+              <input formControlName="telefonoClienteCotizacion" type="text"
+                class="field-input"
+                [class.border-red-400]="campoInvalido('telefonoClienteCotizacion')"
+                maxlength="8" inputmode="numeric" placeholder="Ej. 50001234">
+              @if (campoInvalido('telefonoClienteCotizacion')) {
+                <span class="text-xs text-red-500">8 dígitos requeridos</span>
+              }
+            </div>
+
+            <div class="flex flex-col gap-1 md:col-span-2">
+              <label class="field-label">Dirección <span class="text-red-500">*</span></label>
+              <input formControlName="direccionClienteCotizacion" type="text"
+                class="field-input"
+                [class.border-red-400]="campoInvalido('direccionClienteCotizacion')"
+                maxlength="200" placeholder="Dirección del evento">
+              @if (campoInvalido('direccionClienteCotizacion')) {
+                <span class="text-xs text-red-500">Campo requerido</span>
+              }
+            </div>
+
+            <div class="flex flex-col gap-1 md:col-span-2">
+              <label class="field-label">Tipo de evento <span class="text-red-500">*</span></label>
+              <select formControlName="codTipoEvento"
+                class="field-select"
+                [class.border-red-400]="campoInvalido('codTipoEvento')">
+                <option [value]="null" disabled>Selecciona un tipo de evento</option>
+                @for (tipo of tiposEvento; track tipo.idCatalogo) {
+                  <option [value]="tipo.codigo">{{ tipo.nombre }}</option>
+                }
+              </select>
+              @if (campoInvalido('codTipoEvento')) {
+                <span class="text-xs text-red-500">Campo requerido</span>
+              }
+            </div>
+
+            <div class="flex flex-col gap-1 md:col-span-2 relative">
+              <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Fecha del evento <span class="text-red-500">*</span></label>
+
+              <button type="button" (click)="abrirCalendario()"
+                class="w-full flex items-center justify-between border-2 rounded-xl px-3 py-2.5 text-sm text-left bg-white transition-colors"
+                [class.border-amber-400]="calendarioAbierto"
+                [class.border-slate-200]="!calendarioAbierto"
+                [class.border-red-400]="campoInvalido('fechaHoraEvento') && !calendarioAbierto">
+                <span [class.text-gray-400]="!fechaEventoSeleccionada" [class.text-gray-800]="fechaEventoSeleccionada">
+                  {{ fechaEventoTexto || 'Selecciona fecha y hora' }}
+                </span>
+                <span class="material-icons text-amber-500 text-[20px]">calendar_month</span>
+              </button>
+              @if (campoInvalido('fechaHoraEvento')) {
+                <span class="text-xs text-red-500">Campo requerido</span>
+              }
+
+              @if (calendarioAbierto) {
+                <div class="fixed inset-0 z-40" (click)="cerrarCalendario()"></div>
+
+                <div class="absolute z-50 top-full mt-2 left-0 w-full max-w-sm bg-white rounded-3xl shadow-2xl border border-slate-100 p-5 animate-fade-in-up"
+                  (click)="horaPickerAbierto = false; $event.stopPropagation()">
+
+                  <!-- Navegación de mes -->
+                  <div class="flex items-center justify-between mb-4">
+                    <button type="button" (click)="mesAnterior()"
+                      class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-gray-500 transition-colors">
+                      <span class="material-icons text-[18px]">chevron_left</span>
+                    </button>
+                    <span class="font-serif italic text-lg text-gray-900">{{ nombreMesVisible }}</span>
+                    <button type="button" (click)="mesSiguiente()"
+                      class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-gray-500 transition-colors">
+                      <span class="material-icons text-[18px]">chevron_right</span>
+                    </button>
+                  </div>
+
+                  <!-- Encabezado de días -->
+                  <div class="grid grid-cols-7 mb-1">
+                    @for (d of ['D','L','M','M','J','V','S']; track $index) {
+                      <span class="text-center text-[11px] font-bold uppercase text-slate-400">{{ d }}</span>
+                    }
+                  </div>
+
+                  <!-- Grid de días -->
+                  <div class="grid grid-cols-7 gap-y-1">
+                    @for (dia of diasCalendario; track $index) {
+                      <div class="flex items-center justify-center h-9">
+                        @if (dia) {
+                          <button type="button" (click)="seleccionarDia(dia)"
+                            class="w-8 h-8 rounded-full text-sm transition-colors"
+                            [class.bg-amber-400]="esHoy(dia)"
+                            [class.text-gray-900]="esHoy(dia)"
+                            [class.font-bold]="esHoy(dia)"
+                            [class.ring-2]="esSeleccionado(dia) && !esHoy(dia)"
+                            [class.ring-brand-900]="esSeleccionado(dia) && !esHoy(dia)"
+                            [class.text-gray-700]="!esHoy(dia)"
+                            [class.hover:bg-slate-100]="!esHoy(dia)">
+                            {{ dia.getDate() }}
+                          </button>
+                        }
+                      </div>
+                    }
+                  </div>
+
+                  <!-- Hora -->
+                  <div class="relative mt-3 pt-3 border-t border-slate-100">
+                    <button type="button" (click)="toggleHoraPicker($event)"
+                      class="w-full flex items-center gap-2 border-2 rounded-lg px-3 py-2 text-sm transition-colors bg-white"
+                      [class.border-amber-400]="horaPickerAbierto"
+                      [class.border-slate-200]="!horaPickerAbierto">
+                      <span class="material-icons text-[18px] text-slate-400">schedule</span>
+                      <span [class.text-gray-400]="!horaEvento" [class.text-gray-800]="horaEvento">{{ horaEvento || '--:--' }}</span>
+                    </button>
+
+                    @if (horaPickerAbierto) {
+                      <div class="absolute z-10 top-full mt-1 left-0 flex bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden"
+                        (click)="$event.stopPropagation()">
+                        <div class="w-16 max-h-48 overflow-y-auto py-1">
+                          @for (h of horasDisponibles; track h) {
+                            <button type="button" (click)="seleccionarHora(h)"
+                              class="w-full text-center py-1.5 text-sm font-montserrat transition-colors"
+                              [class.bg-amber-400]="horaSeleccionadaNum === h"
+                              [class.text-gray-900]="horaSeleccionadaNum === h"
+                              [class.font-bold]="horaSeleccionadaNum === h"
+                              [class.text-gray-600]="horaSeleccionadaNum !== h"
+                              [class.hover:bg-slate-50]="horaSeleccionadaNum !== h">
+                              {{ h < 10 ? '0' + h : h }}
+                            </button>
+                          }
+                        </div>
+                        <div class="w-16 max-h-48 overflow-y-auto py-1 border-l border-slate-100">
+                          @for (m of minutosDisponibles; track m) {
+                            <button type="button" (click)="seleccionarMinuto(m)"
+                              class="w-full text-center py-1.5 text-sm font-montserrat transition-colors"
+                              [class.bg-amber-400]="minutoSeleccionadoNum === m"
+                              [class.text-gray-900]="minutoSeleccionadoNum === m"
+                              [class.font-bold]="minutoSeleccionadoNum === m"
+                              [class.text-gray-600]="minutoSeleccionadoNum !== m"
+                              [class.hover:bg-slate-50]="minutoSeleccionadoNum !== m">
+                              {{ m < 10 ? '0' + m : m }}
+                            </button>
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
+
+                  <!-- Leyenda -->
+                  <div class="flex items-center justify-between mt-3 pt-3 border-t border-slate-100 text-xs">
+                    <span class="flex items-center gap-1.5 text-gray-500">
+                      <span class="w-2 h-2 rounded-full ring-2 ring-brand-900 inline-block"></span>
+                      Seleccionado
+                    </span>
+                    <span class="font-semibold text-amber-600">Hoy</span>
+                  </div>
+                </div>
+              }
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ── Detalle de items ── -->
+        <div class="section-divider">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Items cotizados</h3>
+            <button type="button" (click)="agregarDetalle()"
+              class="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 transition-colors">
+              <span class="material-icons text-[18px]">add_circle_outline</span>
+              Agregar item
+            </button>
+          </div>
+
+          <!-- Tabla de detalles -->
+          <div class="rounded-xl border border-gray-200 overflow-hidden">
+            <table class="w-full text-sm">
+              <thead class="table-head">
+                <tr>
+                  <th class="px-4 py-3 text-left">Item</th>
+                  <th class="px-4 py-3 text-right w-32">Cantidad</th>
+                  <th class="px-4 py-3 text-right w-32">Costo unit.</th>
+                  <th class="px-4 py-3 text-right w-32">Subtotal</th>
+                  <th class="px-4 py-3 w-12"></th>
+                </tr>
+              </thead>
+              <tbody formArrayName="detalles" class="divide-y divide-gray-100">
+                @for (detalle of detalles.controls; let i = $index; track i) {
+                  <tr [formGroupName]="i" class="row-hover">
+                    <td class="px-4 py-2">
+                      <select formControlName="idItem"
+                        class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-sm bg-white outline-none focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/15"
+                        [class.border-red-400]="detalleInvalido(i, 'idItem')">
+                        <option [value]="null" disabled>Seleccione un item</option>
+                        @for (item of items; track item.idItem) {
+                          <option [value]="item.idItem">{{ item.descripcionItem }}</option>
+                        }
+                      </select>
+                    </td>
+                    <td class="px-4 py-2">
+                      <input formControlName="cantidadItemCotizacion" type="number" min="1"
+                        class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-sm text-right outline-none focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/15"
+                        [class.border-red-400]="detalleInvalido(i, 'cantidadItemCotizacion')">
+                    </td>
+                    <td class="px-4 py-2 text-right text-gray-600">
+                      @let itemSel = getItem(detalle.get('idItem')?.value);
+                      @if (itemSel) {
+                        Q {{ itemSel.costoItem | number:'1.2-2' }}
+                      } @else {
+                        <span class="text-gray-300">—</span>
+                      }
+                    </td>
+                    <td class="px-4 py-2 text-right font-medium text-gray-800">
+                      @if (subtotalDetalle(i) > 0) {
+                        Q {{ subtotalDetalle(i) | number:'1.2-2' }}
+                      } @else {
+                        <span class="text-gray-300">—</span>
+                      }
+                    </td>
+                    <td class="px-4 py-2 text-center">
+                      @if (detalles.length > 1) {
+                        <button type="button" (click)="eliminarDetalle(i)"
+                          class="p-1 rounded hover:bg-red-50 text-red-400 transition-colors">
+                          <span class="material-icons text-[18px]">delete_outline</span>
+                        </button>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ── Detalle de servicios ── -->
+        <div class="section-divider">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Servicios cotizados</h3>
+            <button type="button" (click)="agregarDetalleServicio()"
+              class="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 transition-colors">
+              <span class="material-icons text-[18px]">add_circle_outline</span>
+              Agregar servicio
+            </button>
+          </div>
+
+          @if (detallesServicios.length === 0) {
+            <div class="rounded-xl border border-dashed border-gray-200 py-6 text-center text-sm text-gray-400">
+              Ningún servicio agregado (opcional)
+            </div>
+          } @else {
+            <div class="rounded-xl border border-gray-200 overflow-hidden">
+              <table class="w-full text-sm">
+                <thead class="table-head">
+                  <tr>
+                    <th class="px-4 py-3 text-left">Servicio</th>
+                    <th class="px-4 py-3 text-right w-24">Cantidad</th>
+                    <th class="px-4 py-3 text-right w-32">Precio cotizado</th>
+                    <th class="px-4 py-3 text-left">Especificaciones</th>
+                    <th class="px-4 py-3 text-right w-32">Subtotal</th>
+                    <th class="px-4 py-3 w-12"></th>
+                  </tr>
+                </thead>
+                <tbody formArrayName="detallesServicios" class="divide-y divide-gray-100">
+                  @for (detalle of detallesServicios.controls; let i = $index; track i) {
+                    <tr [formGroupName]="i" class="row-hover">
+                      <td class="px-4 py-2">
+                        <select formControlName="idServicio"
+                          class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-sm bg-white outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
+                          [class.border-red-400]="detalleServicioInvalido(i, 'idServicio')">
+                          <option [value]="null" disabled>Seleccione un servicio</option>
+                          @for (s of servicios; track s.idServicio) {
+                            <option [value]="s.idServicio">{{ s.nombreServicio }}</option>
+                          }
+                        </select>
+                      </td>
+                      <td class="px-4 py-2">
+                        <input formControlName="cantidad" type="number" min="1"
+                          class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-sm text-right outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
+                          [class.border-red-400]="detalleServicioInvalido(i, 'cantidad')">
+                      </td>
+                      <td class="px-4 py-2">
+                        <input formControlName="precioCotizado" type="number" min="0" step="0.01"
+                          class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-sm text-right outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
+                          [class.border-red-400]="detalleServicioInvalido(i, 'precioCotizado')"
+                          placeholder="0.00">
+                      </td>
+                      <td class="px-4 py-2">
+                        <input formControlName="especificaciones" type="text"
+                          class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-sm outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
+                          placeholder="Opcional">
+                      </td>
+                      <td class="px-4 py-2 text-right font-medium text-gray-800">
+                        @if (subtotalDetalleServicio(i) > 0) {
+                          Q {{ subtotalDetalleServicio(i) | number:'1.2-2' }}
+                        } @else {
+                          <span class="text-gray-300">—</span>
+                        }
+                      </td>
+                      <td class="px-4 py-2 text-center">
+                        <button type="button" (click)="eliminarDetalleServicio(i)"
+                          class="p-1 rounded hover:bg-red-50 text-red-400 transition-colors">
+                          <span class="material-icons text-[18px]">delete_outline</span>
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+
+        <!-- Total general -->
+        <div class="rounded-xl bg-slate-50 px-5 py-4 flex items-center justify-between">
+          <span class="text-sm font-semibold text-gray-700">Total estimado</span>
+          <span class="font-montserrat font-bold text-xl text-gray-900">Q {{ totalCotizacion | number:'1.2-2' }}</span>
+        </div>
+
+        <!-- Acciones -->
+        <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+          <button type="button" (click)="cancelar()"
+            class="btn-cancel">
+            Cancelar
+          </button>
+          <button type="submit" [disabled]="form.invalid"
+            class="btn-submit">
+            Guardar cotización
+          </button>
+        </div>
+
+      </form>
+    </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════════
+       FILTROS + LISTADO DE COTIZACIONES
+  ══════════════════════════════════════════════════════ -->
+  <div class="flex flex-col lg:flex-row gap-6 items-start">
+
+    <!-- Panel de filtros -->
+    <aside class="surface-card w-full lg:w-56 shrink-0 p-5 space-y-6">
+
+      <!-- Fecha del evento -->
+      <div>
+        <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-3">Fecha del evento</p>
+        <div class="flex flex-wrap gap-2 mb-3">
+          @for (preset of presetsFecha; track preset.id) {
+            <button type="button" (click)="seleccionarPreset(preset.id)"
+              class="px-2.5 py-1 rounded-full text-xs font-semibold transition-colors"
+              [class.bg-amber-400]="rangoPreset === preset.id"
+              [class.text-gray-900]="rangoPreset === preset.id"
+              [class.bg-slate-100]="rangoPreset !== preset.id"
+              [class.text-gray-600]="rangoPreset !== preset.id"
+              [class.hover:bg-slate-200]="rangoPreset !== preset.id">
+              {{ preset.label }}
+            </button>
+          }
+        </div>
+        <div class="space-y-2">
+          <div class="flex flex-col gap-1">
+            <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Desde</label>
+            <app-date-picker [(ngModel)]="fechaDesde" (ngModelChange)="onRangoManualChange()"
+              modo="fecha" placeholder="Fecha inicial"
+              [fechaMaxima]="fechaHasta || null"></app-date-picker>
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Hasta</label>
+            <app-date-picker [(ngModel)]="fechaHasta" (ngModelChange)="onRangoManualChange()"
+              modo="fecha" placeholder="Fecha final"
+              [fechaMinima]="fechaDesde || null"></app-date-picker>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-5 border-t border-slate-100">
+        <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-3">Estado</p>
+        <div class="space-y-2.5">
+          @for (e of estadosDisponibles; track e.codigo) {
+            <label class="flex items-center gap-2.5 text-sm text-gray-700 cursor-pointer select-none">
+              <input type="checkbox"
+                class="w-4 h-4 rounded accent-amber-500 cursor-pointer"
+                [checked]="estadosSeleccionados.includes(e.codigo)"
+                (change)="toggleEstadoFiltro(e.codigo)">
+              {{ e.label }}
+            </label>
+          }
+        </div>
+      </div>
+
+      <div class="pt-5 border-t border-slate-100">
+        <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-3">Cliente</p>
+        <input type="text"
+          [(ngModel)]="textoClienteFiltro"
+          (ngModelChange)="aplicarFiltros()"
+          placeholder="Buscar cliente..."
+          class="field-input">
+      </div>
+    </aside>
+
+    <!-- Tabla -->
+    <div class="surface-card overflow-hidden flex-1 w-full">
+      <div class="card-title-bar flex items-center justify-between">
+        <h2 class="font-montserrat font-semibold text-gray-800">Listado de cotizaciones</h2>
+        <span class="text-xs text-grayMedium">{{ cotizacionesFiltradas.length }} de {{ cotizaciones.length }} registros</span>
+      </div>
+
+      @if (cargando) {
+        <div class="flex justify-center items-center py-12">
+          <div class="spinner"></div>
+        </div>
+      } @else if (cotizacionesFiltradas.length === 0) {
+        <div class="empty-state">
+          <span class="material-icons text-5xl mb-2 text-gray-300">request_quote</span>
+          <p class="text-sm">No se encontraron cotizaciones</p>
+        </div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="table-head">
+              <tr>
+                <th class="px-4 py-3 text-left">No.</th>
+                <th class="px-4 py-3 text-left">Cliente</th>
+                <th class="px-4 py-3 text-left">Fecha</th>
+                <th class="px-4 py-3 text-right">Monto</th>
+                <th class="px-4 py-3 text-center">Estado</th>
+                <th class="px-4 py-3 text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+              @for (c of cotizacionesFiltradas; track c.idCotizacion) {
+                <tr class="row-hover">
+                  <td class="px-4 py-3 font-mono text-xs font-semibold text-gray-700">{{ c.codigoCotizacion }}</td>
+                  <td class="px-4 py-3 font-medium text-gray-800">{{ c.nombreClienteCotizacion }}</td>
+                  <td class="px-4 py-3 text-gray-600">{{ c.fechaHoraEvento | date:'dd MMM yyyy, HH:mm' }}</td>
+                  <td class="px-4 py-3 text-right font-montserrat font-bold text-gray-900">
+                    Q {{ montoTotal(c) | number:'1.0-0' }}
+                  </td>
+                  <td class="px-4 py-3 text-center">
+                    <span class="badge"
+                      [class.bg-slate-50]="c.estadoCotizacion === 'C'"
+                      [class.text-slate-600]="c.estadoCotizacion === 'C'"
+                      [class.ring-slate-200]="c.estadoCotizacion === 'C'"
+                      [class.bg-white]="c.estadoCotizacion === 'P' || c.estadoCotizacion === 'CAN'"
+                      [class.text-amber-700]="c.estadoCotizacion === 'P'"
+                      [class.ring-amber-300]="c.estadoCotizacion === 'P'"
+                      [class.bg-amber-400]="c.estadoCotizacion === 'CONF'"
+                      [class.text-gray-900]="c.estadoCotizacion === 'CONF'"
+                      [class.ring-0]="c.estadoCotizacion === 'CONF'"
+                      [class.shadow-glow-amber]="c.estadoCotizacion === 'CONF'"
+                      [class.text-red-600]="c.estadoCotizacion === 'CAN'"
+                      [class.ring-red-300]="c.estadoCotizacion === 'CAN'">
+                      {{ estadoLabel(c.estadoCotizacion) }}
+                    </span>
+                    <!-- La cotización confirmada no se cancela desde aquí; si su
+                         pedido se canceló (desde Pedidos), se avisa con esta nota. -->
+                    @if (c.pedidoCancelado) {
+                      <div class="mt-1 flex items-center justify-center gap-1 text-[11px] font-semibold text-red-600"
+                        title="El pedido generado por esta cotización fue cancelado">
+                        <span class="material-icons text-[13px]">block</span>
+                        Pedido cancelado
+                      </div>
+                    }
+                  </td>
+                  <td class="px-4 py-3 text-center">
+                    <div class="flex justify-center gap-2">
+                      <!-- Ver documento: solo mientras la cotización esté vigente
+                           (creada / pendiente / confirmada), no en cancelada. -->
+                      @if (puedeVerDocumento(c)) {
+                        <button (click)="verDocumento(c)" title="Ver documento"
+                          class="p-2 rounded-xl hover:bg-amber-50 text-amber-500 transition-colors">
+                          <span class="material-icons text-[18px]">description</span>
+                        </button>
+                      }
+                      <!-- Confirmada: su única acción es ver el documento. Ya generó
+                           un pedido, así que modificar/confirmar/cancelar/eliminar no
+                           aplican aquí; si se quiere cancelar, se hace desde Pedidos. -->
+                      @if (esEditable(c)) {
+                        <button (click)="editar(c)" title="Modificar cotización"
+                          class="btn-icon-edit">
+                          <span class="material-icons text-[18px]">edit</span>
+                        </button>
+                        <button (click)="abrirConfirmar(c)" title="Confirmar cotización"
+                          class="btn-icon-success">
+                          <span class="material-icons text-[18px]">check_circle</span>
+                        </button>
+                        <button (click)="cancelarCotizacion(c)" title="Cancelar cotización"
+                          class="btn-icon-delete">
+                          <span class="material-icons text-[18px]">block</span>
+                        </button>
+                      }
+                      <!-- Trazabilidad: disponible en cualquier estado. Es el
+                           historial de lo que pasó, y una cotización cancelada
+                           es justo de las que interesa poder revisar. -->
+                      <button (click)="verTrazabilidad(c)" title="Ver trazabilidad"
+                        class="p-2 rounded-xl hover:bg-indigo-50 text-indigo-500 transition-colors">
+                        <span class="material-icons text-[18px]">timeline</span>
+                      </button>
+                      @if (c.estadoCotizacion !== 'CONF') {
+                        <button (click)="eliminar(c)" title="Eliminar"
+                          class="p-2 rounded-xl hover:bg-gray-100 text-gray-400 transition-colors">
+                          <span class="material-icons text-[18px]">delete_outline</span>
+                        </button>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       VISOR DEL DOCUMENTO GENERADO
+  ══════════════════════════════════════════════════════ -->
+  <app-document-viewer
+    [visible]="mostrarVisorDocumento"
+    [blob]="documentoBlob"
+    [nombreArchivo]="documentoNombre"
+    [titulo]="documentoTitulo"
+    (cerrarModal)="cerrarVisorDocumento()">
+  </app-document-viewer>
+
+  <!-- ══════════════════════════════════════════════════════
+       TRAZABILIDAD (ventana emergente)
+  ══════════════════════════════════════════════════════ -->
+  <app-trazabilidad-modal
+    [visible]="mostrarTrazabilidad"
+    tipo="COTIZACION"
+    [titulo]="trazaTitulo"
+    [subtitulo]="trazaSubtitulo"
+    [historial]="trazaHistorial"
+    [cargando]="cargandoTraza"
+    (cerrarModal)="cerrarTrazabilidad()">
+  </app-trazabilidad-modal>
+
+  <!-- ══════════════════════════════════════════════════════
+       MODAL: CONFIRMAR COTIZACIÓN (fecha entrega + viajes aprox.)
+  ══════════════════════════════════════════════════════ -->
+  @if (mostrarConfirmar && cotizacionAConfirmar) {
+    <div class="fixed inset-0 z-40 bg-[#021930]/50 backdrop-blur-[2px] animate-backdrop-in"
+      (click)="cerrarConfirmar()"></div>
+
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+      <div class="pointer-events-auto w-full max-w-sm bg-white rounded-[2rem] shadow-2xl overflow-hidden animate-modal-in"
+        (click)="$event.stopPropagation()">
+
+        <div class="flex items-start justify-between px-6 pt-6">
+          <div>
+            <h2 class="font-serif italic text-2xl text-gray-900">Confirmar cotización</h2>
+            <p class="text-xs text-gray-400 mt-1">{{ cotizacionAConfirmar.codigoCotizacion }} — {{ cotizacionAConfirmar.nombreClienteCotizacion }}</p>
+          </div>
+          <button (click)="cerrarConfirmar()" title="Cerrar"
+            class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 transition-colors shrink-0">
+            <span class="material-icons text-[18px]">close</span>
+          </button>
+        </div>
+
+        <form [formGroup]="formConfirmar" (ngSubmit)="guardarConfirmacion()" class="px-6 pb-6 pt-4 space-y-4">
+
+          <div class="flex flex-col gap-1">
+            <label class="field-label">Fecha de entrega estimada <span class="text-red-500">*</span></label>
+            <app-date-picker formControlName="fechaEntregaEstimada" modo="fecha" [minimoHoy]="true"
+              placeholder="Selecciona la fecha de entrega"
+              [invalido]="campoInvalidoConfirmar('fechaEntregaEstimada')"></app-date-picker>
+            @if (campoInvalidoConfirmar('fechaEntregaEstimada')) {
+              <span class="text-xs text-red-500">Campo requerido</span>
+            }
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <label class="field-label">Viajes aproximados <span class="text-red-500">*</span></label>
+            <input formControlName="cantidadViajesAproximados" type="number" min="1"
+              class="field-input" [class.border-red-400]="campoInvalidoConfirmar('cantidadViajesAproximados')">
+            @if (campoInvalidoConfirmar('cantidadViajesAproximados')) {
+              <span class="text-xs text-red-500">Campo requerido</span>
+            }
+            <span class="text-xs text-gray-400">Estimado inicial de viajes para la logística de entrega.</span>
+          </div>
+
+          <div class="flex gap-3 pt-2">
+            <button type="button" (click)="cerrarConfirmar()" class="btn-cancel flex-1">Cancelar</button>
+            <button type="submit" [disabled]="formConfirmar.invalid" class="btn-submit flex-1">Confirmar cotización</button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  }
+
+</div>

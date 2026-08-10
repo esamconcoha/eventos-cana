@@ -1,0 +1,121 @@
+<!-- Contenedor principal - centro superior, estilo Sonner -->
+<div
+  class="fixed top-6 left-1/2 -translate-x-1/2 z-[9999] flex flex-col gap-0 pointer-events-none"
+  style="width: 420px; max-width: calc(100vw - 2rem);">
+
+  @for (toast of toasts$ | async; let i = $index; track trackById(i, toast)) {
+
+    @if (!toast.confirm) {
+      <!-- ─── TOAST NORMAL ─── -->
+      <div
+        @toastAnim
+        class="pointer-events-auto relative mb-2 cursor-default select-none"
+        (click)="dismiss(toast)">
+
+        <div
+          class="relative flex items-center gap-4 rounded-2xl pl-5 pr-10 py-5 shadow-[0_16px_40px_-8px_rgba(2,25,48,0.55)] overflow-hidden"
+          style="background: linear-gradient(160deg, #0f1e33, #021930); border: 1px solid rgba(255,255,255,0.08);">
+
+          <!-- Ícono con insignia circular -->
+          <div class="shrink-0 w-11 h-11 rounded-full flex items-center justify-center"
+            [class.bg-amber-400]="toast.type === 'success' || toast.type === 'warning'"
+            [class.bg-red-500]="toast.type === 'error'"
+            [class.bg-slate-500]="toast.type === 'info'">
+            @if (toast.type === 'success') {
+              <span @checkAnim class="material-icons text-white text-[22px]">check</span>
+            }
+            @if (toast.type === 'error') {
+              <span @errorShake class="material-icons text-white text-[22px]">close</span>
+            }
+            @if (toast.type === 'warning') {
+              <span @pulseAnim class="material-icons text-white text-[22px]">priority_high</span>
+            }
+            @if (toast.type === 'info') {
+              <span @fadeIn class="material-icons text-white text-[22px]">info</span>
+            }
+          </div>
+
+          <!-- Texto -->
+          <div class="flex-1 min-w-0">
+            <span class="font-serif italic text-[18px] text-white leading-snug">{{ toast.title }}</span>
+            @if (toast.message) {
+              <p class="text-[13.5px] text-white/55 mt-1 leading-relaxed">{{ toast.message }}</p>
+            }
+          </div>
+
+          <!-- Botón cerrar -->
+          <button
+            (click)="$event.stopPropagation(); dismiss(toast)"
+            class="absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-colors">
+            <span class="material-icons text-[16px]">close</span>
+          </button>
+
+          <!-- Progress bar inferior -->
+          @if ((toast.duration ?? 0) > 0) {
+            <div class="absolute bottom-0 left-0 right-0 h-[4px] rounded-b-2xl overflow-hidden bg-white/10">
+              <div
+                class="h-full origin-left"
+                [class.bg-amber-400]="toast.type === 'success' || toast.type === 'warning'"
+                [class.bg-red-400]="toast.type === 'error'"
+                [class.bg-slate-400]="toast.type === 'info'"
+                [style.animation]="'shrink ' + toast.duration + 'ms linear forwards'">
+              </div>
+            </div>
+          }
+
+        </div>
+      </div>
+
+    } @else {
+      <!-- ─── CONFIRMACIÓN ─── -->
+      <div
+        @toastAnim
+        class="pointer-events-auto relative mb-2">
+
+        <div
+          class="rounded-2xl shadow-[0_16px_40px_-8px_rgba(2,25,48,0.55)] overflow-hidden"
+          style="background: linear-gradient(160deg, #0f1e33, #021930); border: 1px solid rgba(255,255,255,0.1);">
+
+          <!-- Contenido -->
+          <div class="px-6 pt-6 pb-5">
+            <div class="flex items-start gap-4 mb-5">
+              <div class="shrink-0 w-11 h-11 rounded-full flex items-center justify-center"
+                [class.bg-amber-400]="toast.type !== 'error'"
+                [class.bg-red-500]="toast.type === 'error'">
+                <span @pulseAnim class="material-icons text-white text-[22px]">priority_high</span>
+              </div>
+              <div>
+                <p class="font-serif italic text-[18px] text-white leading-snug">{{ toast.title }}</p>
+                @if (toast.message) {
+                  <p class="text-[13.5px] text-white/55 mt-1 leading-relaxed">{{ toast.message }}</p>
+                }
+              </div>
+            </div>
+
+            <!-- Botones -->
+            <div class="flex gap-2.5">
+              <button
+                (click)="cancel(toast)"
+                class="flex-1 py-2.5 text-[14px] font-medium rounded-xl text-white/70 hover:text-white transition-colors duration-150"
+                style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1);">
+                {{ toast.cancelText }}
+              </button>
+              <button
+                (click)="confirm(toast)"
+                class="flex-1 py-2.5 text-[14px] font-bold rounded-xl transition-all duration-150 hover:opacity-90 active:scale-[0.98]"
+                [class.bg-amber-400]="toast.type !== 'error' && toast.type !== 'warning'"
+                [class.text-gray-900]="toast.type !== 'error' && toast.type !== 'warning'"
+                [class.bg-red-500]="toast.type === 'error' || toast.type === 'warning'"
+                [class.text-white]="toast.type === 'error' || toast.type === 'warning'">
+                {{ toast.confirmText }}
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    }
+
+  }
+
+</div>

@@ -1,0 +1,120 @@
+<aside
+  class="bg-gradient-to-b from-[#0f1e33] to-[#021930] text-white h-full transition-all duration-300 flex flex-col z-50 fixed lg:relative top-0 left-0 lg:flex shadow-2xl border-r border-white/5"
+  [class.w-64]="!isCollapsed && !isMobile"
+  [class.w-16]="isCollapsed && !isMobile"
+  [class.translate-x-0]="isSidebarOpen && isMobile"
+  [class.-translate-x-full]="!isSidebarOpen && isMobile"
+  [class.w-64]="isMobile"
+>
+
+  <!-- Logo / Toggle -->
+  <div class="h-20 shrink-0 flex items-center gap-3 px-4 border-b border-white/5">
+    <a (click)="onToggle()" class="shrink-0 cursor-pointer hover:scale-105 transition-transform">
+      <div class="bg-white rounded-xl p-1.5 shadow-md">
+        <img src="assets/logo.png" alt="Logo" class="h-7 w-7 object-contain" />
+      </div>
+    </a>
+    @if (!isCollapsed || isMobile) {
+      <div class="min-w-0">
+        <p class="font-display font-bold text-[12.5px] tracking-wider text-white truncate">EVENTOS CANÁ</p>
+        <p class="text-slate-400 text-[11px] truncate">Panel interno</p>
+      </div>
+    }
+    @if (isMobile) {
+      <button (click)="onToggle()" class="ml-auto shrink-0 text-white bg-white/10 hover:bg-white/20 rounded-full p-1 transition-colors">
+        <span class="material-icons text-sm">close</span>
+      </button>
+    }
+  </div>
+
+  <!-- Nav -->
+  <nav class="mt-5 flex-1 px-3 space-y-6 overflow-x-hidden overflow-y-auto">
+
+    <!-- Sección General (items simples de nivel raíz, ej. Inicio) -->
+    <div class="space-y-1">
+      @if (!isCollapsed || isMobile) {
+        <p class="px-3 mb-2 text-[10.5px] font-bold uppercase tracking-widest text-slate-500">General</p>
+      }
+      @for (item of menuItems; track $index) {
+        @if (!item.children && item.path === 'home') {
+          <a
+            [routerLink]="[item.path]"
+            routerLinkActive="bg-white/[0.07] text-amber-400 border-amber-400"
+            (click)="isMobile ? onToggle() : null"
+            class="flex items-center p-3 rounded-lg border-l-2 border-transparent hover:bg-white/5 hover:text-amber-300 transition-all duration-200 cursor-pointer group"
+            [class.justify-center]="isCollapsed && !isMobile"
+          >
+            <span class="material-icons text-slate-400 group-hover:text-amber-300 transition-colors text-[20px] shrink-0">
+              {{ item.icon }}
+            </span>
+            @if (!isCollapsed || isMobile) {
+              <span class="ml-3 text-sm font-medium whitespace-nowrap text-slate-300 group-hover:text-white">
+                {{ item.title }}
+              </span>
+            }
+          </a>
+        }
+      }
+    </div>
+
+    <!-- Secciones agrupadas (Administración, Eventos, ...) -->
+    @for (item of menuItems; track $index) {
+      @if (item.children && item.children.length > 0) {
+        <div class="space-y-1">
+          @if (!isCollapsed || isMobile) {
+            <p class="px-3 mb-2 text-[10.5px] font-bold uppercase tracking-widest text-slate-500">{{ item.title }}</p>
+          }
+          @for (child of item.children; track child.path) {
+            <a
+              [routerLink]="[child.path]"
+              routerLinkActive="bg-white/[0.07] text-amber-400 border-amber-400"
+              (click)="isMobile ? onToggle() : null"
+              class="flex items-center p-3 rounded-lg border-l-2 border-transparent hover:bg-white/5 hover:text-amber-300 transition-all duration-200 cursor-pointer group"
+              [class.justify-center]="isCollapsed && !isMobile"
+            >
+              <span class="material-icons text-slate-400 group-hover:text-amber-300 text-[20px] shrink-0">
+                {{ child.icon }}
+              </span>
+              @if (!isCollapsed || isMobile) {
+                <span class="ml-3 text-sm font-medium whitespace-nowrap text-slate-300 group-hover:text-white">
+                  {{ child.title }}
+                </span>
+              }
+            </a>
+          }
+        </div>
+      }
+    }
+  </nav>
+
+  <!-- Sección inferior: items simples restantes (Reportes, Configuración) + Salir -->
+  <div class="border-t border-white/5 px-3 py-4 space-y-1 shrink-0">
+    @for (item of menuItems; track $index) {
+      @if (!item.children && item.path !== 'home') {
+        <a
+          [routerLink]="[item.path]"
+          routerLinkActive="text-amber-400"
+          (click)="isMobile ? onToggle() : null"
+          class="flex items-center p-2 rounded-lg hover:bg-white/5 text-slate-500 hover:text-slate-200 transition-colors cursor-pointer group"
+          [class.justify-center]="isCollapsed && !isMobile"
+        >
+          <span class="material-icons shrink-0 text-[19px]">{{ item.icon }}</span>
+          @if (!isCollapsed || isMobile) {
+            <span class="ml-3 text-sm font-medium whitespace-nowrap">{{ item.title }}</span>
+          }
+        </a>
+      }
+    }
+    <button
+      (click)="logout()"
+      class="flex items-center w-full p-2 rounded-lg hover:bg-red-500/10 text-slate-500 hover:text-red-400 transition-colors group"
+      [class.justify-center]="isCollapsed && !isMobile"
+    >
+      <span class="material-icons shrink-0 text-[19px]">logout</span>
+      @if (!isCollapsed || isMobile) {
+        <span class="ml-3 text-sm font-medium whitespace-nowrap">Salir</span>
+      }
+    </button>
+  </div>
+
+</aside>

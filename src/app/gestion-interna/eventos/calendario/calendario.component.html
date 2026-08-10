@@ -1,0 +1,181 @@
+<div class="space-y-6">
+
+  <!-- ─── Encabezado ─────────────────────────────────────── -->
+  <div class="flex flex-wrap items-center justify-between gap-4">
+    <div class="flex items-center gap-4">
+      <div class="page-header-icon">
+        <span class="material-icons text-[22px]">calendar_month</span>
+      </div>
+      <div>
+        <h1 class="font-display text-2xl font-bold text-gray-900 tracking-tight">Calendario de Eventos</h1>
+        <p class="text-sm text-grayMedium mt-1">Agenda de eventos y entregas</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-4">
+      <div class="flex items-center gap-1 surface-card px-2 py-1.5">
+        <button (click)="mesAnterior()" title="Mes anterior"
+          class="p-1.5 rounded-lg hover:bg-amber-50 text-gray-500 transition-colors">
+          <span class="material-icons text-[18px]">chevron_left</span>
+        </button>
+        <button (click)="irAHoy()"
+          class="px-3 py-1 text-sm font-medium text-gray-600 rounded-lg hover:bg-amber-50 transition-colors">
+          Hoy
+        </button>
+        <button (click)="mesSiguiente()" title="Mes siguiente"
+          class="p-1.5 rounded-lg hover:bg-amber-50 text-gray-500 transition-colors">
+          <span class="material-icons text-[18px]">chevron_right</span>
+        </button>
+      </div>
+      <h2 class="font-display text-xl font-bold text-gray-900 min-w-[9rem]">{{ tituloMes }}</h2>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_20rem] gap-6 items-start">
+
+    <!-- ─── Grilla del mes ───────────────────────────────── -->
+    <div class="surface-card overflow-hidden">
+
+      <!-- Leyenda: además de explicar los colores, filtra la grilla -->
+      <div class="flex flex-wrap items-center gap-2 px-5 py-3 border-b border-gray-50">
+        @for (t of tipos; track t.tipo) {
+          <button (click)="alternarTipo(t.tipo)"
+            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all"
+            [class.ring-1]="tipoActivo(t.tipo)"
+            [ngClass]="tipoActivo(t.tipo) ? t.badge : 'bg-slate-50 text-slate-400 line-through'">
+            <span class="w-1.5 h-1.5 rounded-full" [ngClass]="tipoActivo(t.tipo) ? t.dot : 'bg-slate-300'"></span>
+            {{ t.label }}
+          </button>
+        }
+        <span class="ml-auto text-xs text-gray-400">
+          {{ totalVisiblesDelMes }} en el mes
+        </span>
+      </div>
+
+      @if (cargando) {
+        <div class="flex justify-center py-24"><div class="spinner"></div></div>
+      } @else {
+        <div class="grid grid-cols-7 border-b border-gray-50">
+          @for (d of nombresDias; track d) {
+            <div class="px-2 py-2 text-center text-[11px] font-semibold tracking-wide text-gray-400">{{ d }}</div>
+          }
+        </div>
+
+        <div class="grid grid-cols-7">
+          @for (dia of dias; track dia.fecha) {
+            <div (click)="seleccionarDia(dia)"
+              class="min-h-[6.5rem] border-r border-b border-gray-50 p-1.5 cursor-pointer transition-colors align-top"
+              [class.bg-slate-50/60]="!dia.esDelMes"
+              [class.hover:bg-amber-50]="dia.esDelMes"
+              [class.ring-2]="diaSeleccionado?.fecha === dia.fecha"
+              [class.ring-amber-300]="diaSeleccionado?.fecha === dia.fecha"
+              [class.ring-inset]="diaSeleccionado?.fecha === dia.fecha">
+
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-xs font-semibold"
+                  [class.text-gray-300]="!dia.esDelMes"
+                  [class.text-gray-600]="dia.esDelMes && !dia.esHoy"
+                  [class.text-amber-600]="dia.esHoy">{{ dia.numero }}</span>
+                @if (dia.esHoy) {
+                  <span class="text-[9px] font-bold text-amber-500 tracking-wide">HOY</span>
+                }
+              </div>
+
+              <div class="space-y-1">
+                @for (item of itemsVisibles(dia).slice(0, 3); track $index) {
+                  <div (click)="abrirItem(item); $event.stopPropagation()"
+                    class="px-1.5 py-0.5 rounded text-[10px] font-medium truncate hover:opacity-80 transition-opacity"
+                    [ngClass]="defTipo(item).chip"
+                    [title]="item.titulo + ' · ' + item.correlativoPedido">
+                    @if (hora(item)) { <span class="opacity-75">{{ hora(item) }}</span> }
+                    {{ item.titulo }}
+                  </div>
+                }
+                @if (itemsVisibles(dia).length > 3) {
+                  <div class="px-1.5 text-[10px] text-gray-400 font-medium">
+                    +{{ itemsVisibles(dia).length - 3 }} más
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- ─── Panel del día seleccionado ───────────────────── -->
+    <div class="surface-card p-5 relative overflow-hidden">
+      <div class="ambient-blob w-40 h-40 bg-amber-300/20 -top-16 -right-8"></div>
+
+      @if (!diaSeleccionado) {
+        <div class="relative flex flex-col items-center justify-center py-12 text-grayMedium">
+          <span class="material-icons text-4xl text-slate-200 mb-2">event_note</span>
+          <p class="text-sm">Selecciona un día del calendario</p>
+        </div>
+      } @else {
+        <div class="relative">
+          <h3 class="font-display text-lg font-bold text-gray-900 capitalize">{{ subtituloDiaSeleccionado }}</h3>
+
+          @if (itemsVisibles(diaSeleccionado).length === 0) {
+            <p class="text-sm text-gray-400 mt-6">Sin actividad este día.</p>
+          } @else {
+            <div class="mt-4 space-y-3">
+              @for (item of itemsVisibles(diaSeleccionado); track $index) {
+                <div (click)="abrirItem(item)"
+                  class="rounded-xl ring-1 ring-gray-100 p-3 cursor-pointer hover:ring-amber-200 hover:bg-amber-50/40 transition-all">
+
+                  <div class="flex items-start justify-between gap-2">
+                    <span class="badge shrink-0" [ngClass]="defTipo(item).badge">
+                      <span class="w-1.5 h-1.5 rounded-full mr-1.5" [ngClass]="defTipo(item).dot"></span>
+                      {{ defTipo(item).label }}
+                    </span>
+                    @if (hora(item)) {
+                      <span class="text-xs font-montserrat font-semibold text-gray-400">{{ hora(item) }}</span>
+                    }
+                  </div>
+
+                  <p class="font-semibold text-sm text-gray-800 mt-2">{{ item.titulo }}</p>
+
+                  <p class="text-xs text-gray-500 mt-1 flex items-center gap-1 flex-wrap">
+                    <span class="material-icons text-[13px] text-gray-400">confirmation_number</span>
+                    <span class="font-mono">{{ item.correlativoPedido }}</span>
+                    @if (item.nombreCliente) {
+                      <span class="text-gray-300">·</span>
+                      <span>{{ item.nombreCliente }}</span>
+                    }
+                  </p>
+
+                  @if (item.ubicacion) {
+                    <p class="text-xs text-gray-500 mt-1 flex items-start gap-1">
+                      <span class="material-icons text-[13px] text-gray-400">place</span>
+                      <span>{{ item.ubicacion }}</span>
+                    </p>
+                  }
+
+                  @if (item.tipo === 'ENTREGA') {
+                    <p class="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                      <span class="material-icons text-[13px] text-gray-400">local_shipping</span>
+                      <span class="font-montserrat">
+                        {{ item.cantidadViajesReales }} / {{ item.cantidadViajesAproximados }} viajes
+                      </span>
+                      @if (item.entregaFinalizada) {
+                        <span class="text-emerald-600 font-medium">· cerrada</span>
+                      }
+                    </p>
+                  }
+
+                  @if (item.nombreEstadoPedido) {
+                    <p class="text-xs text-gray-400 mt-1.5 flex items-center gap-1.5">
+                      <span class="w-1.5 h-1.5 rounded-full" [ngClass]="estadoDot(item)"></span>
+                      {{ item.nombreEstadoPedido }}
+                    </p>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>

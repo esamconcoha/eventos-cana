@@ -1,0 +1,148 @@
+<div class="space-y-6">
+
+  <!-- ─── Saludo ─────────────────────────────────────────── -->
+  <div class="flex flex-wrap items-start justify-between gap-4">
+    <div>
+      <p class="text-xs text-grayMedium tracking-wide">{{ hoyLargo }}</p>
+      <h1 class="font-serif italic text-3xl text-gray-900 mt-1">
+        Hola{{ nombreUsuario ? ', ' + nombreUsuario : '' }}
+      </h1>
+    </div>
+    @if (rol) {
+      <span class="px-4 py-2 rounded-full bg-[#021930] text-white text-xs font-bold tracking-wide uppercase">
+        {{ rol }}
+      </span>
+    }
+  </div>
+
+  @if (cargando) {
+    <div class="flex justify-center py-20"><div class="spinner"></div></div>
+  } @else if (!resumen) {
+    <div class="surface-card empty-state">
+      <span class="material-icons text-5xl mb-2 text-gray-300">cloud_off</span>
+      <p class="text-sm">No se pudo cargar el resumen</p>
+      <button (click)="cargar()" class="btn-secondary mt-4">Reintentar</button>
+    </div>
+  } @else {
+
+    <!-- Una sola tira: primero las tareas del día, después el contexto en gris -->
+    <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
+      @for (t of tarjetas; track t.label) {
+        <button (click)="ir(t.ruta)"
+          class="surface-card p-4 text-left hover:shadow-glow-amber hover:-translate-y-1 transition-all duration-300"
+          [class.opacity-80]="t.secundaria">
+          <div class="w-9 h-9 rounded-xl flex items-center justify-center mb-3" [ngClass]="t.chip">
+            <span class="material-icons text-[18px]">{{ t.icono }}</span>
+          </div>
+          <p class="font-montserrat font-bold leading-none"
+             [class.text-4xl]="!t.secundaria"
+             [class.text-3xl]="t.secundaria"
+             [class.text-gray-900]="!t.destacar && !t.secundaria"
+             [class.text-gray-500]="t.secundaria"
+             [class.text-amber-600]="t.destacar">{{ t.valor }}</p>
+          <p class="text-xs text-grayMedium mt-2 leading-tight">{{ t.label }}</p>
+        </button>
+      }
+    </div>
+
+    <!-- Sin items-start: las dos tarjetas estiran a la misma altura, así no
+         queda el hueco de fondo cuando una tiene menos contenido que la otra. -->
+    <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)] gap-6">
+
+      <!-- ─── Próximos eventos ───────────────────────────── -->
+      <div class="surface-card overflow-hidden flex flex-col">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+          <h2 class="font-serif italic text-xl text-gray-900">Próximos eventos</h2>
+          <a routerLink="/gestion-interna/eventos/calendario"
+             class="text-sm text-amber-600 hover:text-amber-700 font-medium">Ver calendario →</a>
+        </div>
+
+        @if (resumen.proximosEventos.length === 0) {
+          <div class="empty-state flex-1 py-16">
+            <span class="material-icons text-4xl mb-2 text-gray-200">event_available</span>
+            <p class="text-sm">No hay eventos programados</p>
+          </div>
+        } @else {
+          <div class="divide-y divide-slate-50 flex-1">
+            @for (e of resumen.proximosEventos; track e.correlativoPedido) {
+              <div class="flex items-center gap-4 px-6 py-4 hover:bg-amber-50/40 transition-colors">
+                <div class="w-14 shrink-0 rounded-xl bg-[#021930] text-white py-2 text-center">
+                  <p class="font-montserrat font-bold text-lg leading-none">{{ diaDe(e.fechaEvento) }}</p>
+                  <p class="text-[10px] font-semibold tracking-wide mt-0.5 opacity-80">{{ mesDe(e.fechaEvento) }}</p>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <p class="font-semibold text-sm text-gray-800 truncate">{{ tituloEvento(e) }}</p>
+                  <p class="text-xs text-gray-500 mt-0.5 truncate">
+                    @if (e.ubicacion) { {{ e.ubicacion }} }
+                    @if (e.ubicacion && horaDe(e.fechaEvento)) { <span class="text-gray-300">·</span> }
+                    @if (horaDe(e.fechaEvento)) { {{ horaDe(e.fechaEvento) }} }
+                  </p>
+                  <p class="text-xs text-gray-400 mt-1 flex items-center gap-1.5 flex-wrap">
+                    <span class="w-1.5 h-1.5 rounded-full shrink-0" [ngClass]="estadoDot(e)"></span>
+                    <span class="font-mono">{{ e.correlativoPedido }}</span>
+                    @if (e.nombreEstadoPedido) {
+                      <span class="text-gray-300">·</span> {{ e.nombreEstadoPedido }}
+                    }
+                  </p>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- ─── Accesos rápidos ────────────────────────────── -->
+      <!-- Lista vertical, no cuadrícula: los botones se reparten la altura de
+           la tarjeta y acompañan al listado de al lado. -->
+      <div class="surface-card p-6 flex flex-col">
+        <h2 class="font-serif italic text-xl text-gray-900">Accesos rápidos</h2>
+        <div class="mt-4 flex-1 flex flex-col gap-2">
+          @for (a of accesos; track a.ruta) {
+            <button (click)="ir(a.ruta)"
+              class="flex-1 flex items-center gap-3 rounded-xl ring-1 ring-slate-100 px-4 py-3 text-left
+                     hover:ring-amber-200 hover:bg-amber-50/40 transition-all">
+              <div class="w-9 h-9 rounded-lg bg-amber-50 text-amber-500 flex items-center justify-center shrink-0">
+                <span class="material-icons text-[18px]">{{ a.icono }}</span>
+              </div>
+              <span class="text-sm font-medium text-gray-700 leading-tight">{{ a.label }}</span>
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ─── Misión y visión ────────────────────────────────── -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="surface-card p-6 hover:shadow-glow-amber hover:-translate-y-1 transition-all duration-300">
+      <div class="flex items-center space-x-3 mb-4 pb-3 border-b border-slate-100">
+        <div class="page-header-icon w-10 h-10 rounded-xl">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+        </div>
+        <h4 class="font-display font-bold text-gray-800 tracking-tight">MISIÓN</h4>
+      </div>
+      <p class="text-sm text-gray-600 text-justify leading-relaxed">
+        Brindar servicios de alquiler de mobiliario y apoyo logístico para eventos sociales,
+        ofreciendo calidad, responsabilidad y atención personalizada.
+      </p>
+    </div>
+
+    <div class="surface-card p-6 hover:shadow-glow-amber hover:-translate-y-1 transition-all duration-300">
+      <div class="flex items-center space-x-3 mb-4 pb-3 border-b border-slate-100">
+        <div class="page-header-icon w-10 h-10 rounded-xl">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+        </div>
+        <h4 class="font-display font-bold text-gray-800 tracking-tight">VISIÓN</h4>
+      </div>
+      <p class="text-sm text-gray-600 text-justify leading-relaxed">
+        Ser una empresa organizada y confiable en el sector de eventos sociales,
+        reconocida por su puntualidad, calidad y crecimiento sostenible.
+      </p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,61 @@
+<div class="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#efe4d3] px-4 py-10">
+
+  <!-- Resplandor cálido de fondo -->
+  <div class="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[42rem] h-[42rem] rounded-full bg-amber-200/40 blur-3xl"></div>
+
+  <div class="relative w-full max-w-[420px] bg-white rounded-[2rem] shadow-xl shadow-black/10 px-9 py-11 animate-fade-in-up">
+
+    <div class="flex justify-center mb-4">
+      <!-- El archivo trae bastante margen transparente alrededor del texto:
+           a la altura anterior (h-10) el logo quedaba casi ilegible. -->
+      <img src="assets/logo.png" alt="Logo Eventos Caná" class="h-28 w-auto object-contain">
+    </div>
+
+    <div class="flex justify-center mb-6">
+      <span class="text-[11px] font-bold uppercase tracking-wider text-amber-800 bg-amber-100 px-4 py-1.5 rounded-full">
+        Acceso interno
+      </span>
+    </div>
+
+    <div class="text-center mb-9">
+      <h1 class="font-serif italic text-3xl text-gray-900">Bienvenido de nuevo</h1>
+      <p class="text-sm text-gray-500 mt-2">Ingresa tus credenciales para continuar.</p>
+    </div>
+
+    <form [formGroup]="formLogueo" (ngSubmit)="validarForm()" class="space-y-6">
+
+      <div class="flex flex-col gap-2">
+        <label for="usuario" class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Correo</label>
+        <input
+          id="usuario"
+          type="text"
+          formControlName="usuario"
+          placeholder="correo@ejemplo.com"
+          class="w-full bg-transparent border-0 border-b border-gray-200 pb-2 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-amber-400 transition-colors">
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label for="password" class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Contraseña</label>
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          placeholder="••••••••"
+          class="w-full bg-transparent border-0 border-b border-gray-200 pb-2 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-amber-400 transition-colors">
+      </div>
+
+      <button
+        type="submit"
+        class="group w-full py-3 rounded-full bg-amber-400 hover:bg-amber-500 text-gray-900 font-bold text-sm shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-2 mt-2">
+        Ingresar
+        <span class="material-icons text-[18px] transition-transform group-hover:translate-x-1">arrow_forward</span>
+      </button>
+
+    </form>
+
+    <p class="text-center text-xs text-amber-700/80 mt-7">
+      Acceso restringido a personal autorizado.
+    </p>
+
+  </div>
+</div>

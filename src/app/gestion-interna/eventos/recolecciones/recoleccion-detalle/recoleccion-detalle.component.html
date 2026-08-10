@@ -1,0 +1,276 @@
+<div class="space-y-6">
+
+  @if (cargando) {
+    <div class="flex justify-center py-24"><div class="spinner"></div></div>
+  } @else if (!recoleccion) {
+    <div class="empty-state">
+      <span class="material-icons text-5xl mb-2 text-gray-300">error_outline</span>
+      <p class="text-sm">No se encontró la recolección</p>
+    </div>
+  } @else {
+
+    <div class="flex flex-wrap items-start justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <button (click)="volver()" class="p-2 rounded-xl hover:bg-gray-100 text-gray-500 transition-colors">
+          <span class="material-icons text-[20px]">arrow_back</span>
+        </button>
+        <div>
+          <div class="flex items-center gap-3 flex-wrap">
+            <h1 class="font-display text-2xl font-bold text-gray-900 tracking-tight">Recolección</h1>
+            <span class="badge" [ngClass]="estadoPedidoDef()?.badgeClass ?? 'bg-slate-50 text-slate-500 ring-slate-200'">
+              <span class="w-1.5 h-1.5 rounded-full mr-1.5" [ngClass]="estadoPedidoDef()?.dot ?? 'bg-slate-300'"></span>
+              {{ estadoPedidoLabel() }}
+            </span>
+          </div>
+          <p class="text-sm text-grayMedium mt-1">
+            <span class="font-mono">{{ recoleccion.correlativoPedido }}</span>
+            @if (recoleccion.nombreClientePedido) { · {{ recoleccion.nombreClientePedido }} }
+            @if (recoleccion.fechaRecoleccion) {
+              · Recolección: {{ recoleccion.fechaRecoleccion | date:'dd MMM yyyy' }}
+            } @else {
+              · <span class="text-amber-600 font-medium">sin agendar</span>
+            }
+          </p>
+        </div>
+      </div>
+
+      @if (!recoleccion.recoleccionFinalizada) {
+        <div class="flex flex-wrap gap-2">
+          <button (click)="abrirProgramar()" class="btn-secondary">
+            <span class="material-icons text-[18px] mr-1">event</span>
+            {{ recoleccion.fechaRecoleccion ? 'Reagendar' : 'Agendar' }}
+          </button>
+          <button (click)="abrirRegistrarViaje()" class="btn-primary">
+            <span class="material-icons text-[18px] mr-1">add</span> Registrar viaje
+          </button>
+          <button (click)="marcarFinalizada()" class="btn-secondary">
+            <span class="material-icons text-[18px] mr-1">check_circle</span> Finalizar
+          </button>
+        </div>
+      }
+    </div>
+
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="surface-card p-4">
+        <p class="text-xs text-grayMedium">Viajes de vuelta</p>
+        <p class="font-montserrat font-bold text-3xl text-gray-900">
+          {{ recoleccion.cantidadViajesReales }}
+          <span class="text-lg text-gray-400">/ {{ recoleccion.cantidadViajesAproximados }}</span>
+        </p>
+      </div>
+      <div class="surface-card p-4">
+        <p class="text-xs text-grayMedium">Artículos por volver</p>
+        <p class="font-montserrat font-bold text-3xl"
+           [class.text-emerald-600]="recoleccion.itemsConPendiente === 0"
+           [class.text-amber-600]="recoleccion.itemsConPendiente > 0">
+          {{ recoleccion.itemsConPendiente }}
+        </p>
+      </div>
+      <div class="surface-card p-4">
+        <p class="text-xs text-grayMedium">
+          {{ recoleccion.recoleccionFinalizada ? 'Faltante total' : 'Cantidad pendiente' }}
+        </p>
+        <p class="font-montserrat font-bold text-3xl"
+           [class.text-red-600]="recoleccion.recoleccionFinalizada && recoleccion.totalPendiente > 0"
+           [class.text-gray-900]="!recoleccion.recoleccionFinalizada || recoleccion.totalPendiente === 0">
+          {{ recoleccion.totalPendiente | number:'1.0-2' }}
+        </p>
+      </div>
+      <div class="surface-card p-4">
+        <p class="text-xs text-grayMedium">Cerrada</p>
+        <p class="text-sm font-medium text-gray-800 mt-2">
+          {{ recoleccion.fechaFinRecoleccion ? (recoleccion.fechaFinRecoleccion | date:'dd MMM, HH:mm') : '—' }}
+        </p>
+      </div>
+    </div>
+
+    @if (recoleccion.recoleccionFinalizada && recoleccion.itemsConPendiente > 0) {
+      <div class="surface-card p-4 ring-1 ring-red-100 bg-red-50/40">
+        <p class="text-sm font-semibold text-red-700 flex items-center gap-1.5">
+          <span class="material-icons text-[18px]">report_problem</span>
+          Faltantes registrados
+        </p>
+        <p class="text-xs text-red-600/80 mt-1">
+          Estos artículos salieron a evento y no volvieron a bodega.
+        </p>
+      </div>
+    }
+
+    <div class="surface-card overflow-hidden">
+      <div class="px-5 py-3 border-b border-gray-50">
+        <h2 class="font-display font-bold text-gray-900">Artículos</h2>
+        <p class="text-xs text-gray-400 mt-0.5">El máximo a recolectar es lo que efectivamente se entregó</p>
+      </div>
+      @if (recoleccion.items.length === 0) {
+        <div class="empty-state py-12">
+          <p class="text-sm">Este pedido no registró viajes de entrega con artículos</p>
+        </div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="table-head">
+              <tr>
+                <th class="px-4 py-3 text-left">Artículo</th>
+                <th class="px-4 py-3 text-center">Salió</th>
+                <th class="px-4 py-3 text-center">Volvió</th>
+                <th class="px-4 py-3 text-center">Falta</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+              @for (item of recoleccion.items; track item.idItem) {
+                <tr>
+                  <td class="px-4 py-3 text-gray-700">{{ item.nombreItem }}</td>
+                  <td class="px-4 py-3 text-center font-montserrat text-gray-600">{{ item.cantidadEntregada | number:'1.0-2' }}</td>
+                  <td class="px-4 py-3 text-center font-montserrat text-gray-600">{{ item.cantidadRecolectada | number:'1.0-2' }}</td>
+                  <td class="px-4 py-3 text-center font-montserrat font-bold"
+                      [class.text-emerald-600]="item.cantidadPendiente === 0"
+                      [class.text-amber-600]="item.cantidadPendiente > 0 && !recoleccion.recoleccionFinalizada"
+                      [class.text-red-600]="item.cantidadPendiente > 0 && recoleccion.recoleccionFinalizada">
+                    {{ item.cantidadPendiente | number:'1.0-2' }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+
+    <div class="surface-card overflow-hidden">
+      <div class="px-5 py-3 border-b border-gray-50">
+        <h2 class="font-display font-bold text-gray-900">Viajes de vuelta</h2>
+      </div>
+      @if (recoleccion.viajes.length === 0) {
+        <div class="empty-state py-12">
+          <span class="material-icons text-4xl mb-2 text-gray-200">local_shipping</span>
+          <p class="text-sm">Todavía no se registró ningún viaje</p>
+        </div>
+      } @else {
+        <div class="divide-y divide-gray-50">
+          @for (v of recoleccion.viajes; let i = $index; track v.idViaje) {
+            <div class="px-6 py-4 cursor-pointer hover:bg-sky-50/40 transition-colors" (click)="toggleViajeExpandido(v.idViaje)">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="font-semibold text-sm text-gray-800">Viaje {{ i + 1 }}</p>
+                  <p class="text-xs text-gray-500 mt-0.5">
+                    {{ v.fechaInicioViaje | date:'dd MMM yyyy, HH:mm' }}
+                    @if (v.fechaFinViaje) { → {{ v.fechaFinViaje | date:'HH:mm' }} }
+                  </p>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="text-xs text-gray-500 font-montserrat">
+                    {{ totalItemsViaje(v) | number:'1.0-2' }} artículos
+                  </span>
+                  <span class="material-icons text-gray-300 transition-transform"
+                    [class.rotate-180]="viajeExpandidoId === v.idViaje">expand_more</span>
+                </div>
+              </div>
+
+              @if (viajeExpandidoId === v.idViaje) {
+                <div class="mt-3 pl-4 border-l-2 border-sky-100 space-y-1">
+                  @for (it of v.items ?? []; track it.idDetalle) {
+                    <p class="text-xs text-gray-600 flex justify-between max-w-md">
+                      <span>{{ it.nombreItem }}</span>
+                      <span class="font-montserrat font-medium">{{ it.cantidadItem | number:'1.0-2' }}</span>
+                    </p>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>
+
+@if (mostrarProgramar && recoleccion) {
+  <div class="modal-backdrop" (click)="cerrarProgramar()">
+    <div class="modal-panel max-w-lg" (click)="$event.stopPropagation()">
+      <h3 class="font-display text-lg font-bold text-gray-900">Agendar recolección</h3>
+      <p class="text-sm text-grayMedium mt-1">Pedido {{ recoleccion.correlativoPedido }}</p>
+
+      <form [formGroup]="formProgramar" class="mt-4 space-y-4">
+        <div>
+          <div class="flex items-baseline justify-between">
+            <label class="field-label">Fecha de recolección *</label>
+            @if (campoInvalido(formProgramar, 'fechaRecoleccion')) {
+              <span class="text-xs text-red-500">Obligatoria</span>
+            }
+          </div>
+          <!-- Piso = día del evento: no se recoge antes de que el evento ocurra
+               (y el evento es siempre igual o posterior a la entrega). -->
+          <app-date-picker formControlName="fechaRecoleccion" modo="fecha" [minimoHoy]="true"
+            [fechaMinima]="recoleccion.fechaEvento ? recoleccion.fechaEvento.slice(0, 10) : null"
+            placeholder="Selecciona la fecha"
+            [invalido]="campoInvalido(formProgramar, 'fechaRecoleccion')"></app-date-picker>
+          <p class="text-xs text-gray-400 mt-1">
+            No puede ser antes del evento{{ recoleccion.fechaEvento ? ' (' + (recoleccion.fechaEvento | date:'dd MMM yyyy') + ')' : '' }}
+          </p>
+        </div>
+        <div>
+          <label class="field-label">Viajes estimados *</label>
+          <input formControlName="cantidadViajesAproximados" type="number" min="1" class="field-input"
+            [class.border-red-400]="campoInvalido(formProgramar, 'cantidadViajesAproximados')">
+          <p class="text-xs text-gray-400 mt-1">Se precargó con los viajes que tomó la entrega</p>
+        </div>
+      </form>
+
+      <div class="flex justify-end gap-2 mt-6">
+        <button (click)="cerrarProgramar()" class="btn-secondary">Cancelar</button>
+        <button (click)="guardarProgramacion()" class="btn-primary">Guardar</button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (mostrarRegistrarViaje && recoleccion) {
+  <div class="modal-backdrop" (click)="cerrarRegistrarViaje()">
+    <div class="modal-panel max-w-2xl" (click)="$event.stopPropagation()">
+      <h3 class="font-display text-lg font-bold text-gray-900">Viaje de vuelta {{ siguienteNumeroViaje }}</h3>
+      <p class="text-sm text-grayMedium mt-1">Solo se listan artículos que salieron y aún no volvieron</p>
+
+      <form [formGroup]="formViaje" class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="field-label">Salida *</label>
+          <app-date-picker formControlName="fechaInicioViaje" modo="fechaHora"
+            placeholder="Fecha y hora de salida"
+            [invalido]="campoInvalido(formViaje, 'fechaInicioViaje')"></app-date-picker>
+        </div>
+        <div>
+          <label class="field-label">Llegada a bodega</label>
+          <app-date-picker formControlName="fechaFinViaje" modo="fechaHora"
+            placeholder="Opcional"></app-date-picker>
+        </div>
+      </form>
+
+      <div class="mt-5">
+        <p class="field-label mb-2">Artículos recuperados ({{ itemsSeleccionadosCount }} seleccionados)</p>
+        @if (itemsChecklist.length === 0) {
+          <p class="text-sm text-emerald-600 py-6 text-center">Ya volvió todo lo que se entregó.</p>
+        } @else {
+          <div class="max-h-72 overflow-y-auto space-y-1 pr-1">
+            @for (i of itemsChecklist; track i.item.idItem) {
+              <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
+                <input type="checkbox" [checked]="i.seleccionado" (change)="toggleItemChecklist(i)"
+                  class="w-4 h-4 accent-sky-500 cursor-pointer">
+                <span class="flex-1 text-sm text-gray-700">{{ i.item.nombreItem }}</span>
+                <span class="text-xs text-gray-400">faltan {{ i.item.cantidadPendiente | number:'1.0-2' }}</span>
+                <input type="number" [(ngModel)]="i.cantidad" [ngModelOptions]="{standalone: true}"
+                  [disabled]="!i.seleccionado" min="0.01" [max]="i.item.cantidadPendiente" step="1"
+                  class="w-24 field-input py-1 text-sm disabled:bg-gray-50 disabled:text-gray-300">
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="flex justify-end gap-2 mt-6">
+        <button (click)="cerrarRegistrarViaje()" class="btn-secondary">Cancelar</button>
+        <button (click)="guardarViaje()" class="btn-primary" [disabled]="itemsSeleccionadosCount === 0">
+          Registrar viaje
+        </button>
+      </div>
+    </div>
+  </div>
+}

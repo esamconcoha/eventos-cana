@@ -1,0 +1,28 @@
+<div class="flex h-screen overflow-hidden relative">
+
+  @if (isSidebarOpen && isMobile) {
+    <div class="fixed inset-0 bg-[#021930]/60 backdrop-blur-sm z-40 lg:hidden"
+         (click)="closeSidebar()">
+    </div>
+  }
+
+  <app-sidemenu
+    [isCollapsed]="isCollapsed"
+    [isMobile]="isMobile"
+    [isSidebarOpen]="isSidebarOpen"
+    (toggle)="toggleSidebar()">
+  </app-sidemenu>
+
+  <div class="flex-1 flex flex-col overflow-hidden relative bg-[#eae3d5]">
+
+    <!-- Resplandor ambiental cálido -->
+    <div class="ambient-blob w-[28rem] h-[28rem] bg-amber-200/30 -top-40 -right-24"></div>
+
+    <main class="relative flex-1 overflow-x-hidden overflow-y-auto p-4 md:p-8">
+      <div class="max-w-6xl mx-auto animate-fade-in">
+        <router-outlet></router-outlet>
+      </div>
+    </main>
+  </div>
+
+</div>

@@ -1,0 +1,225 @@
+<div class="space-y-6">
+
+  <!-- Encabezado -->
+  <div class="flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <div class="page-header-icon">
+        <span class="material-icons text-[22px]">design_services</span>
+      </div>
+      <div>
+        <h1 class="font-display text-2xl font-bold text-gray-900 tracking-tight">Servicios de Decoración</h1>
+        <p class="text-sm text-grayMedium mt-1">Gestión del catálogo de servicios</p>
+      </div>
+    </div>
+    <button (click)="abrirCrear()"
+      class="btn-primary">
+      <span class="material-icons text-[18px]">add</span>
+      Nuevo servicio
+    </button>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       FORMULARIO CREAR / EDITAR
+  ══════════════════════════════════════════════════════ -->
+  @if (mostrarForm) {
+    <div class="surface-card p-6"
+      [class.surface-card--edit]="modoEdicion">
+
+      <div class="flex items-center gap-2 mb-5">
+        <span class="material-icons text-blue-500">{{ modoEdicion ? 'edit' : 'design_services' }}</span>
+        <h2 class="font-montserrat text-lg font-semibold text-gray-800">
+          {{ modoEdicion ? 'Editar servicio' : 'Nuevo servicio' }}
+        </h2>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="guardar()" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+        <!-- Categoría -->
+        <div class="flex flex-col gap-1">
+          <label class="field-label">Categoría <span class="text-red-500">*</span></label>
+          <select formControlName="idCategoria"
+            class="field-input bg-white"
+            [class.border-red-400]="campoInvalido('idCategoria')">
+            <option [value]="null" disabled>Seleccione una categoría</option>
+            @for (cat of categorias; track cat.idCategoria) {
+              <option [value]="cat.idCategoria">{{ cat.nombreCategoria }}</option>
+            }
+          </select>
+          @if (campoInvalido('idCategoria')) {
+            <span class="text-xs text-red-500">Seleccione una categoría</span>
+          }
+        </div>
+
+        <!-- Unidad de medida -->
+        <div class="flex flex-col gap-1">
+          <label class="field-label">Unidad de medida <span class="text-red-500">*</span></label>
+          <input formControlName="unidadMedida" type="text"
+            class="field-input"
+            [class.border-red-400]="campoInvalido('unidadMedida')"
+            placeholder="Ej. unidad, metro, paquete">
+          @if (campoInvalido('unidadMedida')) {
+            <span class="text-xs text-red-500">Campo requerido</span>
+          }
+        </div>
+
+        <!-- Nombre -->
+        <div class="flex flex-col gap-1 md:col-span-2">
+          <label class="field-label">Nombre del servicio <span class="text-red-500">*</span></label>
+          <input formControlName="nombreServicio" type="text"
+            class="field-input"
+            [class.border-red-400]="campoInvalido('nombreServicio')"
+            maxlength="100" placeholder="Nombre del servicio">
+          @if (campoInvalido('nombreServicio')) {
+            <span class="text-xs text-red-500">Campo requerido</span>
+          }
+        </div>
+
+        <!-- Descripción -->
+        <div class="flex flex-col gap-1 md:col-span-2">
+          <label class="field-label">Descripción <span class="text-red-500">*</span></label>
+          <textarea formControlName="descripcionServicio" rows="3"
+            class="field-input resize-none"
+            [class.border-red-400]="campoInvalido('descripcionServicio')"
+            maxlength="300" placeholder="Descripción del servicio"></textarea>
+          @if (campoInvalido('descripcionServicio')) {
+            <span class="text-xs text-red-500">Campo requerido</span>
+          }
+        </div>
+
+        <!-- Requiere detalle -->
+        <div class="flex items-center gap-3 self-end pb-2">
+          <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer select-none">
+            <input formControlName="requiereDetalle" type="checkbox" class="w-4 h-4 accent-cyan-500">
+            Requiere detalle adicional
+          </label>
+        </div>
+
+        <!-- Acciones -->
+        <div class="md:col-span-2 flex justify-end gap-3 pt-4 border-t border-gray-100">
+          <button type="button" (click)="cancelar()"
+            class="btn-cancel">
+            Cancelar
+          </button>
+          <button type="submit" [disabled]="form.invalid"
+            class="btn-submit">
+            {{ modoEdicion ? 'Guardar cambios' : 'Guardar servicio' }}
+          </button>
+        </div>
+
+      </form>
+    </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════════
+       TABLA
+  ══════════════════════════════════════════════════════ -->
+  <div class="surface-card overflow-hidden">
+    <div class="card-title-bar flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <h2 class="font-montserrat font-semibold text-gray-800">Listado de servicios</h2>
+      <div class="flex items-center gap-3">
+        <div class="relative">
+          <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[18px]">search</span>
+          <input type="text" [(ngModel)]="textoBusqueda" (ngModelChange)="aplicarFiltro()"
+            placeholder="Buscar por nombre o categoría..."
+            class="field-search w-60">
+        </div>
+        <span class="text-xs text-grayMedium whitespace-nowrap">{{ serviciosFiltrados.length }} registros</span>
+      </div>
+    </div>
+
+    @if (cargando) {
+      <div class="flex justify-center items-center py-12">
+        <div class="spinner"></div>
+      </div>
+    } @else if (serviciosFiltrados.length === 0) {
+      <div class="empty-state">
+        <span class="material-icons text-5xl mb-2 text-gray-300">design_services</span>
+        <p class="text-sm">No se encontraron servicios</p>
+      </div>
+    } @else {
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="table-head">
+            <tr>
+              <th class="px-4 py-3 text-left">Nombre</th>
+              <th class="px-4 py-3 text-left">Categoría</th>
+              <th class="px-4 py-3 text-left">Descripción</th>
+              <th class="px-4 py-3 text-left">Unidad</th>
+              <th class="px-4 py-3 text-center">Detalle</th>
+              <th class="px-4 py-3 text-center">Estado</th>
+              <th class="px-4 py-3 text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-50">
+            @for (s of serviciosPaginados; track s.idServicio) {
+              <tr class="row-hover"
+                [class.bg-blue-50]="servicioEditando?.idServicio === s.idServicio">
+                <td class="px-4 py-3 font-medium text-gray-800">{{ s.nombreServicio }}</td>
+                <td class="px-4 py-3">
+                  <span class="badge-purple">
+                    {{ s.nombreCategoria ?? s.idCategoria }}
+                  </span>
+                </td>
+                <td class="px-4 py-3 text-gray-600 max-w-[200px] truncate text-xs">{{ s.descripcionServicio }}</td>
+                <td class="px-4 py-3 text-gray-600 text-xs">{{ s.unidadMedida }}</td>
+                <td class="px-4 py-3 text-center">
+                  @if (s.requiereDetalle) {
+                    <span class="material-icons text-blue-400 text-[18px]">check</span>
+                  } @else {
+                    <span class="text-gray-300 text-xs">—</span>
+                  }
+                </td>
+                <td class="px-4 py-3 text-center">
+                  @if (s.estadoServicio) {
+                    <span class="badge-success">Activo</span>
+                  } @else {
+                    <span class="badge-danger">Inactivo</span>
+                  }
+                </td>
+                <td class="px-4 py-3 text-center">
+                  <div class="flex justify-center gap-2">
+                    <button (click)="abrirEditar(s)" title="Editar"
+                      class="btn-icon-edit">
+                      <span class="material-icons text-[18px]">edit</span>
+                    </button>
+                    @if (s.estadoServicio) {
+                      <button (click)="confirmarInactivar(s)" title="Inactivar"
+                        class="btn-icon-delete">
+                        <span class="material-icons text-[18px]">block</span>
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginador -->
+      @if (totalPaginas > 1) {
+        <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+          <span class="text-xs text-grayMedium">Página {{ paginaActual }} de {{ totalPaginas }}</span>
+          <div class="flex items-center gap-1">
+            <button (click)="cambiarPagina(paginaActual - 1)" [disabled]="paginaActual === 1"
+              class="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+              <span class="material-icons text-[18px]">chevron_left</span>
+            </button>
+            @for (p of paginas; track p) {
+              <button (click)="cambiarPagina(p)"
+                class="page-btn"
+                [class.page-btn--active]="p === paginaActual">
+                {{ p }}
+              </button>
+            }
+            <button (click)="cambiarPagina(paginaActual + 1)" [disabled]="paginaActual === totalPaginas"
+              class="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+              <span class="material-icons text-[18px]">chevron_right</span>
+            </button>
+          </div>
+        </div>
+      }
+    }
+  </div>
+
+</div>

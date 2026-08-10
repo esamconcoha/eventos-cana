@@ -1,0 +1,1228 @@
+<div class="space-y-6">
+
+  <!-- Encabezado -->
+  <div class="flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <div class="page-header-icon">
+        <span class="material-icons text-[22px]">local_mall</span>
+      </div>
+      <div>
+        <h1 class="font-serif italic text-3xl text-gray-900">Pedidos</h1>
+        <p class="text-sm text-grayMedium mt-1">Seguimiento de entregas y cobros</p>
+      </div>
+    </div>
+    <button (click)="mostrarForm = true" class="btn-primary">
+      <span class="material-icons text-[18px]">add</span>
+      Nuevo pedido
+    </button>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       FORMULARIO NUEVO PEDIDO (directo)
+  ══════════════════════════════════════════════════════ -->
+  @if (mostrarForm) {
+    <div class="surface-card p-6 space-y-6">
+
+      <div class="flex items-center gap-2">
+        <span class="material-icons text-blue-500">local_mall</span>
+        <h2 class="font-montserrat text-lg font-semibold text-gray-800">Nuevo pedido directo</h2>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="guardar()" class="space-y-6">
+
+        <!-- ── Cliente y evento ── -->
+        <div>
+          <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Cliente y evento</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            <div class="flex flex-col gap-1">
+              <label class="field-label">Nombre del cliente <span class="text-red-500">*</span></label>
+              <input formControlName="nombreClientePedido" type="text"
+                class="field-input"
+                [class.border-red-400]="campoInvalido('nombreClientePedido')"
+                maxlength="100" placeholder="Nombre completo">
+              @if (campoInvalido('nombreClientePedido')) {
+                <span class="text-xs text-red-500">Campo requerido</span>
+              }
+            </div>
+
+            <div class="flex flex-col gap-1">
+              <label class="field-label">Teléfono <span class="text-red-500">*</span></label>
+              <input formControlName="telefonoClientePedido" type="text"
+                class="field-input"
+                [class.border-red-400]="campoInvalido('telefonoClientePedido')"
+                maxlength="8" inputmode="numeric" placeholder="Ej. 50001234">
+              @if (campoInvalido('telefonoClientePedido')) {
+                <span class="text-xs text-red-500">8 dígitos requeridos</span>
+              }
+            </div>
+
+            <div class="flex flex-col gap-1">
+              <label class="field-label">DPI / NIT del cliente <span class="text-red-500">*</span></label>
+              <input formControlName="dpiUsuarioPedido" type="text"
+                class="field-input"
+                [class.border-red-400]="campoInvalido('dpiUsuarioPedido')"
+                maxlength="16" placeholder="Ej. 1234567890101">
+              @if (campoInvalido('dpiUsuarioPedido')) {
+                <span class="text-xs text-red-500">Campo requerido</span>
+              }
+            </div>
+
+            <div class="flex flex-col gap-1">
+              <label class="field-label">Tipo de evento <span class="text-red-500">*</span></label>
+              <select formControlName="codTipoEvento"
+                class="field-select"
+                [class.border-red-400]="campoInvalido('codTipoEvento')">
+                <option [value]="null" disabled>Selecciona un tipo de evento</option>
+                @for (tipo of tiposEvento; track tipo.idCatalogo) {
+                  <option [value]="tipo.codigo">{{ tipo.nombre }}</option>
+                }
+              </select>
+              @if (campoInvalido('codTipoEvento')) {
+                <span class="text-xs text-red-500">Campo requerido</span>
+              }
+            </div>
+
+            <div class="flex flex-col gap-1 relative">
+              <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Fecha del evento <span class="text-red-500">*</span></label>
+              <button type="button" (click)="abrirCalendario()"
+                class="w-full flex items-center justify-between border-2 rounded-xl px-3 py-2.5 text-sm text-left bg-white transition-colors"
+                [class.border-amber-400]="calendarioAbierto"
+                [class.border-slate-200]="!calendarioAbierto"
+                [class.border-red-400]="campoInvalido('fechaEventoHora') && !calendarioAbierto">
+                <span [class.text-gray-400]="!fechaEventoSeleccionada" [class.text-gray-800]="fechaEventoSeleccionada">
+                  {{ fechaEventoTexto || 'Selecciona fecha y hora' }}
+                </span>
+                <span class="material-icons text-amber-500 text-[20px]">calendar_month</span>
+              </button>
+              @if (campoInvalido('fechaEventoHora')) {
+                <span class="text-xs text-red-500">Campo requerido</span>
+              }
+
+              @if (calendarioAbierto) {
+                <div class="fixed inset-0 z-40" (click)="cerrarCalendario()"></div>
+                <div class="absolute z-50 top-full mt-2 left-0 w-full max-w-sm bg-white rounded-3xl shadow-2xl border border-slate-100 p-5 animate-fade-in-up"
+                  (click)="horaPickerAbierto = false; $event.stopPropagation()">
+
+                  <div class="flex items-center justify-between mb-4">
+                    <button type="button" (click)="mesAnterior()" class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-gray-500 transition-colors">
+                      <span class="material-icons text-[18px]">chevron_left</span>
+                    </button>
+                    <span class="font-serif italic text-lg text-gray-900">{{ nombreMesVisible }}</span>
+                    <button type="button" (click)="mesSiguiente()" class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-gray-500 transition-colors">
+                      <span class="material-icons text-[18px]">chevron_right</span>
+                    </button>
+                  </div>
+
+                  <div class="grid grid-cols-7 mb-1">
+                    @for (d of ['D','L','M','M','J','V','S']; track $index) {
+                      <span class="text-center text-[11px] font-bold uppercase text-slate-400">{{ d }}</span>
+                    }
+                  </div>
+
+                  <div class="grid grid-cols-7 gap-y-1">
+                    @for (dia of diasCalendario; track $index) {
+                      <div class="flex items-center justify-center h-9">
+                        @if (dia) {
+                          <button type="button" (click)="seleccionarDia(dia)"
+                            class="w-8 h-8 rounded-full text-sm transition-colors"
+                            [class.bg-amber-400]="esHoy(dia)"
+                            [class.text-gray-900]="esHoy(dia)"
+                            [class.font-bold]="esHoy(dia)"
+                            [class.ring-2]="esSeleccionado(dia) && !esHoy(dia)"
+                            [class.ring-brand-900]="esSeleccionado(dia) && !esHoy(dia)"
+                            [class.text-gray-700]="!esHoy(dia)"
+                            [class.hover:bg-slate-100]="!esHoy(dia)">
+                            {{ dia.getDate() }}
+                          </button>
+                        }
+                      </div>
+                    }
+                  </div>
+
+                  <div class="relative mt-3 pt-3 border-t border-slate-100">
+                    <button type="button" (click)="toggleHoraPicker($event)"
+                      class="w-full flex items-center gap-2 border-2 rounded-lg px-3 py-2 text-sm transition-colors bg-white"
+                      [class.border-amber-400]="horaPickerAbierto"
+                      [class.border-slate-200]="!horaPickerAbierto">
+                      <span class="material-icons text-[18px] text-slate-400">schedule</span>
+                      <span [class.text-gray-400]="!horaEvento" [class.text-gray-800]="horaEvento">{{ horaEvento || '--:--' }}</span>
+                    </button>
+
+                    @if (horaPickerAbierto) {
+                      <div class="absolute z-10 top-full mt-1 left-0 flex bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden"
+                        (click)="$event.stopPropagation()">
+                        <div class="w-16 max-h-48 overflow-y-auto py-1">
+                          @for (h of horasDisponibles; track h) {
+                            <button type="button" (click)="seleccionarHora(h)"
+                              class="w-full text-center py-1.5 text-sm font-montserrat transition-colors"
+                              [class.bg-amber-400]="horaSeleccionadaNum === h"
+                              [class.text-gray-900]="horaSeleccionadaNum === h"
+                              [class.font-bold]="horaSeleccionadaNum === h"
+                              [class.text-gray-600]="horaSeleccionadaNum !== h"
+                              [class.hover:bg-slate-50]="horaSeleccionadaNum !== h">
+                              {{ h < 10 ? '0' + h : h }}
+                            </button>
+                          }
+                        </div>
+                        <div class="w-16 max-h-48 overflow-y-auto py-1 border-l border-slate-100">
+                          @for (m of minutosDisponibles; track m) {
+                            <button type="button" (click)="seleccionarMinuto(m)"
+                              class="w-full text-center py-1.5 text-sm font-montserrat transition-colors"
+                              [class.bg-amber-400]="minutoSeleccionadoNum === m"
+                              [class.text-gray-900]="minutoSeleccionadoNum === m"
+                              [class.font-bold]="minutoSeleccionadoNum === m"
+                              [class.text-gray-600]="minutoSeleccionadoNum !== m"
+                              [class.hover:bg-slate-50]="minutoSeleccionadoNum !== m">
+                              {{ m < 10 ? '0' + m : m }}
+                            </button>
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
+
+                  <div class="flex items-center justify-between mt-3 pt-3 border-t border-slate-100 text-xs">
+                    <span class="flex items-center gap-1.5 text-gray-500">
+                      <span class="w-2 h-2 rounded-full ring-2 ring-brand-900 inline-block"></span>
+                      Seleccionado
+                    </span>
+                    <span class="font-semibold text-amber-600">Hoy</span>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <div class="flex flex-col gap-1 md:col-span-2">
+              <label class="field-label">Dirección del pedido <span class="text-red-500">*</span></label>
+              <input formControlName="direccionPedido" type="text"
+                class="field-input"
+                [class.border-red-400]="campoInvalido('direccionPedido')"
+                maxlength="200" placeholder="Dirección donde se realizará el evento">
+              @if (campoInvalido('direccionPedido')) {
+                <span class="text-xs text-red-500">Campo requerido</span>
+              }
+            </div>
+
+            <div class="flex flex-col gap-1">
+              <label class="field-label">Salón de entrega</label>
+              <select formControlName="salonEntrega" class="field-select">
+                <option [value]="null">Sin salón asignado</option>
+                @for (s of salones; track s.idSalon) {
+                  <option [value]="s.idSalon">{{ s.nombreSalon }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="flex flex-col gap-1">
+              <label class="field-label">Fecha de entrega estimada <span class="text-red-500">*</span></label>
+              <!-- Tope = día del evento: no se entrega después de que ocurra. -->
+              <app-date-picker formControlName="fechaEntrega" modo="fecha" [minimoHoy]="true"
+                [fechaMaxima]="fechaSolo(form.get('fechaEventoHora')?.value)"
+                placeholder="Selecciona la fecha de entrega"
+                [invalido]="campoInvalido('fechaEntrega')"></app-date-picker>
+              @if (campoInvalido('fechaEntrega')) {
+                <span class="text-xs text-red-500">Campo requerido</span>
+              }
+            </div>
+
+            <div class="flex flex-col gap-1">
+              <label class="field-label">Fecha de recolección</label>
+              <!-- Piso = día de entrega: no se recoge antes de haber entregado. -->
+              <app-date-picker formControlName="fechaRecoleccion" modo="fecha" [minimoHoy]="true"
+                [fechaMinima]="form.get('fechaEntrega')?.value || null"
+                placeholder="Se puede agendar después"></app-date-picker>
+            </div>
+
+            <div class="flex flex-col gap-1">
+              <label class="field-label">Viajes aproximados <span class="text-red-500">*</span></label>
+              <input formControlName="cantidadViajesAproximados" type="number" min="1"
+                class="field-input" [class.border-red-400]="campoInvalido('cantidadViajesAproximados')">
+              @if (campoInvalido('cantidadViajesAproximados')) {
+                <span class="text-xs text-red-500">Campo requerido</span>
+              }
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ── Detalle de items ── -->
+        <div class="section-divider">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Items del pedido</h3>
+            <button type="button" (click)="agregarDetalle()"
+              class="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 transition-colors">
+              <span class="material-icons text-[18px]">add_circle_outline</span>
+              Agregar item
+            </button>
+          </div>
+
+          <div class="rounded-xl border border-gray-200 overflow-hidden">
+            <table class="w-full text-sm">
+              <thead class="table-head">
+                <tr>
+                  <th class="px-4 py-3 text-left">Item</th>
+                  <th class="px-4 py-3 text-right w-32">Cantidad</th>
+                  <th class="px-4 py-3 text-right w-32">Costo unit.</th>
+                  <th class="px-4 py-3 text-right w-32">Subtotal</th>
+                  <th class="px-4 py-3 w-12"></th>
+                </tr>
+              </thead>
+              <tbody formArrayName="detalles" class="divide-y divide-gray-100">
+                @for (detalle of detalles.controls; let i = $index; track i) {
+                  <tr [formGroupName]="i" class="row-hover">
+                    <td class="px-4 py-2">
+                      <select formControlName="idItem"
+                        class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-sm bg-white outline-none focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/15"
+                        [class.border-red-400]="detalleInvalido(i, 'idItem')">
+                        <option [value]="null" disabled>Seleccione un item</option>
+                        @for (item of items; track item.idItem) {
+                          <option [value]="item.idItem">{{ item.descripcionItem }}</option>
+                        }
+                      </select>
+                    </td>
+                    <td class="px-4 py-2">
+                      <input formControlName="cantidadItemPedido" type="number" min="1"
+                        class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-sm text-right outline-none focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/15"
+                        [class.border-red-400]="detalleInvalido(i, 'cantidadItemPedido')">
+                    </td>
+                    <td class="px-4 py-2 text-right text-gray-600">
+                      @let itemSel = getItem(detalle.get('idItem')?.value);
+                      @if (itemSel) {
+                        Q {{ itemSel.costoItem | number:'1.2-2' }}
+                      } @else {
+                        <span class="text-gray-300">—</span>
+                      }
+                    </td>
+                    <td class="px-4 py-2 text-right font-medium text-gray-800">
+                      @if (subtotalDetalle(i) > 0) {
+                        Q {{ subtotalDetalle(i) | number:'1.2-2' }}
+                      } @else {
+                        <span class="text-gray-300">—</span>
+                      }
+                    </td>
+                    <td class="px-4 py-2 text-center">
+                      @if (detalles.length > 1) {
+                        <button type="button" (click)="eliminarDetalle(i)"
+                          class="p-1 rounded hover:bg-red-50 text-red-400 transition-colors">
+                          <span class="material-icons text-[18px]">delete_outline</span>
+                        </button>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ── Detalle de servicios ── -->
+        <div class="section-divider">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Servicios del pedido</h3>
+            <button type="button" (click)="agregarDetalleServicio()"
+              class="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 transition-colors">
+              <span class="material-icons text-[18px]">add_circle_outline</span>
+              Agregar servicio
+            </button>
+          </div>
+
+          @if (detallesServicios.length === 0) {
+            <div class="rounded-xl border border-dashed border-gray-200 py-6 text-center text-sm text-gray-400">
+              Ningún servicio agregado (opcional)
+            </div>
+          } @else {
+            <div class="rounded-xl border border-gray-200 overflow-hidden">
+              <table class="w-full text-sm">
+                <thead class="table-head">
+                  <tr>
+                    <th class="px-4 py-3 text-left">Servicio</th>
+                    <th class="px-4 py-3 text-right w-24">Cantidad</th>
+                    <th class="px-4 py-3 text-right w-32">Precio acordado</th>
+                    <th class="px-4 py-3 text-left">Especificaciones</th>
+                    <th class="px-4 py-3 text-right w-32">Subtotal</th>
+                    <th class="px-4 py-3 w-12"></th>
+                  </tr>
+                </thead>
+                <tbody formArrayName="detallesServicios" class="divide-y divide-gray-100">
+                  @for (detalle of detallesServicios.controls; let i = $index; track i) {
+                    <tr [formGroupName]="i" class="row-hover">
+                      <td class="px-4 py-2">
+                        <select formControlName="idServicio"
+                          class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-sm bg-white outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
+                          [class.border-red-400]="detalleServicioInvalido(i, 'idServicio')">
+                          <option [value]="null" disabled>Seleccione un servicio</option>
+                          @for (s of servicios; track s.idServicio) {
+                            <option [value]="s.idServicio">{{ s.nombreServicio }}</option>
+                          }
+                        </select>
+                      </td>
+                      <td class="px-4 py-2">
+                        <input formControlName="cantidad" type="number" min="1"
+                          class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-sm text-right outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
+                          [class.border-red-400]="detalleServicioInvalido(i, 'cantidad')">
+                      </td>
+                      <td class="px-4 py-2">
+                        <input formControlName="precioAcordado" type="number" min="0" step="0.01"
+                          class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-sm text-right outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
+                          [class.border-red-400]="detalleServicioInvalido(i, 'precioAcordado')"
+                          placeholder="0.00">
+                      </td>
+                      <td class="px-4 py-2">
+                        <input formControlName="especificaciones" type="text"
+                          class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-sm outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
+                          placeholder="Opcional">
+                      </td>
+                      <td class="px-4 py-2 text-right font-medium text-gray-800">
+                        @if (subtotalDetalleServicio(i) > 0) {
+                          Q {{ subtotalDetalleServicio(i) | number:'1.2-2' }}
+                        } @else {
+                          <span class="text-gray-300">—</span>
+                        }
+                      </td>
+                      <td class="px-4 py-2 text-center">
+                        <button type="button" (click)="eliminarDetalleServicio(i)"
+                          class="p-1 rounded hover:bg-red-50 text-red-400 transition-colors">
+                          <span class="material-icons text-[18px]">delete_outline</span>
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+
+        <!-- Total general -->
+        <div class="rounded-xl bg-slate-50 px-5 py-4 flex items-center justify-between">
+          <span class="text-sm font-semibold text-gray-700">Total del pedido</span>
+          <span class="font-montserrat font-bold text-xl text-gray-900">Q {{ totalPedido | number:'1.2-2' }}</span>
+        </div>
+
+        <!-- Acciones -->
+        <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+          <button type="button" (click)="cancelar()" class="btn-cancel">Cancelar</button>
+          <button type="submit" [disabled]="form.invalid" class="btn-submit">Guardar pedido</button>
+        </div>
+
+      </form>
+    </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════════
+       TABS + FILTROS + LISTADO
+  ══════════════════════════════════════════════════════ -->
+  <div class="surface-card px-6 pt-4">
+    <div class="flex items-center gap-6 border-b border-slate-100">
+      <button type="button" (click)="cambiarTab('todos')"
+        class="pb-3 text-sm font-semibold transition-colors border-b-2 -mb-px"
+        [class.text-gray-900]="tabActiva === 'todos'"
+        [class.border-amber-400]="tabActiva === 'todos'"
+        [class.text-gray-400]="tabActiva !== 'todos'"
+        [class.border-transparent]="tabActiva !== 'todos'">
+        Todos los pedidos
+      </button>
+      <button type="button" (click)="cambiarTab('no-pagados')"
+        class="pb-3 text-sm font-semibold transition-colors border-b-2 -mb-px flex items-center gap-2"
+        [class.text-gray-900]="tabActiva === 'no-pagados'"
+        [class.border-amber-400]="tabActiva === 'no-pagados'"
+        [class.text-gray-400]="tabActiva !== 'no-pagados'"
+        [class.border-transparent]="tabActiva !== 'no-pagados'">
+        No pagados
+        @if (pedidosNoPagados.length > 0) {
+          <span class="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold">
+            {{ pedidosNoPagados.length }}
+          </span>
+        }
+      </button>
+    </div>
+  </div>
+
+  <div class="flex flex-col lg:flex-row gap-6 items-start">
+
+    <!-- Panel de filtros -->
+    <aside class="surface-card w-full lg:w-64 shrink-0 p-5 space-y-6">
+
+      <!-- Fecha del evento: por defecto los eventos de esta semana. -->
+      <div>
+        <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-3">Fecha del evento</p>
+        <div class="flex flex-wrap gap-2 mb-3">
+          @for (preset of presetsFecha; track preset.id) {
+            <button type="button" (click)="seleccionarPreset(preset.id)"
+              class="px-2.5 py-1 rounded-full text-xs font-semibold transition-colors"
+              [class.bg-amber-400]="rangoPreset === preset.id"
+              [class.text-gray-900]="rangoPreset === preset.id"
+              [class.bg-slate-100]="rangoPreset !== preset.id"
+              [class.text-gray-600]="rangoPreset !== preset.id"
+              [class.hover:bg-slate-200]="rangoPreset !== preset.id">
+              {{ preset.label }}
+            </button>
+          }
+        </div>
+        <div class="space-y-2">
+          <div class="flex flex-col gap-1">
+            <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Desde</label>
+            <app-date-picker [(ngModel)]="fechaDesde" (ngModelChange)="onRangoManualChange()"
+              modo="fecha" placeholder="Fecha inicial"
+              [fechaMaxima]="fechaHasta || null"></app-date-picker>
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Hasta</label>
+            <app-date-picker [(ngModel)]="fechaHasta" (ngModelChange)="onRangoManualChange()"
+              modo="fecha" placeholder="Fecha final"
+              [fechaMinima]="fechaDesde || null"></app-date-picker>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-5 border-t border-slate-100">
+        <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-3">Estado logístico</p>
+        <div class="space-y-2.5">
+          @for (e of estadosLogisticos; track e.idEstado) {
+            <label class="flex items-center gap-2.5 text-sm text-gray-700 cursor-pointer select-none">
+              <input type="checkbox"
+                class="w-4 h-4 rounded accent-amber-500 cursor-pointer"
+                [checked]="estadosLogisticosSeleccionados.includes(e.idEstado)"
+                (change)="toggleEstadoLogisticoFiltro(e.idEstado)">
+              <span class="w-2 h-2 rounded-full shrink-0" [ngClass]="e.dot"></span>
+              {{ e.label }}
+            </label>
+          }
+        </div>
+      </div>
+
+      <div class="pt-5 border-t border-slate-100">
+        <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-3">Cliente</p>
+        <input type="text"
+          [(ngModel)]="textoClienteFiltro"
+          (ngModelChange)="aplicarFiltros()"
+          placeholder="Buscar cliente..."
+          class="field-input">
+      </div>
+    </aside>
+
+    <!-- Tabla -->
+    <div class="surface-card overflow-hidden flex-1 w-full">
+      <div class="card-title-bar flex items-center justify-between">
+        <h2 class="font-montserrat font-semibold text-gray-800">Listado de pedidos</h2>
+        <span class="text-xs text-grayMedium">{{ pedidosFiltrados.length }} de {{ pedidos.length }} registros</span>
+      </div>
+
+      @if (cargando) {
+        <div class="flex justify-center items-center py-12">
+          <div class="spinner"></div>
+        </div>
+      } @else if (pedidosFiltrados.length === 0) {
+        <div class="empty-state">
+          <span class="material-icons text-5xl mb-2 text-gray-300">local_mall</span>
+          <p class="text-sm">No se encontraron pedidos</p>
+        </div>
+      } @else {
+        <div class="overflow-x-auto" (scroll)="cerrarEstadoDropdown()">
+          <table class="w-full text-sm">
+            <thead class="table-head">
+              <tr>
+                <th class="px-4 py-3 text-left">No.</th>
+                <th class="px-4 py-3 text-left">Cliente</th>
+                <th class="px-4 py-3 text-left">Fecha de evento</th>
+                <th class="px-4 py-3 text-center">Origen</th>
+                <th class="px-4 py-3 text-right">Saldo pendiente</th>
+                <th class="px-4 py-3 text-left">Estado</th>
+                <th class="px-4 py-3 text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+              @for (p of pedidosFiltrados; track p.correlativoPedido) {
+                <tr class="row-hover">
+                  <td class="px-4 py-3 font-mono text-xs font-semibold text-gray-700">{{ p.correlativoPedido }}</td>
+                  <td class="px-4 py-3 font-medium text-gray-800">{{ p.nombreClientePedido || '—' }}</td>
+                  <td class="px-4 py-3 text-gray-600">{{ p.fechaEvento | date:'dd MMM yyyy' }}</td>
+                  <td class="px-4 py-3 text-center">
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ring-1"
+                      [class.bg-amber-50]="p.origenPedido === 'COTIZACION'"
+                      [class.text-amber-700]="p.origenPedido === 'COTIZACION'"
+                      [class.ring-amber-200]="p.origenPedido === 'COTIZACION'"
+                      [class.bg-slate-50]="p.origenPedido !== 'COTIZACION'"
+                      [class.text-slate-600]="p.origenPedido !== 'COTIZACION'"
+                      [class.ring-slate-200]="p.origenPedido !== 'COTIZACION'">
+                      {{ p.origenPedido === 'COTIZACION' ? 'Cotización' : 'Directo' }}
+                    </span>
+                  </td>
+                  <td class="px-4 py-3 text-right">
+                    @if (p.estadoPago === 'PAGADO') {
+                      <span class="font-semibold text-emerald-600">Pagado</span>
+                    } @else {
+                      <span class="font-montserrat font-bold text-gray-900">Q {{ p.saldoPendiente ?? 0 | number:'1.2-2' }}</span>
+                    }
+                  </td>
+                  <td class="px-4 py-3" (click)="$event.stopPropagation()">
+                    <button type="button" (click)="toggleEstadoDropdown(p, $event)"
+                      class="inline-flex items-center gap-2 pl-2.5 pr-2 py-1.5 rounded-full border-2 transition-colors text-sm text-gray-700"
+                      [class.border-amber-400]="estadoDropdownPedido?.correlativoPedido === p.correlativoPedido"
+                      [class.border-slate-200]="estadoDropdownPedido?.correlativoPedido !== p.correlativoPedido"
+                      [class.hover:border-slate-300]="estadoDropdownPedido?.correlativoPedido !== p.correlativoPedido">
+                      <span class="w-2 h-2 rounded-full shrink-0" [ngClass]="dotEstadoPedido(p)"></span>
+                      {{ labelEstadoPedido(p) }}
+                      <span class="material-icons text-[16px] text-gray-400">expand_more</span>
+                    </button>
+                  </td>
+                  <td class="px-4 py-3 text-center">
+                    <div class="flex justify-center gap-2">
+                      <button (click)="verDetalle(p)" title="Ver detalle"
+                        class="p-2 rounded-xl hover:bg-amber-50 text-amber-500 transition-colors">
+                        <span class="material-icons text-[18px]">visibility</span>
+                      </button>
+                      <!-- Un pedido cancelado es terminal: solo se puede consultar
+                           (ojito) y, si fue error, revertir el estado con el combo.
+                           No admite editar, registrar pagos ni cambios logísticos. -->
+                      @if (!esPedidoCancelado(p)) {
+                        <button (click)="abrirEditar(p)" title="Editar pedido" class="btn-icon-edit">
+                          <span class="material-icons text-[18px]">edit</span>
+                        </button>
+                        <button (click)="verTrazabilidad(p)" title="Ver trazabilidad"
+                          class="p-2 rounded-xl hover:bg-indigo-50 text-indigo-500 transition-colors">
+                          <span class="material-icons text-[18px]">timeline</span>
+                        </button>
+                        <button (click)="refrescarEstadoPago(p)" title="Actualizar estado de pago"
+                          class="p-2 rounded-xl hover:bg-sky-50 text-sky-500 transition-colors">
+                          <span class="material-icons text-[18px]">refresh</span>
+                        </button>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       DROPDOWN DE ESTADO (columna "Estado" de la tabla)
+       position:fixed y fuera del contenedor con scroll de la tabla,
+       para que no se recorte verticalmente.
+  ══════════════════════════════════════════════════════ -->
+  @if (estadoDropdownPedido && estadoDropdownPos) {
+    <div class="fixed inset-0 z-40" (click)="cerrarEstadoDropdown()"></div>
+    <div class="fixed z-50 w-56 bg-white rounded-2xl shadow-2xl border border-slate-100 py-1.5 animate-fade-in-up max-h-72 overflow-y-auto"
+      [style.top.px]="estadoDropdownPos.top" [style.left.px]="estadoDropdownPos.left"
+      (click)="$event.stopPropagation()">
+      @for (e of estadosLogisticos; track e.idEstado) {
+        <button type="button" (click)="seleccionarEstadoDropdown(e)"
+          class="w-full flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-amber-50 transition-colors text-left">
+          <span class="w-2 h-2 rounded-full shrink-0" [ngClass]="e.dot"></span>
+          <span class="flex-1 text-gray-700">{{ e.label }}</span>
+          @if (estadoDropdownPedido.estadoActual?.idEstado === e.idEstado) {
+            <span class="material-icons text-[16px] text-amber-500">check</span>
+          }
+        </button>
+      }
+    </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════════
+       DRAWER: DETALLE DEL PEDIDO (estado logístico + pagos)
+  ══════════════════════════════════════════════════════ -->
+  @if (mostrarDetalle && pedidoSeleccionado) {
+    <div class="drawer-backdrop" (click)="cerrarDetalle()"></div>
+    <div class="drawer-panel !max-w-lg">
+
+      <div class="flex items-start justify-between mb-6">
+        <div>
+          <h2 class="font-serif italic text-2xl text-gray-900">{{ pedidoSeleccionado.correlativoPedido }}</h2>
+          <p class="text-xs text-gray-400 mt-1">{{ pedidoSeleccionado.nombreClientePedido }}</p>
+        </div>
+        <button type="button" (click)="cerrarDetalle()"
+          class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 transition-colors shrink-0">
+          <span class="material-icons text-[18px]">close</span>
+        </button>
+      </div>
+
+      @if (cargandoDetalle) {
+        <div class="flex justify-center items-center py-12">
+          <div class="spinner"></div>
+        </div>
+      } @else {
+
+        <!-- Datos del evento -->
+        <div class="space-y-4">
+          <div class="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <p class="drawer-field-label mb-1">Tipo de evento</p>
+              <p class="text-gray-800">{{ pedidoSeleccionado.nombreTipoEvento || pedidoSeleccionado.codTipoEvento }}</p>
+            </div>
+            <div>
+              <p class="drawer-field-label mb-1">Fecha del evento</p>
+              <p class="text-gray-800">{{ pedidoSeleccionado.fechaEvento | date:'dd MMM yyyy, HH:mm' }}</p>
+            </div>
+            <div class="col-span-2">
+              <p class="drawer-field-label mb-1">Dirección</p>
+              <p class="text-gray-800">{{ pedidoSeleccionado.direccionPedido }}</p>
+            </div>
+            @if (pedidoSeleccionado.salonEntrega) {
+              <div>
+                <p class="drawer-field-label mb-1">Salón de entrega</p>
+                <p class="text-gray-800">{{ pedidoSeleccionado.nombreSalon || nombreSalon(pedidoSeleccionado.salonEntrega) }}</p>
+              </div>
+            }
+            @if (pedidoSeleccionado.fechaEntrega) {
+              <div>
+                <p class="drawer-field-label mb-1">Fecha de entrega</p>
+                <p class="text-gray-800">{{ pedidoSeleccionado.fechaEntrega | date:'dd MMM yyyy' }}</p>
+              </div>
+            }
+          </div>
+
+          <!-- Estado logístico -->
+          <div class="section-divider">
+            <p class="drawer-field-label mb-2">Estado logístico</p>
+            <div class="flex items-center justify-between">
+              <span class="flex items-center gap-2 text-sm font-medium text-gray-800">
+                <span class="w-2.5 h-2.5 rounded-full shrink-0" [ngClass]="dotEstadoPedido(pedidoSeleccionado)"></span>
+                {{ labelEstadoPedido(pedidoSeleccionado) }}
+              </span>
+              @if (!esPedidoCancelado(pedidoSeleccionado) && siguienteEstadoLogistico(pedidoSeleccionado.estadoActual?.idEstado); as siguiente) {
+                <button type="button" (click)="avanzarEstado(pedidoSeleccionado)"
+                  class="flex items-center gap-1 text-xs font-bold text-amber-600 hover:text-amber-700 transition-colors">
+                  Avanzar a "{{ siguiente.label }}"
+                  <span class="material-icons text-[16px]">arrow_forward</span>
+                </button>
+              }
+            </div>
+
+            <!-- Cancelar pedido: única vía para dar de baja un evento ya confirmado.
+                 En Cotizaciones se refleja como la nota "Pedido cancelado". -->
+            @if (esPedidoCancelado(pedidoSeleccionado)) {
+              <p class="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-red-600">
+                <span class="material-icons text-[16px]">block</span>
+                Evento cancelado
+              </p>
+            } @else {
+              <button type="button" (click)="cancelarPedido(pedidoSeleccionado)"
+                class="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-red-600 hover:text-red-700 transition-colors">
+                <span class="material-icons text-[16px]">block</span>
+                Cancelar pedido
+              </button>
+            }
+          </div>
+
+          <!-- Items y servicios -->
+          @if ((pedidoSeleccionado.detalles?.length ?? 0) > 0 || (pedidoSeleccionado.detallesServicios?.length ?? 0) > 0) {
+            <div class="section-divider">
+              <p class="drawer-field-label mb-2">Items y servicios</p>
+              <div class="space-y-1.5">
+                @for (d of pedidoSeleccionado.detalles ?? []; track d.idItem) {
+                  <div class="flex items-center justify-between text-sm">
+                    <span class="text-gray-600">{{ d.cantidadItemPedido }}x {{ d.nombreItem || ('Item #' + d.idItem) }}</span>
+                    @if (d.costoItem) {
+                      <span class="text-gray-800 font-medium">Q {{ (d.costoItem * d.cantidadItemPedido) | number:'1.2-2' }}</span>
+                    }
+                  </div>
+                }
+                @for (d of pedidoSeleccionado.detallesServicios ?? []; track d.idServicio) {
+                  <!-- Servicio en tarjeta propia: el estado "realizado" tiene que
+                       verse de un vistazo, no depender de un punto chico. -->
+                  <div class="rounded-xl ring-1 p-3"
+                    [class.ring-emerald-200]="d.fechaRealizado"
+                    [class.bg-emerald-50/50]="d.fechaRealizado"
+                    [class.ring-slate-200]="!d.fechaRealizado">
+                    <div class="flex items-center justify-between text-sm gap-2">
+                      <span class="text-gray-700 font-medium flex-1 min-w-0">
+                        {{ d.cantidad }}x {{ d.nombreServicio || ('Servicio #' + d.idServicio) }}
+                      </span>
+                      <span class="text-gray-800 font-medium shrink-0">Q {{ (d.precioAcordado * d.cantidad) | number:'1.2-2' }}</span>
+                    </div>
+
+                    @if (d.idDetalleServPedido) {
+                      @if (d.fechaRealizado) {
+                        <div class="flex items-center justify-between gap-2 mt-2">
+                          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full
+                                       bg-emerald-100 text-emerald-800 text-xs font-bold">
+                            <span class="material-icons text-[15px]">check_circle</span>
+                            REALIZADO · {{ d.fechaRealizado | date:'dd MMM, HH:mm' }}
+                          </span>
+                          <button type="button" (click)="alternarServicioRealizado(d)"
+                            class="text-xs text-gray-400 hover:text-red-500 transition-colors">Deshacer</button>
+                        </div>
+                      } @else {
+                        <button type="button" (click)="alternarServicioRealizado(d)"
+                          class="mt-2 w-full inline-flex items-center justify-center gap-2 py-2 rounded-xl
+                                 border-2 border-dashed border-slate-300 text-slate-500 text-xs font-bold
+                                 hover:border-emerald-400 hover:text-emerald-600 hover:bg-emerald-50/50 transition-all">
+                          <span class="material-icons text-[16px]">check_circle_outline</span>
+                          CONFIRMAR REALIZADO
+                        </button>
+                      }
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Pagos -->
+          <div class="section-divider">
+            <p class="drawer-field-label mb-3">Cuenta de cobro</p>
+
+            @if (estadoCuenta) {
+              <div class="rounded-xl bg-slate-50 p-4 grid grid-cols-3 gap-3 text-center mb-4">
+                <div>
+                  <p class="text-[10px] uppercase tracking-wider text-gray-400 mb-1">Total</p>
+                  <p class="font-montserrat font-bold text-gray-900">Q {{ estadoCuenta.montoTotalPedido | number:'1.0-0' }}</p>
+                </div>
+                <div>
+                  <p class="text-[10px] uppercase tracking-wider text-gray-400 mb-1">Pagado</p>
+                  <p class="font-montserrat font-bold text-emerald-600">Q {{ estadoCuenta.totalPagado | number:'1.0-0' }}</p>
+                </div>
+                <div>
+                  <p class="text-[10px] uppercase tracking-wider text-gray-400 mb-1">Saldo</p>
+                  <p class="font-montserrat font-bold text-red-600">Q {{ estadoCuenta.saldoPendiente | number:'1.0-0' }}</p>
+                </div>
+              </div>
+              <div class="flex justify-center mb-4">
+                <span class="badge"
+                  [ngClass]="estadoPagoDef(estadoCuenta.estadoPago)?.badgeClass">
+                  {{ estadoPagoDef(estadoCuenta.estadoPago)?.label ?? estadoCuenta.estadoPago }}
+                </span>
+              </div>
+            }
+
+            @if (cargandoPagos) {
+              <div class="flex justify-center py-6">
+                <div class="spinner"></div>
+              </div>
+            } @else if (pagos.length === 0) {
+              <p class="text-xs text-gray-400 text-center py-3">Aún no se han registrado pagos</p>
+            } @else {
+              <div class="space-y-2 mb-4">
+                @for (pago of pagos; track pago.idPago) {
+                  <div class="flex items-center justify-between text-sm rounded-lg border border-slate-100 px-3 py-2"
+                    [class.opacity-40]="!pago.estadoRegistro">
+                    <div>
+                      <p class="font-medium text-gray-800">Q {{ pago.montoPago | number:'1.2-2' }} <span class="text-xs text-gray-400 font-normal">{{ pago.metodoPago }}</span></p>
+                      <p class="text-xs text-gray-400">{{ pago.fechaPago | date:'dd MMM yyyy, HH:mm' }} @if (pago.referenciaPago) { · {{ pago.referenciaPago }} }</p>
+                    </div>
+                    @if (pago.estadoRegistro) {
+                      <button type="button" (click)="anularPago(pago)" title="Anular pago" class="btn-icon-delete">
+                        <span class="material-icons text-[16px]">block</span>
+                      </button>
+                    } @else {
+                      <span class="text-xs text-red-400 font-medium">Anulado</span>
+                    }
+                  </div>
+                }
+              </div>
+            }
+
+            @if (esPedidoCancelado(pedidoSeleccionado)) {
+              <p class="flex items-center justify-center gap-1.5 text-xs text-gray-400 border-2 border-dashed border-slate-200 rounded-xl py-2.5">
+                <span class="material-icons text-[16px] text-red-400">block</span>
+                No se pueden registrar pagos en un pedido cancelado
+              </p>
+            } @else if (!mostrarFormPago) {
+              <button type="button" (click)="mostrarFormPago = true"
+                class="w-full flex items-center justify-center gap-1.5 text-sm font-bold text-amber-600 hover:text-amber-700 border-2 border-dashed border-amber-200 rounded-xl py-2.5 transition-colors">
+                <span class="material-icons text-[18px]">add_card</span>
+                Registrar pago
+              </button>
+            } @else {
+              <form [formGroup]="formPago" (ngSubmit)="registrarPago()" class="space-y-3 rounded-xl bg-slate-50 p-4">
+                <div class="grid grid-cols-2 gap-3">
+                  <div class="flex flex-col gap-1">
+                    <label class="drawer-field-label">Monto</label>
+                    <input formControlName="montoPago" type="number" min="0.01" step="0.01"
+                      class="field-input" [class.border-red-400]="campoInvalidoPago('montoPago')" placeholder="0.00">
+                  </div>
+                  <div class="flex flex-col gap-1">
+                    <label class="drawer-field-label">Tipo de pago</label>
+                    <select formControlName="tipoPago" class="field-select" [class.border-red-400]="campoInvalidoPago('tipoPago')">
+                      <option [value]="null" disabled>Seleccione</option>
+                      @for (t of tiposPago; track t.idCatalogo) {
+                        <option [value]="t.codigo">{{ t.nombre }}</option>
+                      }
+                    </select>
+                  </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                  <div class="flex flex-col gap-1">
+                    <label class="drawer-field-label">Método de pago</label>
+                    <select formControlName="metodoPago" class="field-select"
+                      [class.border-red-400]="campoInvalidoPago('metodoPago')">
+                      <option [value]="null" disabled>Seleccione</option>
+                      @for (m of modalidadesPago; track m.idCatalogo) {
+                        <option [value]="m.codigo">{{ m.nombre }}</option>
+                      }
+                    </select>
+                  </div>
+                  <div class="flex flex-col gap-1">
+                    <label class="drawer-field-label">Referencia</label>
+                    <input formControlName="referenciaPago" type="text" class="field-input" placeholder="Opcional">
+                  </div>
+                </div>
+                <div class="flex gap-2 pt-1">
+                  <button type="button" (click)="mostrarFormPago = false; formPago.reset()" class="btn-cancel flex-1">Cancelar</button>
+                  <button type="submit" [disabled]="formPago.invalid" class="btn-submit flex-1">Registrar</button>
+                </div>
+              </form>
+            }
+          </div>
+
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════════
+       DRAWER: EDICIÓN RÁPIDA
+  ══════════════════════════════════════════════════════ -->
+  @if (mostrarEditar && pedidoEditando) {
+    <div class="drawer-backdrop" (click)="cerrarEditar()"></div>
+    <div class="drawer-panel !max-w-2xl">
+
+      <div class="flex items-start justify-between mb-8">
+        <div>
+          <h2 class="font-serif italic text-2xl text-gray-900">Editar pedido</h2>
+          <p class="text-xs text-gray-400 mt-1">{{ pedidoEditando.correlativoPedido }}</p>
+        </div>
+        <button type="button" (click)="cerrarEditar()"
+          class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 transition-colors shrink-0">
+          <span class="material-icons text-[18px]">close</span>
+        </button>
+      </div>
+
+      @if (cargandoEditar) {
+        <div class="flex justify-center items-center py-12">
+          <div class="spinner"></div>
+        </div>
+      } @else {
+        <form [formGroup]="formEditar" (ngSubmit)="guardarEdicion()" class="space-y-6">
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            <div class="flex flex-col gap-2 md:col-span-2">
+              <label class="drawer-field-label">Dirección</label>
+              <input formControlName="direccionPedido" type="text" maxlength="200"
+                class="drawer-field-input" [class.border-red-400]="campoInvalidoEditar('direccionPedido')">
+              @if (campoInvalidoEditar('direccionPedido')) {
+                <span class="field-error">Campo requerido</span>
+              }
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label class="drawer-field-label">Salón de entrega</label>
+              <select formControlName="salonEntrega" class="drawer-field-input">
+                <option [value]="null">Sin salón asignado</option>
+                @for (s of salones; track s.idSalon) {
+                  <option [value]="s.idSalon">{{ s.nombreSalon }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label class="drawer-field-label">Fecha de entrega</label>
+              <app-date-picker formControlName="fechaEntrega" modo="fecha"
+                [fechaMaxima]="fechaSolo(formEditar.get('fechaEventoHora')?.value)"
+                placeholder="Sin fecha"></app-date-picker>
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label class="drawer-field-label">Fecha de recolección</label>
+              <app-date-picker formControlName="fechaRecoleccion" modo="fecha"
+                [fechaMinima]="formEditar.get('fechaEntrega')?.value || null"
+                placeholder="Sin agendar"></app-date-picker>
+            </div>
+
+            <!-- Fecha del evento -->
+            <div class="flex flex-col gap-2 md:col-span-2 relative">
+              <label class="drawer-field-label">Fecha del evento <span class="text-red-500">*</span></label>
+              <button type="button" (click)="abrirCalendarioEditar()"
+                class="w-full flex items-center justify-between border-2 rounded-xl px-3 py-2.5 text-sm text-left bg-white transition-colors"
+                [class.border-amber-400]="calendarioEditarAbierto"
+                [class.border-slate-200]="!calendarioEditarAbierto"
+                [class.border-red-400]="campoInvalidoEditar('fechaEventoHora') && !calendarioEditarAbierto">
+                <span [class.text-gray-400]="!fechaEventoSeleccionadaEditar" [class.text-gray-800]="fechaEventoSeleccionadaEditar">
+                  {{ fechaEventoTextoEditar || 'Selecciona fecha y hora' }}
+                </span>
+                <span class="material-icons text-amber-500 text-[20px]">calendar_month</span>
+              </button>
+              @if (campoInvalidoEditar('fechaEventoHora')) {
+                <span class="field-error">Campo requerido</span>
+              }
+
+              @if (calendarioEditarAbierto) {
+                <div class="fixed inset-0 z-40" (click)="cerrarCalendarioEditar()"></div>
+                <div class="absolute z-50 top-full mt-2 left-0 w-full max-w-sm bg-white rounded-3xl shadow-2xl border border-slate-100 p-5 animate-fade-in-up"
+                  (click)="horaPickerEditarAbierto = false; $event.stopPropagation()">
+
+                  <div class="flex items-center justify-between mb-4">
+                    <button type="button" (click)="mesAnteriorEditar()" class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-gray-500 transition-colors">
+                      <span class="material-icons text-[18px]">chevron_left</span>
+                    </button>
+                    <span class="font-serif italic text-lg text-gray-900">{{ nombreMesVisibleEditar }}</span>
+                    <button type="button" (click)="mesSiguienteEditar()" class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-gray-500 transition-colors">
+                      <span class="material-icons text-[18px]">chevron_right</span>
+                    </button>
+                  </div>
+
+                  <div class="grid grid-cols-7 mb-1">
+                    @for (d of ['D','L','M','M','J','V','S']; track $index) {
+                      <span class="text-center text-[11px] font-bold uppercase text-slate-400">{{ d }}</span>
+                    }
+                  </div>
+
+                  <div class="grid grid-cols-7 gap-y-1">
+                    @for (dia of diasCalendarioEditar; track $index) {
+                      <div class="flex items-center justify-center h-9">
+                        @if (dia) {
+                          <button type="button" (click)="seleccionarDiaEditar(dia)"
+                            class="w-8 h-8 rounded-full text-sm transition-colors"
+                            [class.bg-amber-400]="esHoy(dia)"
+                            [class.text-gray-900]="esHoy(dia)"
+                            [class.font-bold]="esHoy(dia)"
+                            [class.ring-2]="esSeleccionadoEditar(dia) && !esHoy(dia)"
+                            [class.ring-brand-900]="esSeleccionadoEditar(dia) && !esHoy(dia)"
+                            [class.text-gray-700]="!esHoy(dia)"
+                            [class.hover:bg-slate-100]="!esHoy(dia)">
+                            {{ dia.getDate() }}
+                          </button>
+                        }
+                      </div>
+                    }
+                  </div>
+
+                  <div class="relative mt-3 pt-3 border-t border-slate-100">
+                    <button type="button" (click)="toggleHoraPickerEditar($event)"
+                      class="w-full flex items-center gap-2 border-2 rounded-lg px-3 py-2 text-sm transition-colors bg-white"
+                      [class.border-amber-400]="horaPickerEditarAbierto"
+                      [class.border-slate-200]="!horaPickerEditarAbierto">
+                      <span class="material-icons text-[18px] text-slate-400">schedule</span>
+                      <span [class.text-gray-400]="!horaEventoEditar" [class.text-gray-800]="horaEventoEditar">{{ horaEventoEditar || '--:--' }}</span>
+                    </button>
+
+                    @if (horaPickerEditarAbierto) {
+                      <div class="absolute z-10 top-full mt-1 left-0 flex bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden"
+                        (click)="$event.stopPropagation()">
+                        <div class="w-16 max-h-48 overflow-y-auto py-1">
+                          @for (h of horasDisponibles; track h) {
+                            <button type="button" (click)="seleccionarHoraEditar(h)"
+                              class="w-full text-center py-1.5 text-sm font-montserrat transition-colors"
+                              [class.bg-amber-400]="horaSeleccionadaNumEditar === h"
+                              [class.text-gray-900]="horaSeleccionadaNumEditar === h"
+                              [class.font-bold]="horaSeleccionadaNumEditar === h"
+                              [class.text-gray-600]="horaSeleccionadaNumEditar !== h"
+                              [class.hover:bg-slate-50]="horaSeleccionadaNumEditar !== h">
+                              {{ h < 10 ? '0' + h : h }}
+                            </button>
+                          }
+                        </div>
+                        <div class="w-16 max-h-48 overflow-y-auto py-1 border-l border-slate-100">
+                          @for (m of minutosDisponibles; track m) {
+                            <button type="button" (click)="seleccionarMinutoEditar(m)"
+                              class="w-full text-center py-1.5 text-sm font-montserrat transition-colors"
+                              [class.bg-amber-400]="minutoSeleccionadoNumEditar === m"
+                              [class.text-gray-900]="minutoSeleccionadoNumEditar === m"
+                              [class.font-bold]="minutoSeleccionadoNumEditar === m"
+                              [class.text-gray-600]="minutoSeleccionadoNumEditar !== m"
+                              [class.hover:bg-slate-50]="minutoSeleccionadoNumEditar !== m">
+                              {{ m < 10 ? '0' + m : m }}
+                            </button>
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+
+          </div>
+
+          <div class="flex items-start gap-2 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3">
+            <span class="material-icons text-amber-500 text-[18px] mt-0.5">info</span>
+            <p class="text-xs text-amber-800 leading-relaxed">
+              Editar items o servicios recalculará el saldo pendiente del pedido; los pagos ya registrados se conservan.
+            </p>
+          </div>
+
+          <!-- Items -->
+          <div class="section-divider">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Items del pedido</h3>
+              <button type="button" (click)="agregarDetalleEditar()"
+                class="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 transition-colors">
+                <span class="material-icons text-[18px]">add_circle_outline</span>
+                Agregar item
+              </button>
+            </div>
+
+            <div class="rounded-xl border border-gray-200 overflow-hidden">
+              <table class="w-full text-sm">
+                <thead class="table-head">
+                  <tr>
+                    <th class="px-4 py-3 text-left">Item</th>
+                    <th class="px-4 py-3 text-right w-32">Cantidad</th>
+                    <th class="px-4 py-3 text-right w-32">Costo unit.</th>
+                    <th class="px-4 py-3 text-right w-32">Subtotal</th>
+                    <th class="px-4 py-3 w-12"></th>
+                  </tr>
+                </thead>
+                <tbody formArrayName="detalles" class="divide-y divide-gray-100">
+                  @for (detalle of detallesEditar.controls; let i = $index; track i) {
+                    <tr [formGroupName]="i" class="row-hover">
+                      <td class="px-4 py-2">
+                        <select formControlName="idItem"
+                          class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-sm bg-white outline-none focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/15"
+                          [class.border-red-400]="detalleInvalidoEditar(i, 'idItem')">
+                          <option [value]="null" disabled>Seleccione un item</option>
+                          @for (item of items; track item.idItem) {
+                            <option [value]="item.idItem">{{ item.descripcionItem }}</option>
+                          }
+                        </select>
+                      </td>
+                      <td class="px-4 py-2">
+                        <input formControlName="cantidadItemPedido" type="number" min="1"
+                          class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-sm text-right outline-none focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/15"
+                          [class.border-red-400]="detalleInvalidoEditar(i, 'cantidadItemPedido')">
+                      </td>
+                      <td class="px-4 py-2 text-right text-gray-600">
+                        @let itemSel = getItem(detalle.get('idItem')?.value);
+                        @if (itemSel) {
+                          Q {{ itemSel.costoItem | number:'1.2-2' }}
+                        } @else {
+                          <span class="text-gray-300">—</span>
+                        }
+                      </td>
+                      <td class="px-4 py-2 text-right font-medium text-gray-800">
+                        @if (subtotalDetalleEditar(i) > 0) {
+                          Q {{ subtotalDetalleEditar(i) | number:'1.2-2' }}
+                        } @else {
+                          <span class="text-gray-300">—</span>
+                        }
+                      </td>
+                      <td class="px-4 py-2 text-center">
+                        @if (detallesEditar.length > 1) {
+                          <button type="button" (click)="eliminarDetalleEditar(i)"
+                            class="p-1 rounded hover:bg-red-50 text-red-400 transition-colors">
+                            <span class="material-icons text-[18px]">delete_outline</span>
+                          </button>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Servicios -->
+          <div class="section-divider">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Servicios del pedido</h3>
+              <button type="button" (click)="agregarDetalleServicioEditar()"
+                class="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 transition-colors">
+                <span class="material-icons text-[18px]">add_circle_outline</span>
+                Agregar servicio
+              </button>
+            </div>
+
+            @if (detallesServiciosEditar.length === 0) {
+              <div class="rounded-xl border border-dashed border-gray-200 py-6 text-center text-sm text-gray-400">
+                Ningún servicio agregado (opcional)
+              </div>
+            } @else {
+              <div class="rounded-xl border border-gray-200 overflow-hidden">
+                <table class="w-full text-sm">
+                  <thead class="table-head">
+                    <tr>
+                      <th class="px-4 py-3 text-left">Servicio</th>
+                      <th class="px-4 py-3 text-right w-24">Cantidad</th>
+                      <th class="px-4 py-3 text-right w-32">Precio acordado</th>
+                      <th class="px-4 py-3 text-left">Especificaciones</th>
+                      <th class="px-4 py-3 text-right w-32">Subtotal</th>
+                      <th class="px-4 py-3 w-12"></th>
+                    </tr>
+                  </thead>
+                  <tbody formArrayName="detallesServicios" class="divide-y divide-gray-100">
+                    @for (detalle of detallesServiciosEditar.controls; let i = $index; track i) {
+                      <tr [formGroupName]="i" class="row-hover">
+                        <td class="px-4 py-2">
+                          <select formControlName="idServicio"
+                            class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-sm bg-white outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
+                            [class.border-red-400]="detalleServicioInvalidoEditar(i, 'idServicio')">
+                            <option [value]="null" disabled>Seleccione un servicio</option>
+                            @for (s of servicios; track s.idServicio) {
+                              <option [value]="s.idServicio">{{ s.nombreServicio }}</option>
+                            }
+                          </select>
+                        </td>
+                        <td class="px-4 py-2">
+                          <input formControlName="cantidad" type="number" min="1"
+                            class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-sm text-right outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
+                            [class.border-red-400]="detalleServicioInvalidoEditar(i, 'cantidad')">
+                        </td>
+                        <td class="px-4 py-2">
+                          <input formControlName="precioAcordado" type="number" min="0" step="0.01"
+                            class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-sm text-right outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
+                            [class.border-red-400]="detalleServicioInvalidoEditar(i, 'precioAcordado')"
+                            placeholder="0.00">
+                        </td>
+                        <td class="px-4 py-2">
+                          <input formControlName="especificaciones" type="text"
+                            class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-sm outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
+                            placeholder="Opcional">
+                        </td>
+                        <td class="px-4 py-2 text-right font-medium text-gray-800">
+                          @if (subtotalDetalleServicioEditar(i) > 0) {
+                            Q {{ subtotalDetalleServicioEditar(i) | number:'1.2-2' }}
+                          } @else {
+                            <span class="text-gray-300">—</span>
+                          }
+                        </td>
+                        <td class="px-4 py-2 text-center">
+                          <button type="button" (click)="eliminarDetalleServicioEditar(i)"
+                            class="p-1 rounded hover:bg-red-50 text-red-400 transition-colors">
+                            <span class="material-icons text-[18px]">delete_outline</span>
+                          </button>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </div>
+
+          <!-- Total -->
+          <div class="rounded-xl bg-slate-50 px-5 py-4 flex items-center justify-between">
+            <span class="text-sm font-semibold text-gray-700">Total del pedido</span>
+            <span class="font-montserrat font-bold text-xl text-gray-900">Q {{ totalPedidoEditar | number:'1.2-2' }}</span>
+          </div>
+
+          <div class="flex gap-3 pt-4 border-t border-gray-100">
+            <button type="button" (click)="cerrarEditar()" class="btn-cancel flex-1">Cancelar</button>
+            <button type="submit" [disabled]="formEditar.invalid" class="btn-submit flex-1">Guardar cambios</button>
+          </div>
+
+        </form>
+      }
+    </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════════
+       TRAZABILIDAD (ventana emergente)
+       ══════════════════════════════════════════════════════ -->
+  <app-trazabilidad-modal
+    [visible]="mostrarTrazabilidad"
+    tipo="PEDIDO"
+    [titulo]="trazaTitulo"
+    [subtitulo]="trazaSubtitulo"
+    [historial]="trazaHistorial"
+    [cargando]="cargandoTraza"
+    (cerrarModal)="cerrarTrazabilidad()">
+  </app-trazabilidad-modal>
+
+</div>

@@ -1,0 +1,246 @@
+/* You can add global styles to this file, and also import other style files */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Barra de progreso de los toasts (duración dinámica por instancia) */
+@keyframes shrink {
+  from { width: 100%; }
+  to   { width: 0%; }
+}
+
+@layer base {
+  body {
+    @apply font-opensans text-[15px] text-gray-800;
+    background-color: #eae3d5;
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(2, 25, 48, 0.05) 1px, transparent 0);
+    background-size: 22px 22px;
+    background-attachment: fixed;
+  }
+
+  h1 {
+    @apply font-montserrat text-[24px] md:text-[28px] font-bold text-gray-900;
+  }
+
+  h2 {
+    @apply font-montserrat text-[20px] md:text-[22px] font-semibold text-gray-800;
+  }
+
+  small,
+  .note {
+    @apply font-opensans text-[12px] text-grayMedium;
+  }
+
+  button {
+    @apply font-montserrat font-semibold text-[14px];
+  }
+
+  ::selection {
+    background: rgba(217, 119, 6, 0.25);
+    color: #021930;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(2, 25, 48, 0.25);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(2, 25, 48, 0.4);
+    background-clip: padding-box;
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(2, 25, 48, 0.25) transparent;
+  }
+}
+
+@layer components {
+  /* ── Superficies ── */
+  .surface-card {
+    @apply bg-white/90 backdrop-blur-sm rounded-2xl border border-slate-200/80 shadow-card;
+  }
+  .surface-card--edit {
+    @apply ring-2 ring-amber-400/60 border-amber-200;
+  }
+
+  .page-header-icon {
+    @apply flex items-center justify-center w-11 h-11 rounded-2xl bg-[#021930] text-amber-400 shadow-glow-amber shrink-0;
+  }
+
+  .card-title-bar {
+    @apply px-6 py-4 border-b border-slate-100;
+  }
+
+  .section-divider {
+    @apply border-t border-slate-200 pt-5;
+  }
+
+  /* ── Campos de formulario ── */
+  .field-label {
+    @apply text-sm font-medium text-slate-700;
+  }
+
+  .field-input {
+    @apply w-full border-2 border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-slate-50/60 text-gray-900
+      outline-none transition-all duration-150
+      focus:bg-white focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15;
+  }
+
+  .field-input.border-red-400 {
+    @apply border-red-300 focus:ring-red-500/15;
+  }
+
+  .field-select {
+    @apply field-input bg-white;
+  }
+
+  .field-textarea {
+    @apply field-input resize-none;
+  }
+
+  .field-search {
+    @apply field-input pl-9;
+  }
+
+  .field-error {
+    @apply text-xs text-red-500;
+  }
+
+  /* ── Botones ── */
+  .btn-primary {
+    @apply inline-flex items-center gap-2 bg-amber-400 text-gray-900
+      px-4 py-2.5 rounded-full font-bold text-sm shadow-glow-amber
+      transition-all duration-150 hover:bg-amber-500 hover:-translate-y-0.5 active:translate-y-0;
+  }
+
+  .btn-submit {
+    @apply px-5 py-2.5 rounded-xl bg-amber-400 text-gray-900 font-bold
+      transition-all duration-150 text-sm shadow-glow-amber hover:bg-amber-500 hover:-translate-y-0.5
+      disabled:opacity-40 disabled:pointer-events-none disabled:translate-y-0 disabled:shadow-none;
+  }
+
+  .btn-cancel {
+    @apply px-4 py-2.5 rounded-xl border-2 border-slate-200 text-slate-600 font-medium
+      hover:bg-slate-50 hover:border-slate-300 transition-colors text-sm;
+  }
+
+  /* Acción secundaria junto a un btn-primary: mismo alto y forma, sin relleno. */
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 bg-white text-slate-600 border-2 border-slate-200
+      px-4 py-2.5 rounded-full font-semibold text-sm
+      transition-all duration-150 hover:bg-slate-50 hover:border-slate-300
+      disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-icon-edit {
+    @apply p-2 rounded-xl hover:bg-amber-50 text-[#021930] transition-colors;
+  }
+
+  .btn-icon-delete {
+    @apply p-2 rounded-xl hover:bg-red-50 text-red-400 transition-colors;
+  }
+
+  .btn-icon-success {
+    @apply p-2 rounded-xl hover:bg-emerald-50 text-emerald-500 transition-colors;
+  }
+
+  /* ── Tablas ── */
+  .table-head {
+    @apply bg-slate-50/80 text-slate-500 uppercase text-[11px] tracking-wider;
+  }
+
+  .row-hover {
+    @apply hover:bg-amber-50/50 transition-colors;
+  }
+
+  .empty-state {
+    @apply flex flex-col items-center justify-center py-16 text-grayMedium;
+  }
+
+  .spinner {
+    @apply w-9 h-9 rounded-full animate-spin;
+    border: 3px solid rgba(180, 83, 9, 0.15);
+    border-top-color: #d97706;
+  }
+
+  /* ── Insignias de estado ── */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ring-1;
+  }
+  .badge-success {
+    @apply badge bg-emerald-50 text-emerald-700 ring-emerald-200;
+  }
+  .badge-danger {
+    @apply badge bg-red-50 text-red-600 ring-red-200;
+  }
+  .badge-info {
+    @apply badge bg-[#021930] text-amber-300 ring-0;
+  }
+  .badge-purple {
+    @apply badge bg-purple-50 text-purple-700 ring-purple-200;
+  }
+  .badge-warning {
+    @apply badge bg-amber-50 text-amber-700 ring-amber-200;
+  }
+
+  /* ── Paginación ── */
+  .page-btn {
+    @apply w-8 h-8 rounded-lg text-xs font-medium transition-colors text-slate-600 hover:bg-slate-100;
+  }
+  .page-btn--active {
+    @apply bg-amber-400 text-gray-900 shadow-glow-amber hover:bg-amber-400;
+  }
+
+  /* ── Fondo ambiental decorativo ── */
+  .ambient-blob {
+    @apply pointer-events-none absolute rounded-full blur-3xl;
+  }
+
+  /* ── Panel lateral (drawer) ── */
+  /* ── Modal centrado ──
+     Contraparte del drawer para diálogos cortos. Sin estas clases el modal
+     renderiza como contenido plano al final de la página: no falla el build,
+     simplemente no se ve. El ancho lo fija quien lo usa con max-w-*. */
+  .modal-backdrop {
+    @apply fixed inset-0 z-40 bg-[#021930]/50 backdrop-blur-[2px] animate-backdrop-in;
+  }
+  /* Se centra con inset-0 + m-auto, NO con -translate-x/y-1/2: los keyframes
+     de animate-modal-in definen transform y pisarían ese centrado, dejando el
+     panel corrido hacia abajo a la derecha. */
+  /* Sin overflow-y-auto a proposito: recortaba el calendario del date-picker,
+     que se despliega fuera de los limites del panel. Los modales largos llevan
+     su propia zona con scroll adentro (la lista de articulos, por ejemplo). */
+  .modal-panel {
+    @apply fixed inset-0 m-auto h-fit z-50
+      w-[calc(100%-2rem)] bg-white rounded-[2rem] shadow-2xl p-6
+      animate-modal-in;
+  }
+
+  .drawer-backdrop {
+    @apply fixed inset-0 z-40 bg-[#021930]/50 backdrop-blur-[2px] animate-backdrop-in;
+  }
+  .drawer-panel {
+    @apply fixed top-0 right-0 z-50 h-full w-full max-w-md bg-white shadow-2xl
+      rounded-l-[2rem] overflow-y-auto px-8 py-9 animate-drawer-in;
+  }
+  .drawer-field-label {
+    @apply text-[11px] font-bold uppercase tracking-wider text-slate-500;
+  }
+  .drawer-field-input {
+    @apply w-full bg-transparent border-0 border-b border-gray-200 pb-2 text-sm text-gray-800
+      placeholder-gray-400 outline-none focus:border-amber-400 transition-colors;
+  }
+  .drawer-field-input.border-red-400 {
+    @apply border-red-300;
+  }
+}

@@ -1,0 +1,333 @@
+<div class="space-y-6">
+
+  <!-- Encabezado -->
+  <div class="flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <div class="page-header-icon">
+        <span class="material-icons text-[22px]">inventory_2</span>
+      </div>
+      <div>
+        <h1 class="font-serif italic text-3xl text-gray-900">Inventario</h1>
+        <p class="text-sm text-grayMedium mt-1">Mobiliario, decoración y flores en stock</p>
+      </div>
+    </div>
+    <button (click)="abrirCrear()"
+      class="btn-primary">
+      <span class="material-icons text-[18px]">add_box</span>
+      Nuevo item
+    </button>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       FORMULARIO (Crear / Editar)
+  ══════════════════════════════════════════════════════ -->
+  @if (mostrarForm) {
+    <div class="surface-card p-6"
+      [class.surface-card--edit]="modoEdicion">
+
+      <div class="flex items-center gap-2 mb-5">
+        <span class="material-icons text-blue-500">{{ modoEdicion ? 'edit' : 'add_box' }}</span>
+        <h2 class="font-montserrat text-lg font-semibold text-gray-800">
+          {{ modoEdicion ? 'Editar item' : 'Nuevo item' }}
+        </h2>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="guardar()" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+        <div class="flex flex-col gap-1 md:col-span-2">
+          <label class="field-label">Tipo de item <span class="text-red-500">*</span></label>
+          <select formControlName="idTipoItem"
+            class="field-input bg-white"
+            [class.border-red-400]="campoInvalido('idTipoItem')">
+            <option [value]="null" disabled>Seleccione un tipo</option>
+            @for (t of tiposItem; track t.idCatalogo) {
+              <option [value]="t.idCatalogo">{{ t.nombre }}</option>
+            }
+          </select>
+          @if (campoInvalido('idTipoItem')) {
+            <span class="text-xs text-red-500">Seleccione un tipo</span>
+          }
+        </div>
+
+        <div class="flex flex-col gap-1 md:col-span-2">
+          <label class="field-label">Descripción <span class="text-red-500">*</span></label>
+          <input formControlName="descripcionItem" type="text"
+            class="field-input"
+            [class.border-red-400]="campoInvalido('descripcionItem')"
+            maxlength="200"
+            placeholder="Descripción del item">
+          @if (campoInvalido('descripcionItem')) {
+            <span class="text-xs text-red-500">Campo requerido</span>
+          }
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="field-label">Costo <span class="text-red-500">*</span></label>
+          <input formControlName="costoItem" type="number" min="0" step="0.01"
+            class="field-input"
+            [class.border-red-400]="campoInvalido('costoItem')"
+            placeholder="0.00">
+          @if (campoInvalido('costoItem')) {
+            <span class="text-xs text-red-500">Campo requerido</span>
+          }
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="field-label">Cantidad <span class="text-red-500">*</span></label>
+          <input formControlName="cantidadItem" type="number" min="0"
+            class="field-input"
+            [class.border-red-400]="campoInvalido('cantidadItem')"
+            placeholder="0">
+          @if (campoInvalido('cantidadItem')) {
+            <span class="text-xs text-red-500">Campo requerido</span>
+          }
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="field-label">Cantidad faltantes</label>
+          <input formControlName="cantidadFaltante" type="number" min="0"
+            class="field-input"
+            placeholder="0">
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="field-label">Observaciones</label>
+          <input formControlName="observaciones" type="text"
+            class="field-input"
+            placeholder="Opcional">
+        </div>
+
+        <div class="md:col-span-2 flex justify-end gap-3 pt-4 border-t border-gray-100">
+          <button type="button" (click)="cancelar()"
+            class="btn-cancel">
+            Cancelar
+          </button>
+          <button type="submit" [disabled]="form.invalid"
+            class="btn-submit">
+            {{ modoEdicion ? 'Guardar cambios' : 'Guardar item' }}
+          </button>
+        </div>
+
+      </form>
+    </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════════
+       FILTROS POR CATEGORÍA + BÚSQUEDA
+  ══════════════════════════════════════════════════════ -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div class="flex flex-wrap items-center gap-2">
+      <button type="button" (click)="textoBusqueda = ''; aplicarFiltro()"
+        class="px-4 py-2 rounded-full text-sm transition-all"
+        [class.bg-amber-400]="textoBusqueda === ''"
+        [class.text-gray-900]="textoBusqueda === ''"
+        [class.font-bold]="textoBusqueda === ''"
+        [class.shadow-glow-amber]="textoBusqueda === ''"
+        [class.bg-white]="textoBusqueda !== ''"
+        [class.border]="textoBusqueda !== ''"
+        [class.border-slate-200]="textoBusqueda !== ''"
+        [class.text-slate-600]="textoBusqueda !== ''"
+        [class.font-medium]="textoBusqueda !== ''"
+        [class.hover:border-slate-300]="textoBusqueda !== ''">
+        Todas
+      </button>
+      @for (t of tiposItem; track t.idCatalogo) {
+        <button type="button" (click)="textoBusqueda = t.nombre; aplicarFiltro()"
+          class="px-4 py-2 rounded-full text-sm transition-all"
+          [class.bg-amber-400]="textoBusqueda === t.nombre"
+          [class.text-gray-900]="textoBusqueda === t.nombre"
+          [class.font-bold]="textoBusqueda === t.nombre"
+          [class.shadow-glow-amber]="textoBusqueda === t.nombre"
+          [class.bg-white]="textoBusqueda !== t.nombre"
+          [class.border]="textoBusqueda !== t.nombre"
+          [class.border-slate-200]="textoBusqueda !== t.nombre"
+          [class.text-slate-600]="textoBusqueda !== t.nombre"
+          [class.font-medium]="textoBusqueda !== t.nombre"
+          [class.hover:border-slate-300]="textoBusqueda !== t.nombre">
+          {{ t.nombre }}
+        </button>
+      }
+    </div>
+
+    <div class="relative shrink-0">
+      <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[18px]">search</span>
+      <input
+        type="text"
+        [(ngModel)]="textoBusqueda"
+        (ngModelChange)="aplicarFiltro()"
+        placeholder="Buscar por descripción o tipo..."
+        class="field-search w-full sm:w-64">
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       CUADRÍCULA DE ITEMS
+  ══════════════════════════════════════════════════════ -->
+  @if (cargando) {
+    <div class="flex justify-center items-center py-16">
+      <div class="spinner"></div>
+    </div>
+  } @else if (itemsFiltrados.length === 0) {
+    <div class="surface-card empty-state">
+      <span class="material-icons text-5xl mb-2 text-gray-300">inventory_2</span>
+      <p class="text-sm">No se encontraron items</p>
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      @for (item of itemsPaginados; track item.idItem) {
+        <div class="group surface-card overflow-hidden hover:shadow-glow-amber hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+          [class.opacity-60]="!item.estadoItem"
+          (click)="itemDetalle = item">
+
+          <!-- Placeholder de foto -->
+          <div class="relative h-40 flex items-center justify-center overflow-hidden
+            bg-[repeating-linear-gradient(45deg,#e7dfcd,#e7dfcd_10px,#f3ecdd_10px,#f3ecdd_20px)]">
+            <span class="font-uimono text-[11px] text-slate-500/70 bg-white/50 px-2 py-1 rounded">
+              foto: {{ item.descripcionItem.toLowerCase() }}
+            </span>
+
+            @if (!item.estadoItem) {
+              <span class="absolute top-2 left-2 badge-danger">Inactivo</span>
+            }
+
+            <!-- Acciones (aparecen al pasar el mouse) -->
+            <div class="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button (click)="$event.stopPropagation(); abrirEditar(item)" title="Editar"
+                class="w-8 h-8 rounded-full bg-white/90 hover:bg-white flex items-center justify-center text-[#021930] shadow-md transition-colors">
+                <span class="material-icons text-[16px]">edit</span>
+              </button>
+              <button (click)="$event.stopPropagation(); confirmarEliminar(item)" title="Eliminar"
+                class="w-8 h-8 rounded-full bg-white/90 hover:bg-white flex items-center justify-center text-red-500 shadow-md transition-colors">
+                <span class="material-icons text-[16px]">delete_outline</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Contenido -->
+          <div class="p-4">
+            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">{{ item.nombreItem }}</p>
+            <h3 class="font-serif italic text-lg text-gray-900 mt-0.5 truncate" [title]="item.descripcionItem">
+              {{ item.descripcionItem }}
+            </h3>
+            <div class="flex items-end justify-between mt-3">
+              <div>
+                <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Cantidad</p>
+                <span class="font-montserrat font-bold text-2xl text-gray-900">{{ item.cantidadItem }}</span>
+              </div>
+              @if (item.cantidadFaltante > 0) {
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-300">
+                  Stock bajo
+                </span>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Paginador -->
+    @if (totalPaginas > 1) {
+      <div class="surface-card px-6 py-4 flex items-center justify-between">
+        <span class="text-xs text-grayMedium">
+          Página {{ paginaActual }} de {{ totalPaginas }}
+        </span>
+        <div class="flex items-center gap-1">
+          <button (click)="cambiarPagina(paginaActual - 1)" [disabled]="paginaActual === 1"
+            class="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+            <span class="material-icons text-[18px]">chevron_left</span>
+          </button>
+          @for (p of paginas; track p) {
+            <button (click)="cambiarPagina(p)"
+              class="page-btn"
+              [class.page-btn--active]="p === paginaActual">
+              {{ p }}
+            </button>
+          }
+          <button (click)="cambiarPagina(paginaActual + 1)" [disabled]="paginaActual === totalPaginas"
+            class="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+            <span class="material-icons text-[18px]">chevron_right</span>
+          </button>
+        </div>
+      </div>
+    }
+  }
+
+  <!-- ══════════════════════════════════════════════════════
+       DETALLE DEL ITEM (modal)
+  ══════════════════════════════════════════════════════ -->
+  @if (itemDetalle) {
+    <div class="fixed inset-0 z-40 bg-[#021930]/50 backdrop-blur-[2px] animate-backdrop-in"
+      (click)="itemDetalle = null">
+    </div>
+
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+      <div class="pointer-events-auto w-full max-w-md bg-white rounded-[2rem] shadow-2xl overflow-hidden animate-modal-in"
+        (click)="$event.stopPropagation()">
+
+        <!-- Foto -->
+        <div class="relative h-44 flex items-center justify-center overflow-hidden
+          bg-[repeating-linear-gradient(45deg,#e7dfcd,#e7dfcd_10px,#f3ecdd_10px,#f3ecdd_20px)]">
+          <span class="font-uimono text-xs text-slate-500/70 bg-white/50 px-2 py-1 rounded">
+            foto: {{ itemDetalle.descripcionItem.toLowerCase() }}
+          </span>
+          <button (click)="itemDetalle = null" title="Cerrar"
+            class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 hover:bg-white flex items-center justify-center text-gray-600 shadow-md transition-colors">
+            <span class="material-icons text-[18px]">close</span>
+          </button>
+        </div>
+
+        <div class="p-6">
+          <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">{{ itemDetalle.nombreItem }}</p>
+          <h3 class="font-serif italic text-2xl text-gray-900 mt-0.5">{{ itemDetalle.descripcionItem }}</h3>
+
+          <!-- Estadísticas -->
+          <div class="grid grid-cols-2 gap-3 mt-5">
+            <div class="rounded-2xl bg-slate-50 px-4 py-3">
+              <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Precio unitario</p>
+              <p class="font-montserrat font-bold text-xl text-gray-900 mt-0.5">
+                <span class="text-base align-top mr-0.5">Q</span>{{ itemDetalle.costoItem | number:'1.2-2' }}
+              </p>
+            </div>
+            <div class="rounded-2xl bg-slate-50 px-4 py-3">
+              <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Cantidad en stock</p>
+              <p class="font-montserrat font-bold text-xl text-gray-900 mt-0.5">
+                {{ itemDetalle.cantidadItem }} <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">uds</span>
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between mt-3">
+            @if (itemDetalle.estadoItem) {
+              <span class="badge-success">Activo</span>
+            } @else {
+              <span class="badge-danger">Inactivo</span>
+            }
+            @if (itemDetalle.cantidadFaltante > 0) {
+              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-300">
+                Faltan {{ itemDetalle.cantidadFaltante }} uds
+              </span>
+            }
+          </div>
+
+          @if (itemDetalle.observaciones) {
+            <div class="mt-4 pt-4 border-t border-slate-100">
+              <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-400 mb-1">Observaciones</p>
+              <p class="text-sm text-gray-600 leading-relaxed">{{ itemDetalle.observaciones }}</p>
+            </div>
+          }
+
+          <p class="text-xs text-slate-300 font-mono mt-4">ID #{{ itemDetalle.idItem }}</p>
+
+          <!-- Acciones -->
+          <div class="flex gap-3 mt-6 pt-5 border-t border-slate-100">
+            <button type="button" (click)="itemDetalle = null" class="btn-cancel flex-1">Cerrar</button>
+            <button type="button" (click)="abrirEditar(itemDetalle); itemDetalle = null" class="btn-submit flex-1">
+              Editar item
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

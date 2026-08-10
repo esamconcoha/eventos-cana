@@ -1,0 +1,178 @@
+@if (visible) {
+  <div class="modal-backdrop" (click)="cerrar()"></div>
+
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+    <div class="pointer-events-auto w-full max-w-2xl max-h-[88vh] bg-white rounded-[2rem] shadow-2xl
+                overflow-hidden animate-modal-in flex flex-col"
+      (click)="$event.stopPropagation()">
+
+      <!-- ── Encabezado oscuro: anillo de avance + identificación ── -->
+      <div class="relative shrink-0 bg-[#021930] px-6 py-5 overflow-hidden">
+        <!-- Halo decorativo; pointer-events-none para no comerse los clics -->
+        <div class="ambient-blob pointer-events-none w-56 h-56 -top-24 -right-16 bg-amber-400/20"></div>
+
+        <div class="relative flex items-center gap-5">
+          <!-- Anillo de progreso -->
+          <div class="relative w-20 h-20 shrink-0">
+            <svg viewBox="0 0 80 80" class="w-20 h-20 -rotate-90">
+              <circle cx="40" cy="40" r="34" fill="none" stroke="rgba(255,255,255,0.14)" stroke-width="7" />
+              <circle cx="40" cy="40" r="34" fill="none" stroke-width="7" stroke-linecap="round"
+                [attr.stroke]="colorAnillo"
+                [attr.stroke-dasharray]="circunferencia"
+                [attr.stroke-dashoffset]="offsetAnillo"
+                style="transition: stroke-dashoffset .7s cubic-bezier(0.16,1,0.3,1)" />
+            </svg>
+            <div class="absolute inset-0 flex flex-col items-center justify-center">
+              <span class="font-montserrat font-bold text-white text-lg leading-none">{{ porcentaje }}%</span>
+              <span class="text-[9px] uppercase tracking-wider text-white/50 mt-0.5">avance</span>
+            </div>
+          </div>
+
+          <div class="min-w-0 flex-1">
+            <p class="text-[11px] uppercase tracking-wider text-amber-400/80 font-semibold">
+              Trazabilidad · {{ flujo.titulo }}
+            </p>
+            <h3 class="font-serif italic text-2xl text-white truncate">{{ titulo }}</h3>
+            @if (subtitulo) {
+              <p class="text-xs text-white/60 truncate">{{ subtitulo }}</p>
+            }
+
+            <div class="flex items-center gap-2 mt-2 flex-wrap">
+              <span class="badge {{ estadoActual?.badgeClass ?? 'bg-slate-50 text-slate-600 ring-slate-200' }}">
+                {{ nombreEstadoActual }}
+              </span>
+              @if (detenido) {
+                <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-red-300">
+                  <span class="material-icons text-[14px]">block</span>
+                  Avance detenido
+                </span>
+              } @else if (porcentaje >= 100) {
+                <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-300">
+                  <span class="material-icons text-[14px]">check_circle</span>
+                  Ciclo completo
+                </span>
+              }
+            </div>
+          </div>
+
+          <button (click)="cerrar()" type="button"
+            class="w-9 h-9 rounded-full hover:bg-white/10 flex items-center justify-center text-white/70 transition-colors shrink-0 self-start">
+            <span class="material-icons text-[20px]">close</span>
+          </button>
+        </div>
+      </div>
+
+      @if (cargando) {
+        <div class="flex-1 flex items-center justify-center py-16">
+          <div class="spinner"></div>
+        </div>
+      } @else if (!filas.length) {
+        <div class="flex-1 empty-state">
+          <span class="material-icons text-[44px] text-slate-300">timeline</span>
+          <p class="text-sm mt-2">Sin historial de estados registrado.</p>
+        </div>
+      } @else {
+
+        <!-- ── Stepper del flujo ── -->
+        <!-- El stepper scrollea dentro de su propia caja: con 6 pasos en un
+             celular las etiquetas de pasos contiguos se pisan, y un min-w les
+             garantiza ancho legible sin empujar el scroll horizontal a la página. -->
+        <div class="shrink-0 px-6 py-5 border-b border-slate-100 bg-slate-50/60 overflow-x-auto">
+          <div class="flex items-start min-w-[420px]">
+            @for (p of pasos; track p.def.codigo; let i = $index; let ultimo = $last) {
+              <div class="flex-1 flex flex-col items-center relative min-w-0">
+                <!-- Conector hacia el paso siguiente -->
+                @if (!ultimo) {
+                  <div class="absolute top-[11px] left-1/2 w-full h-0.5"
+                    [class.bg-amber-300]="p.alcanzado && !detenido"
+                    [class.bg-red-200]="p.alcanzado && detenido"
+                    [class.bg-slate-200]="!p.alcanzado"></div>
+                }
+                <div class="relative z-10 w-6 h-6 rounded-full flex items-center justify-center transition-all
+                            ring-4 ring-slate-50"
+                  [class]="p.alcanzado ? (detenido ? 'bg-red-400' : p.def.dot) : 'bg-slate-200'"
+                  [class.scale-125]="p.esActual"
+                  [class.shadow-glow-amber]="p.esActual && !detenido">
+                  @if (p.alcanzado && !p.esActual) {
+                    <span class="material-icons text-white text-[14px]">check</span>
+                  } @else if (p.esActual) {
+                    <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+                  }
+                </div>
+                <span class="mt-2 text-[10px] leading-tight text-center px-0.5"
+                  [class.font-bold]="p.esActual"
+                  [class.text-gray-900]="p.esActual"
+                  [class.text-slate-500]="!p.esActual">
+                  {{ p.def.corto }}
+                </span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- ── Métricas ── -->
+        <div class="shrink-0 grid grid-cols-2 sm:grid-cols-4 gap-px bg-slate-100 border-b border-slate-100">
+          <div class="bg-white px-4 py-3">
+            <p class="drawer-field-label">Tiempo total</p>
+            <p class="text-sm font-semibold text-gray-900 mt-1">{{ duracionTotal }}</p>
+          </div>
+          <div class="bg-white px-4 py-3">
+            <p class="drawer-field-label">En estado actual</p>
+            <p class="text-sm font-semibold text-gray-900 mt-1">{{ duracionEstadoActual }}</p>
+          </div>
+          <div class="bg-white px-4 py-3">
+            <p class="drawer-field-label">Cambios</p>
+            <p class="text-sm font-semibold text-gray-900 mt-1">{{ totalCambios }}</p>
+          </div>
+          <div class="bg-white px-4 py-3">
+            <p class="drawer-field-label">Inicio</p>
+            <p class="text-sm font-semibold text-gray-900 mt-1">
+              {{ fechaInicioCiclo ? (fechaInicioCiclo | date: 'dd/MM/yy') : '—' }}
+            </p>
+          </div>
+        </div>
+
+        <!-- ── Línea de tiempo (más reciente arriba) ── -->
+        <div class="flex-1 overflow-y-auto px-6 py-5 min-h-0">
+          <p class="drawer-field-label mb-4">Línea de tiempo · más reciente primero</p>
+
+          <div class="relative">
+            @for (f of filas; track $index; let ultimo = $last) {
+              <div class="relative flex gap-4 pb-5" [class.pb-0]="ultimo">
+                <!-- Riel vertical + punto -->
+                <div class="relative flex flex-col items-center shrink-0">
+                  <span class="w-3 h-3 rounded-full ring-4 ring-white z-10 mt-1 {{ f.dot }}"
+                    [class.animate-pulse]="f.esActual"></span>
+                  @if (!ultimo) {
+                    <span class="absolute top-4 w-0.5 h-full bg-slate-200"></span>
+                  }
+                </div>
+
+                <div class="min-w-0 flex-1 pb-1">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <span class="badge {{ f.badgeClass }}">{{ f.label }}</span>
+                    @if (f.esActual) {
+                      <span class="text-[10px] font-bold uppercase tracking-wider text-amber-600">Actual</span>
+                    }
+                  </div>
+                  <p class="text-xs text-grayMedium mt-1.5">
+                    <span class="material-icons text-[13px] align-[-2px]">schedule</span>
+                    {{ f.fechaInicio | date: 'dd/MM/yyyy HH:mm' }}
+                    @if (f.fechaFin) {
+                      <span class="mx-1 text-slate-300">→</span>
+                      {{ f.fechaFin | date: 'dd/MM/yyyy HH:mm' }}
+                    }
+                  </p>
+                  <p class="text-[11px] text-slate-400 mt-0.5">
+                    {{ f.esActual ? 'lleva ' : 'duró ' }}{{ f.duracion }}
+                  </p>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+    </div>
+  </div>
+}

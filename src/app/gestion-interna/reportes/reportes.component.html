@@ -1,0 +1,345 @@
+<div class="space-y-6">
+
+  <!-- Encabezado -->
+  <div class="flex flex-wrap items-center gap-4">
+    <div class="page-header-icon">
+      <span class="material-icons text-[22px]">bar_chart</span>
+    </div>
+    <div class="min-w-0">
+      <h1 class="font-serif italic text-3xl text-gray-900">Reportes</h1>
+      <p class="text-sm text-grayMedium mt-1">Estadísticas del negocio en el periodo seleccionado</p>
+    </div>
+    <button (click)="exportarPdf()" [disabled]="cargando || generandoPdf || !reporte"
+            class="btn-primary ml-auto disabled:opacity-50 disabled:pointer-events-none">
+      @if (generandoPdf) {
+        <span class="material-icons text-[18px] animate-spin">progress_activity</span>
+        Generando…
+      } @else {
+        <span class="material-icons text-[18px]">picture_as_pdf</span>
+        Exportar PDF
+      }
+    </button>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       FILTRO DE PERIODO
+  ══════════════════════════════════════════════════════ -->
+  <!-- relative z-30: cada surface-card de abajo (backdrop-blur) abre su propio
+       stacking context y, al venir después en el DOM, tapaba el calendario
+       desplegado del date-picker. Elevar este contenedor lo deja por encima. -->
+  <div class="surface-card p-4 relative z-30">
+    <div class="flex flex-wrap items-center gap-2">
+      <span class="material-icons text-[18px] text-slate-400">date_range</span>
+      @for (op of opcionesPeriodo; track op.clave) {
+        <button (click)="aplicarPreset(op.clave)"
+                class="px-3 py-1.5 rounded-full text-xs font-semibold transition-colors"
+                [class]="periodo === op.clave
+                  ? 'bg-[#021930] text-amber-300'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'">
+          {{ op.etiqueta }}
+        </button>
+      }
+
+      @if (reporte && periodo !== 'personalizado') {
+        <span class="text-xs text-grayMedium ml-auto">
+          {{ fechaCorta(reporte.desde) }} — {{ fechaCorta(reporte.hasta) }}
+        </span>
+      }
+    </div>
+
+    @if (periodo === 'personalizado') {
+      <div class="flex flex-wrap items-end gap-3 mt-4 pt-4 border-t border-slate-100">
+        <div class="w-44">
+          <label class="field-label block mb-1">Desde</label>
+          <app-date-picker [(ngModel)]="desde" placeholder="Fecha de inicio"></app-date-picker>
+        </div>
+        <div class="w-44">
+          <label class="field-label block mb-1">Hasta</label>
+          <app-date-picker [(ngModel)]="hasta" placeholder="Fecha de fin"></app-date-picker>
+        </div>
+        <button (click)="aplicarRangoPersonalizado()" class="btn-submit">Aplicar</button>
+      </div>
+    }
+  </div>
+
+  @if (cargando) {
+    <div class="flex justify-center py-24"><div class="spinner"></div></div>
+  } @else if (!reporte) {
+    <div class="surface-card empty-state">
+      <span class="material-icons text-5xl mb-2 text-gray-300">cloud_off</span>
+      <p class="text-sm">No se pudo cargar el reporte</p>
+      <button (click)="cargar()" class="btn-secondary mt-4">Reintentar</button>
+    </div>
+  } @else {
+
+    <!-- ══════════════════════════════════════════════════════
+         INDICADORES
+    ══════════════════════════════════════════════════════ -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      @for (k of indicadores; track k.label) {
+        <div class="surface-card p-4">
+          <div class="flex items-start gap-3">
+            <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" [ngClass]="k.chip">
+              <span class="material-icons text-[18px]">{{ k.icono }}</span>
+            </div>
+            <div class="min-w-0">
+              <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400">{{ k.label }}</p>
+              <p class="font-montserrat font-bold text-2xl leading-tight mt-1 truncate"
+                 [class.text-gray-900]="!k.destacar" [class.text-amber-600]="k.destacar"
+                 [title]="k.valor">{{ k.valor }}</p>
+              <p class="text-[11px] text-grayMedium mt-1 truncate" [title]="k.nota">{{ k.nota }}</p>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <p class="text-xs text-grayMedium -mt-2">
+      Los montos corresponden a pedidos no cancelados cuya fecha de evento cae dentro del periodo.
+      Lo cobrado es neto de devoluciones.
+    </p>
+
+    <!-- ══════════════════════════════════════════════════════
+         FACTURACIÓN POR MES
+    ══════════════════════════════════════════════════════ -->
+    <div class="surface-card overflow-hidden">
+      <div class="card-title-bar flex flex-wrap items-center justify-between gap-2">
+        <h2 class="font-serif italic text-xl text-gray-900">Facturación y cobranza por mes</h2>
+        <span class="text-xs text-grayMedium">Pasa el cursor sobre una barra para ver el monto exacto</span>
+      </div>
+      <div class="p-4">
+        <app-grafico-barras
+          [etiquetas]="etiquetasMeses"
+          [serieA]="serieFacturado" nombreA="Facturado" colorA="#021930"
+          [serieB]="serieCobrado"   nombreB="Cobrado"   colorB="#F2B134"
+          [moneda]="true">
+        </app-grafico-barras>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         EVENTOS POR MES / COMPOSICIÓN
+    ══════════════════════════════════════════════════════ -->
+    <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-6">
+      <div class="surface-card overflow-hidden">
+        <div class="card-title-bar">
+          <h2 class="font-serif italic text-xl text-gray-900">Eventos por mes</h2>
+        </div>
+        <div class="p-4">
+          <app-grafico-barras
+            [etiquetas]="etiquetasMeses"
+            [serieA]="serieEventos" nombreA="Eventos" colorA="#0F4A7A"
+            [serieB]="null" [moneda]="false">
+          </app-grafico-barras>
+        </div>
+      </div>
+
+      <div class="surface-card overflow-hidden">
+        <div class="card-title-bar">
+          <h2 class="font-serif italic text-xl text-gray-900">Eventos por tipo</h2>
+        </div>
+        <div class="p-5">
+          <app-grafico-dona [porciones]="donaTipos" leyendaTotal="EVENTOS"></app-grafico-dona>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         CARTERA Y CICLO LOGÍSTICO
+    ══════════════════════════════════════════════════════ -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="surface-card overflow-hidden">
+        <div class="card-title-bar">
+          <h2 class="font-serif italic text-xl text-gray-900">Saldo por cobrar según estado de pago</h2>
+          <p class="text-xs text-grayMedium mt-0.5">Reparte dinero pendiente, no cantidad de pedidos</p>
+        </div>
+        <div class="p-5">
+          <app-grafico-dona [porciones]="donaCartera" leyendaTotal="POR COBRAR" [moneda]="true">
+          </app-grafico-dona>
+        </div>
+      </div>
+
+      <div class="surface-card overflow-hidden">
+        <div class="card-title-bar">
+          <h2 class="font-serif italic text-xl text-gray-900">Eventos por estado</h2>
+          <p class="text-xs text-grayMedium mt-0.5">En qué punto del ciclo está cada pedido del periodo</p>
+        </div>
+        <div class="p-5">
+          <app-grafico-ranking [filas]="rankingEstados" color="#0F4A7A"></app-grafico-ranking>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         CATÁLOGO: ARTÍCULOS Y SERVICIOS
+    ══════════════════════════════════════════════════════ -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="surface-card overflow-hidden">
+        <div class="card-title-bar">
+          <h2 class="font-serif italic text-xl text-gray-900">Artículos más rentados</h2>
+          <p class="text-xs text-grayMedium mt-0.5">Unidades despachadas en los pedidos del periodo</p>
+        </div>
+        <div class="p-5">
+          <app-grafico-ranking [filas]="rankingArticulos" color="#021930"></app-grafico-ranking>
+        </div>
+      </div>
+
+      <div class="surface-card overflow-hidden">
+        <div class="card-title-bar">
+          <h2 class="font-serif italic text-xl text-gray-900">Servicios más vendidos</h2>
+          <p class="text-xs text-grayMedium mt-0.5">Ordenados por lo que facturan</p>
+        </div>
+        <div class="p-5">
+          <app-grafico-ranking [filas]="rankingServicios" color="#D97706"></app-grafico-ranking>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         CLIENTES
+    ══════════════════════════════════════════════════════ -->
+    <div class="surface-card overflow-hidden">
+      <div class="card-title-bar">
+        <h2 class="font-serif italic text-xl text-gray-900">Clientes con mayor facturación</h2>
+      </div>
+      @if (reporte.topClientes.length === 0) {
+        <div class="empty-state py-12">
+          <span class="material-icons text-4xl mb-2 text-gray-200">groups</span>
+          <p class="text-sm">Sin clientes en el periodo</p>
+        </div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="table-head">
+              <tr>
+                <th class="text-left font-semibold px-6 py-3">Cliente</th>
+                <th class="text-right font-semibold px-6 py-3">Eventos</th>
+                <th class="text-right font-semibold px-6 py-3">Facturado</th>
+                <th class="text-right font-semibold px-6 py-3">Cobrado</th>
+                <th class="text-right font-semibold px-6 py-3">Saldo</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-50">
+              @for (c of reporte.topClientes; track c.nombre) {
+                <tr class="row-hover">
+                  <td class="px-6 py-3 text-gray-800">{{ c.nombre }}</td>
+                  <td class="px-6 py-3 text-right text-gray-600">{{ c.eventos }}</td>
+                  <td class="px-6 py-3 text-right font-montserrat font-semibold text-gray-900">
+                    {{ moneda(c.facturado) }}
+                  </td>
+                  <td class="px-6 py-3 text-right text-emerald-700">{{ moneda(c.cobrado) }}</td>
+                  <td class="px-6 py-3 text-right"
+                      [class.text-amber-600]="c.saldo > 0" [class.text-slate-400]="c.saldo <= 0">
+                    {{ moneda(c.saldo) }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         CARTERA POR PEDIDO
+    ══════════════════════════════════════════════════════ -->
+    <div class="surface-card overflow-hidden">
+      <div class="card-title-bar">
+        <h2 class="font-serif italic text-xl text-gray-900">Pedidos con saldo pendiente</h2>
+        <p class="text-xs text-grayMedium mt-0.5">Del saldo más alto al más bajo</p>
+      </div>
+      @if (reporte.pedidosConSaldo.length === 0) {
+        <div class="empty-state py-12">
+          <span class="material-icons text-4xl mb-2 text-emerald-200">task_alt</span>
+          <p class="text-sm">Ningún pedido del periodo tiene saldo pendiente</p>
+        </div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="table-head">
+              <tr>
+                <th class="text-left font-semibold px-6 py-3">Pedido</th>
+                <th class="text-left font-semibold px-6 py-3">Cliente</th>
+                <th class="text-left font-semibold px-6 py-3">Evento</th>
+                <th class="text-left font-semibold px-6 py-3">Estado de pago</th>
+                <th class="text-right font-semibold px-6 py-3">Total</th>
+                <th class="text-right font-semibold px-6 py-3">Pagado</th>
+                <th class="text-right font-semibold px-6 py-3">Saldo</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-50">
+              @for (p of reporte.pedidosConSaldo; track p.correlativoPedido) {
+                <tr class="row-hover">
+                  <td class="px-6 py-3 font-mono text-xs text-gray-700">{{ p.correlativoPedido }}</td>
+                  <td class="px-6 py-3 text-gray-800">{{ p.cliente }}</td>
+                  <td class="px-6 py-3 text-gray-600">{{ fechaCorta(p.fechaEvento) }}</td>
+                  <td class="px-6 py-3"><span class="badge-warning">{{ p.estadoPago }}</span></td>
+                  <td class="px-6 py-3 text-right text-gray-600">{{ moneda(p.total) }}</td>
+                  <td class="px-6 py-3 text-right text-emerald-700">{{ moneda(p.pagado) }}</td>
+                  <td class="px-6 py-3 text-right font-montserrat font-bold text-amber-600">
+                    {{ moneda(p.saldo) }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         INVENTARIO
+    ══════════════════════════════════════════════════════ -->
+    <div class="surface-card overflow-hidden">
+      <div class="card-title-bar">
+        <h2 class="font-serif italic text-xl text-gray-900">Faltantes de inventario</h2>
+        <p class="text-xs text-grayMedium mt-0.5">
+          Estado actual de bodega: no depende del periodo consultado
+        </p>
+      </div>
+      @if (reporte.articulosConFaltantes.length === 0) {
+        <div class="empty-state py-12">
+          <span class="material-icons text-4xl mb-2 text-emerald-200">inventory_2</span>
+          <p class="text-sm">No hay artículos con faltantes registrados</p>
+        </div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="table-head">
+              <tr>
+                <th class="text-left font-semibold px-6 py-3">Artículo</th>
+                <th class="text-left font-semibold px-6 py-3">Categoría</th>
+                <th class="text-right font-semibold px-6 py-3">Faltantes</th>
+                <th class="text-right font-semibold px-6 py-3">En bodega</th>
+                <th class="text-right font-semibold px-6 py-3">Costo de reposición</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-50">
+              @for (a of reporte.articulosConFaltantes; track a.etiqueta) {
+                <tr class="row-hover">
+                  <td class="px-6 py-3 text-gray-800">{{ a.etiqueta }}</td>
+                  <td class="px-6 py-3 text-gray-500">{{ a.categoria }}</td>
+                  <td class="px-6 py-3 text-right font-montserrat font-bold text-red-600">
+                    {{ entero(a.cantidad) }}
+                  </td>
+                  <td class="px-6 py-3 text-right text-gray-600">{{ entero(a.disponible) }}</td>
+                  <td class="px-6 py-3 text-right text-gray-700">{{ moneda(a.monto) }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Visor del PDF generado -->
+  <app-document-viewer
+    [visible]="mostrarVisorDocumento"
+    [blob]="documentoBlob"
+    [nombreArchivo]="documentoNombre"
+    titulo="Reporte estadístico"
+    (cerrarModal)="cerrarVisorDocumento()">
+  </app-document-viewer>
+
+</div>
