@@ -1,0 +1,21 @@
+app = "eventos-cana"
+primary_region = "ord"
+
+[http_service]
+  internal_port = 8082
+  force_https = true
+  auto_start_machines = true
+  auto_stop_machines = true
+  # En 0, Fly apaga la maquina y el siguiente request tiene que esperar el
+  # arranque completo de Spring Boot (~40-60s); el proxy corta antes. En 1
+  # siempre queda una viva.
+  min_machines_running = 1
+  processes = ["app"]
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  # Una sola clave de memoria. Con "memory" y "memory_mb" a la vez gana
+  # memory_mb, la maquina queda en 256 MB y el JVM muere por OOM antes de
+  # terminar de arrancar.
+  memory = "1gb"
