@@ -5,6 +5,10 @@ primary_region = "ord"
   # Apaga el logging de cada consulta SQL y de cada parametro, que en local si
   # se quiere. Ver application.properties.
   SQL_LOG_LEVEL = "warn"
+  # Origenes que pueden llamar a la API desde un navegador. Se deja localhost
+  # para poder apuntar un "ng serve" local contra el backend desplegado. Cuando
+  # el frontend salga a Vercel hay que agregar su URL a esta lista.
+  CORS_ALLOWED_ORIGINS = "http://localhost:4200,https://eventos-cana.fly.dev"
 
 [http_service]
   internal_port = 8082
