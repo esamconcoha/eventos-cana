@@ -1,18 +1,18 @@
 <div class="space-y-6">
 
   <!-- Encabezado -->
-  <div class="flex items-center justify-between">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
     <div class="flex items-center gap-4">
       <div class="page-header-icon">
         <span class="material-icons text-[22px]">request_quote</span>
       </div>
-      <div>
+      <div class="min-w-0">
         <h1 class="font-serif italic text-3xl text-gray-900">Cotizaciones</h1>
         <p class="text-sm text-grayMedium mt-1">Seguimiento de propuestas y contratos</p>
       </div>
     </div>
     <button (click)="mostrarForm = true"
-      class="btn-primary">
+      class="btn-primary self-start sm:self-auto shrink-0">
       <span class="material-icons text-[18px]">add</span>
       Nueva cotización
     </button>
@@ -225,8 +225,12 @@
           </div>
 
           <!-- Tabla de detalles -->
+          <!-- El overflow-x-auto interno es lo que salva esta tabla en movil: son
+               cinco columnas con selects e inputs adentro y sin el ancho minimo
+               el select de item queda de ~60px. -->
           <div class="rounded-xl border border-gray-200 overflow-hidden">
-            <table class="w-full text-sm">
+            <div class="overflow-x-auto">
+            <table class="w-full min-w-[680px] text-sm">
               <thead class="table-head">
                 <tr>
                   <th class="px-4 py-3 text-left">Item</th>
@@ -281,6 +285,7 @@
                 }
               </tbody>
             </table>
+            </div>
           </div>
         </div>
 
@@ -301,7 +306,8 @@
             </div>
           } @else {
             <div class="rounded-xl border border-gray-200 overflow-hidden">
-              <table class="w-full text-sm">
+              <div class="overflow-x-auto">
+              <table class="w-full min-w-[880px] text-sm">
                 <thead class="table-head">
                   <tr>
                     <th class="px-4 py-3 text-left">Servicio</th>
@@ -358,6 +364,7 @@
                   }
                 </tbody>
               </table>
+              </div>
             </div>
           }
         </div>
@@ -451,7 +458,7 @@
 
     <!-- Tabla -->
     <div class="surface-card overflow-hidden flex-1 w-full">
-      <div class="card-title-bar flex items-center justify-between">
+      <div class="card-title-bar flex flex-wrap items-center justify-between gap-2">
         <h2 class="font-montserrat font-semibold text-gray-800">Listado de cotizaciones</h2>
         <span class="text-xs text-grayMedium">{{ cotizacionesFiltradas.length }} de {{ cotizaciones.length }} registros</span>
       </div>
@@ -467,7 +474,7 @@
         </div>
       } @else {
         <div class="overflow-x-auto">
-          <table class="w-full text-sm">
+          <table class="w-full min-w-[980px] text-sm">
             <thead class="table-head">
               <tr>
                 <th class="px-4 py-3 text-left">No.</th>

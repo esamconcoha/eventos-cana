@@ -1,18 +1,18 @@
 <div class="space-y-6">
 
   <!-- Encabezado -->
-  <div class="flex items-center justify-between">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
     <div class="flex items-center gap-4">
       <div class="page-header-icon">
         <span class="material-icons text-[22px]">inventory_2</span>
       </div>
-      <div>
+      <div class="min-w-0">
         <h1 class="font-serif italic text-3xl text-gray-900">Inventario</h1>
         <p class="text-sm text-grayMedium mt-1">Mobiliario, decoración y flores en stock</p>
       </div>
     </div>
     <button (click)="abrirCrear()"
-      class="btn-primary">
+      class="btn-primary self-start sm:self-auto shrink-0">
       <span class="material-icons text-[18px]">add_box</span>
       Nuevo item
     </button>
@@ -190,8 +190,11 @@
               <span class="absolute top-2 left-2 badge-danger">Inactivo</span>
             }
 
-            <!-- Acciones (aparecen al pasar el mouse) -->
-            <div class="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <!-- Acciones. En escritorio siguen apareciendo solo al pasar el mouse;
+                 abajo de lg quedan siempre visibles porque en pantalla tactil no
+                 existe el hover y editar/eliminar eran inalcanzables desde el
+                 telefono o la tablet. -->
+            <div class="absolute top-2 right-2 flex gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
               <button (click)="$event.stopPropagation(); abrirEditar(item)" title="Editar"
                 class="w-8 h-8 rounded-full bg-white/90 hover:bg-white flex items-center justify-center text-[#021930] shadow-md transition-colors">
                 <span class="material-icons text-[16px]">edit</span>

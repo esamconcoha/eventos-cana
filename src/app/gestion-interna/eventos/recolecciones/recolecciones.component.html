@@ -65,8 +65,10 @@
         <p class="text-xs text-gray-400 mt-1">Se crean solas al finalizar cada entrega</p>
       </div>
     } @else {
+      <!-- Ver nota de entregas.component.html: el min-w es lo que hace que el
+           overflow-x-auto sirva de algo en pantallas chicas. -->
       <div class="overflow-x-auto mt-4">
-        <table class="w-full text-sm">
+        <table class="w-full min-w-[820px] text-sm">
           <thead class="table-head">
             <tr>
               <th class="px-4 py-3 text-left">Correlativo pedido</th>

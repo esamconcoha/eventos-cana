@@ -123,8 +123,12 @@
         <p class="text-sm">No se encontraron entregas</p>
       </div>
     } @else {
+      <!-- min-w fuerza el scroll horizontal en pantallas chicas. Con solo
+           "w-full" la tabla se encoge al ancho del telefono y las 6 columnas
+           quedan ilegibles, partidas letra por letra; en escritorio el min-w
+           nunca aplica porque el contenedor siempre es mas ancho. -->
       <div class="overflow-x-auto">
-        <table class="w-full text-sm">
+        <table class="w-full min-w-[820px] text-sm">
           <thead class="table-head">
             <tr>
               <th class="px-4 py-3 text-left">Correlativo pedido</th>

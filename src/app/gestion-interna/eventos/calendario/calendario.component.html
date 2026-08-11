@@ -55,6 +55,14 @@
       @if (cargando) {
         <div class="flex justify-center py-24"><div class="spinner"></div></div>
       } @else {
+        <!-- Los dos grid-cols-7 van dentro del MISMO contenedor con scroll para
+             que la fila de nombres de dia se desplace junto con las celdas. En
+             un telefono de 360-390px, siete columnas sin ancho minimo dejan
+             celdas de ~45px donde ningun evento se alcanza a leer; con el min-w
+             el mes se arrastra de lado. En escritorio el contenedor siempre es
+             mas ancho que 560px, asi que no cambia nada. -->
+        <div class="overflow-x-auto">
+        <div class="min-w-[560px]">
         <div class="grid grid-cols-7 border-b border-gray-50">
           @for (d of nombresDias; track d) {
             <div class="px-2 py-2 text-center text-[11px] font-semibold tracking-wide text-gray-400">{{ d }}</div>
@@ -99,6 +107,8 @@
               </div>
             </div>
           }
+        </div>
+        </div>
         </div>
       }
     </div>

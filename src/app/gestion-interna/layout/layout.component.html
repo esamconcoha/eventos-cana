@@ -15,6 +15,22 @@
 
   <div class="flex-1 flex flex-col overflow-hidden relative bg-[#eae3d5]">
 
+    <!-- Barra superior solo para movil/tablet vertical. Sin ella el menu queda
+         inalcanzable abajo de lg: el aside vive fuera de pantalla con
+         -translate-x-full y no habia ningun control que disparara toggleSidebar().
+         Es lg:hidden, asi que en escritorio no aparece ni ocupa alto. -->
+    <header class="lg:hidden shrink-0 z-30 flex items-center gap-3 h-14 px-4
+                   bg-[#021930] text-white shadow-md">
+      <button type="button" (click)="toggleSidebar()" aria-label="Abrir menú"
+        class="-ml-1 p-2 rounded-lg hover:bg-white/10 active:bg-white/20 transition-colors">
+        <span class="material-icons text-[22px]">menu</span>
+      </button>
+      <div class="bg-white rounded-lg p-1 shrink-0">
+        <img src="assets/logo.png" alt="Logo" class="h-6 w-6 object-contain" />
+      </div>
+      <p class="font-display font-bold text-[12.5px] tracking-wider truncate">EVENTOS CANÁ</p>
+    </header>
+
     <!-- Resplandor ambiental cálido -->
     <div class="ambient-blob w-[28rem] h-[28rem] bg-amber-200/30 -top-40 -right-24"></div>
 

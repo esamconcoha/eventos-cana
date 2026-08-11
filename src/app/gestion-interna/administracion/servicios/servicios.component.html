@@ -1,18 +1,18 @@
 <div class="space-y-6">
 
   <!-- Encabezado -->
-  <div class="flex items-center justify-between">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
     <div class="flex items-center gap-4">
       <div class="page-header-icon">
         <span class="material-icons text-[22px]">design_services</span>
       </div>
-      <div>
+      <div class="min-w-0">
         <h1 class="font-display text-2xl font-bold text-gray-900 tracking-tight">Servicios de Decoración</h1>
         <p class="text-sm text-grayMedium mt-1">Gestión del catálogo de servicios</p>
       </div>
     </div>
     <button (click)="abrirCrear()"
-      class="btn-primary">
+      class="btn-primary self-start sm:self-auto shrink-0">
       <span class="material-icons text-[18px]">add</span>
       Nuevo servicio
     </button>
@@ -117,11 +117,11 @@
     <div class="card-title-bar flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <h2 class="font-montserrat font-semibold text-gray-800">Listado de servicios</h2>
       <div class="flex items-center gap-3">
-        <div class="relative">
+        <div class="relative flex-1 sm:flex-none">
           <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[18px]">search</span>
           <input type="text" [(ngModel)]="textoBusqueda" (ngModelChange)="aplicarFiltro()"
             placeholder="Buscar por nombre o categoría..."
-            class="field-search w-60">
+            class="field-search w-full sm:w-60">
         </div>
         <span class="text-xs text-grayMedium whitespace-nowrap">{{ serviciosFiltrados.length }} registros</span>
       </div>
@@ -138,7 +138,7 @@
       </div>
     } @else {
       <div class="overflow-x-auto">
-        <table class="w-full text-sm">
+        <table class="w-full min-w-[900px] text-sm">
           <thead class="table-head">
             <tr>
               <th class="px-4 py-3 text-left">Nombre</th>

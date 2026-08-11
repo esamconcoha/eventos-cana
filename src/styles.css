@@ -222,16 +222,20 @@
      su propia zona con scroll adentro (la lista de articulos, por ejemplo). */
   .modal-panel {
     @apply fixed inset-0 m-auto h-fit z-50
-      w-[calc(100%-2rem)] bg-white rounded-[2rem] shadow-2xl p-6
+      w-[calc(100%-2rem)] bg-white rounded-[2rem] shadow-2xl p-5 sm:p-6
       animate-modal-in;
   }
 
   .drawer-backdrop {
     @apply fixed inset-0 z-40 bg-[#021930]/50 backdrop-blur-[2px] animate-backdrop-in;
   }
+  /* En movil el drawer ocupa todo el ancho y las esquinas redondeadas de la
+     izquierda no se ven: se quitan abajo de sm para no recortar contenido, y el
+     padding baja de 8 a 5 para recuperar 24px utiles en pantallas de 360-390px. */
   .drawer-panel {
     @apply fixed top-0 right-0 z-50 h-full w-full max-w-md bg-white shadow-2xl
-      rounded-l-[2rem] overflow-y-auto px-8 py-9 animate-drawer-in;
+      rounded-none sm:rounded-l-[2rem] overflow-y-auto px-5 sm:px-8 py-7 sm:py-9
+      animate-drawer-in;
   }
   .drawer-field-label {
     @apply text-[11px] font-bold uppercase tracking-wider text-slate-500;

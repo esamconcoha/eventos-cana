@@ -1,13 +1,13 @@
 <div class="space-y-6">
 
   <!-- Encabezado -->
-  <div class="surface-card p-6 flex items-center justify-between">
-    <div>
+  <div class="surface-card p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div class="min-w-0">
       <h1 class="font-serif italic text-3xl text-gray-900">Usuarios</h1>
       <p class="text-sm text-grayMedium mt-1">Administración de accesos del equipo</p>
     </div>
     <button (click)="mostrarFormCrear = true; mostrarFormEditar = false"
-      class="btn-primary">
+      class="btn-primary self-start sm:self-auto shrink-0">
       <span class="material-icons text-[18px]">person_add</span>
       Nuevo usuario
     </button>
@@ -33,7 +33,7 @@
       </div>
     } @else {
       <div class="overflow-x-auto">
-        <table class="w-full text-sm">
+        <table class="w-full min-w-[860px] text-sm">
           <thead class="table-head">
             <tr>
               <th class="px-4 py-3 text-left">Nombre</th>

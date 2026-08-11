@@ -1,17 +1,19 @@
 <div class="space-y-6">
 
   <!-- Encabezado -->
-  <div class="flex items-center justify-between">
+  <!-- En movil el titulo y el boton se apilan; a partir de sm vuelven a la
+       misma fila con el boton a la derecha, igual que estaba. -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
     <div class="flex items-center gap-4">
       <div class="page-header-icon">
         <span class="material-icons text-[22px]">meeting_room</span>
       </div>
-      <div>
+      <div class="min-w-0">
         <h1 class="font-serif italic text-3xl text-gray-900">Salones</h1>
         <p class="text-sm text-grayMedium mt-1">Catálogo de salones disponibles para entrega/montaje</p>
       </div>
     </div>
-    <button (click)="abrirCrear()" class="btn-primary">
+    <button (click)="abrirCrear()" class="btn-primary self-start sm:self-auto shrink-0">
       <span class="material-icons text-[18px]">add</span>
       Nuevo salón
     </button>
@@ -73,11 +75,13 @@
     <div class="card-title-bar flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <h2 class="font-montserrat font-semibold text-gray-800">Listado de salones</h2>
       <div class="flex items-center gap-3">
-        <div class="relative">
+        <!-- El buscador ocupa el ancho disponible en movil (w-60 fijo se salia
+             de la tarjeta en pantallas de 360-390px) y recupera su ancho a partir de sm. -->
+        <div class="relative flex-1 sm:flex-none">
           <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[18px]">search</span>
           <input type="text" [(ngModel)]="textoBusqueda" (ngModelChange)="aplicarFiltro()"
             placeholder="Buscar por nombre o dirección..."
-            class="field-search w-60">
+            class="field-search w-full sm:w-60">
         </div>
         <span class="text-xs text-grayMedium whitespace-nowrap">{{ salonesFiltrados.length }} registros</span>
       </div>
@@ -94,7 +98,7 @@
       </div>
     } @else {
       <div class="overflow-x-auto">
-        <table class="w-full text-sm">
+        <table class="w-full min-w-[640px] text-sm">
           <thead class="table-head">
             <tr>
               <th class="px-4 py-3 text-left">Nombre</th>

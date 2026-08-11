@@ -1,17 +1,17 @@
 <div class="space-y-6">
 
   <!-- Encabezado -->
-  <div class="flex items-center justify-between">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
     <div class="flex items-center gap-4">
       <div class="page-header-icon">
         <span class="material-icons text-[22px]">local_mall</span>
       </div>
-      <div>
+      <div class="min-w-0">
         <h1 class="font-serif italic text-3xl text-gray-900">Pedidos</h1>
         <p class="text-sm text-grayMedium mt-1">Seguimiento de entregas y cobros</p>
       </div>
     </div>
-    <button (click)="mostrarForm = true" class="btn-primary">
+    <button (click)="mostrarForm = true" class="btn-primary self-start sm:self-auto shrink-0">
       <span class="material-icons text-[18px]">add</span>
       Nuevo pedido
     </button>
@@ -257,8 +257,11 @@
             </button>
           </div>
 
+          <!-- overflow-x-auto + min-w: son cinco columnas con selects e inputs
+               adentro; sin ancho minimo se aplastan en movil. -->
           <div class="rounded-xl border border-gray-200 overflow-hidden">
-            <table class="w-full text-sm">
+            <div class="overflow-x-auto">
+            <table class="w-full min-w-[680px] text-sm">
               <thead class="table-head">
                 <tr>
                   <th class="px-4 py-3 text-left">Item</th>
@@ -313,6 +316,7 @@
                 }
               </tbody>
             </table>
+            </div>
           </div>
         </div>
 
@@ -333,7 +337,8 @@
             </div>
           } @else {
             <div class="rounded-xl border border-gray-200 overflow-hidden">
-              <table class="w-full text-sm">
+              <div class="overflow-x-auto">
+              <table class="w-full min-w-[900px] text-sm">
                 <thead class="table-head">
                   <tr>
                     <th class="px-4 py-3 text-left">Servicio</th>
@@ -390,6 +395,7 @@
                   }
                 </tbody>
               </table>
+              </div>
             </div>
           }
         </div>
@@ -414,9 +420,10 @@
        TABS + FILTROS + LISTADO
   ══════════════════════════════════════════════════════ -->
   <div class="surface-card px-6 pt-4">
-    <div class="flex items-center gap-6 border-b border-slate-100">
+    <!-- overflow-x-auto como en entregas: las dos pestañas no caben en 360px. -->
+    <div class="flex items-center gap-6 border-b border-slate-100 overflow-x-auto">
       <button type="button" (click)="cambiarTab('todos')"
-        class="pb-3 text-sm font-semibold transition-colors border-b-2 -mb-px"
+        class="pb-3 text-sm font-semibold whitespace-nowrap transition-colors border-b-2 -mb-px"
         [class.text-gray-900]="tabActiva === 'todos'"
         [class.border-amber-400]="tabActiva === 'todos'"
         [class.text-gray-400]="tabActiva !== 'todos'"
@@ -424,7 +431,7 @@
         Todos los pedidos
       </button>
       <button type="button" (click)="cambiarTab('no-pagados')"
-        class="pb-3 text-sm font-semibold transition-colors border-b-2 -mb-px flex items-center gap-2"
+        class="pb-3 text-sm font-semibold whitespace-nowrap transition-colors border-b-2 -mb-px flex items-center gap-2"
         [class.text-gray-900]="tabActiva === 'no-pagados'"
         [class.border-amber-400]="tabActiva === 'no-pagados'"
         [class.text-gray-400]="tabActiva !== 'no-pagados'"
@@ -504,7 +511,7 @@
 
     <!-- Tabla -->
     <div class="surface-card overflow-hidden flex-1 w-full">
-      <div class="card-title-bar flex items-center justify-between">
+      <div class="card-title-bar flex flex-wrap items-center justify-between gap-2">
         <h2 class="font-montserrat font-semibold text-gray-800">Listado de pedidos</h2>
         <span class="text-xs text-grayMedium">{{ pedidosFiltrados.length }} de {{ pedidos.length }} registros</span>
       </div>
@@ -520,7 +527,7 @@
         </div>
       } @else {
         <div class="overflow-x-auto" (scroll)="cerrarEstadoDropdown()">
-          <table class="w-full text-sm">
+          <table class="w-full min-w-[1000px] text-sm">
             <thead class="table-head">
               <tr>
                 <th class="px-4 py-3 text-left">No.</th>
@@ -650,7 +657,9 @@
 
         <!-- Datos del evento -->
         <div class="space-y-4">
-          <div class="grid grid-cols-2 gap-4 text-sm">
+          <!-- Una columna en telefono: dentro del drawer, dos columnas dejaban
+               ~130px por dato y direcciones/fechas se partian en cuatro lineas. -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
             <div>
               <p class="drawer-field-label mb-1">Tipo de evento</p>
               <p class="text-gray-800">{{ pedidoSeleccionado.nombreTipoEvento || pedidoSeleccionado.codTipoEvento }}</p>
@@ -659,7 +668,7 @@
               <p class="drawer-field-label mb-1">Fecha del evento</p>
               <p class="text-gray-800">{{ pedidoSeleccionado.fechaEvento | date:'dd MMM yyyy, HH:mm' }}</p>
             </div>
-            <div class="col-span-2">
+            <div class="sm:col-span-2">
               <p class="drawer-field-label mb-1">Dirección</p>
               <p class="text-gray-800">{{ pedidoSeleccionado.direccionPedido }}</p>
             </div>
@@ -831,7 +840,7 @@
               </button>
             } @else {
               <form [formGroup]="formPago" (ngSubmit)="registrarPago()" class="space-y-3 rounded-xl bg-slate-50 p-4">
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div class="flex flex-col gap-1">
                     <label class="drawer-field-label">Monto</label>
                     <input formControlName="montoPago" type="number" min="0.01" step="0.01"
@@ -847,7 +856,7 @@
                     </select>
                   </div>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div class="flex flex-col gap-1">
                     <label class="drawer-field-label">Método de pago</label>
                     <select formControlName="metodoPago" class="field-select"
@@ -1060,7 +1069,8 @@
             </div>
 
             <div class="rounded-xl border border-gray-200 overflow-hidden">
-              <table class="w-full text-sm">
+              <div class="overflow-x-auto">
+              <table class="w-full min-w-[680px] text-sm">
                 <thead class="table-head">
                   <tr>
                     <th class="px-4 py-3 text-left">Item</th>
@@ -1115,6 +1125,7 @@
                   }
                 </tbody>
               </table>
+              </div>
             </div>
           </div>
 
@@ -1135,7 +1146,8 @@
               </div>
             } @else {
               <div class="rounded-xl border border-gray-200 overflow-hidden">
-                <table class="w-full text-sm">
+                <div class="overflow-x-auto">
+                <table class="w-full min-w-[900px] text-sm">
                   <thead class="table-head">
                     <tr>
                       <th class="px-4 py-3 text-left">Servicio</th>
@@ -1192,6 +1204,7 @@
                     }
                   </tbody>
                 </table>
+                </div>
               </div>
             }
           </div>

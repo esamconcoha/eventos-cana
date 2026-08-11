@@ -1,10 +1,13 @@
+<!-- Antes habia dos [class.w-64] en el mismo elemento; de un par de bindings
+     duplicados Angular se queda con el primero, asi que el del caso movil nunca
+     se aplicaba y el panel salia del ancho de su contenido. Ahora es un binding
+     por clase, con las dos condiciones adentro. -->
 <aside
   class="bg-gradient-to-b from-[#0f1e33] to-[#021930] text-white h-full transition-all duration-300 flex flex-col z-50 fixed lg:relative top-0 left-0 lg:flex shadow-2xl border-r border-white/5"
-  [class.w-64]="!isCollapsed && !isMobile"
-  [class.w-16]="isCollapsed && !isMobile"
-  [class.translate-x-0]="isSidebarOpen && isMobile"
-  [class.-translate-x-full]="!isSidebarOpen && isMobile"
-  [class.w-64]="isMobile"
+  [class.w-64]="isMobile || !isCollapsed"
+  [class.w-16]="!isMobile && isCollapsed"
+  [class.translate-x-0]="!isMobile || isSidebarOpen"
+  [class.-translate-x-full]="isMobile && !isSidebarOpen"
 >
 
   <!-- Logo / Toggle -->
