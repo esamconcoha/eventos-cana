@@ -41,6 +41,17 @@ public class CorsConfig {
         // Authorization, no en una cookie. Activarlo ademas prohibiria los
         // comodines de arriba.
 
+        // Sin esto, el navegador le esconde Content-Disposition al JavaScript:
+        // solo deja leer las 7 cabeceras "safelisted" (Content-Type, Expires...)
+        // y cualquier otra hay que declararla aca. El front la usa para sacar el
+        // nombre del archivo al descargar cotizaciones, pedidos, constancias y el
+        // PDF de reportes; mientras front y back estaban en el mismo origen no se
+        // notaba, pero con el front en Vercel devolveria null en todos esos casos.
+        config.setExposedHeaders(List.of("Content-Disposition"));
+        // El preflight (OPTIONS) de cada endpoint se cachea una hora en el
+        // navegador. Sin esto, cada POST/PUT/DELETE paga dos viajes a Fly.
+        config.setMaxAge(3600L);
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
