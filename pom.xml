@@ -60,6 +60,21 @@
             <artifactId>jasperreports-pdf</artifactId>
             <version>7.0.3</version>
         </dependency>
+        <!--
+            Compilador de plantillas. Los .jrxml se compilan en tiempo de
+            ejecucion y desde JasperReports 7 el compilador dejo de venir en el
+            artefacto principal: sin este, Jasper cae a invocar "javac" del
+            sistema. En local funciona porque hay un JDK, pero la imagen de
+            despliegue es eclipse-temurin:21-jre-alpine (un JRE, sin javac) y
+            todos los PDF fallaban ahi con "Cannot run program javac".
+            Este artefacto trae el compilador de Eclipse embebido, con lo que la
+            compilacion deja de depender de que el runtime tenga un JDK.
+        -->
+        <dependency>
+            <groupId>net.sf.jasperreports</groupId>
+            <artifactId>jasperreports-jdt</artifactId>
+            <version>7.0.3</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>

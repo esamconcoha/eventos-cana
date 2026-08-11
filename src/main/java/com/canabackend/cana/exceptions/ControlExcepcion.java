@@ -1,5 +1,7 @@
 package com.canabackend.cana.exceptions;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +14,9 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 @ControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class ControlExcepcion {
+
+    private static final Logger logger = LoggerFactory.getLogger(ControlExcepcion.class);
+
     @ExceptionHandler(value = {MSCanaException.class})
     @ResponseBody
     public ResponseEntity MsException(MSCanaException pException) {
@@ -19,6 +24,20 @@ public class ControlExcepcion {
         ErrorEnum error = pException.getError();
         int estadoHttp = error.getEstadoHttp();
         String message = pException.getMessageOverwrite();
+
+        // Este handler atrapa TODAS las MSCanaException, asi que era el unico
+        // lugar del que podia salir un log y no escribia ninguno: un 500 salia
+        // al frontend sin dejar rastro en el servidor.
+        // Los 4xx son reglas de negocio esperadas (usuario repetido, rango de
+        // fechas invalido): se anotan en una linea, sin stack trace, para no
+        // llenar los logs de Fly. Los 5xx son fallas de verdad y van con la
+        // excepcion completa, que es lo unico que permite diagnosticarlas.
+        if (estadoHttp >= 500) {
+            logger.error("Error {} ({}): {}", error.getCodigo(), error.name(),
+                    error.getDescripcion(), pException);
+        } else {
+            logger.warn("Error {} ({}): {}", error.getCodigo(), error.name(), error.getDescripcion());
+        }
 
         if(CollectionUtils.isEmpty(pException.getErrores())) {
             return ResponseEntity

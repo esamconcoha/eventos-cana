@@ -32,8 +32,15 @@ public class MSCanaException extends RuntimeException {
         this.messageOverwrite = null;
     }
 
+    /**
+     * El super() estaba comentado, con lo que este constructor recibia la
+     * excepcion original y la tiraba a la basura: sin causa encadenada y sin
+     * mensaje, el stack trace de lo que fallo de verdad no existia en ningun
+     * lado. Es la razon por la que un error al generar un PDF llegaba al
+     * frontend como "codigo 3004" y en los logs del servidor no aparecia nada.
+     */
     public MSCanaException(ErrorEnum pError, Throwable pCause) {
-        //super(pError.toString(), pCause);
+        super(pError.toString(), pCause);
         this.error = pError;
         this.errores = null;
         this.paramError = null;
