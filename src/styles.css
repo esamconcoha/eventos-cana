@@ -41,6 +41,14 @@
     color: #021930;
   }
 
+  /* Las <option> heredan el fondo del <select>. Fijarlo aca cubre tambien los
+     selects que no usan las clases del drawer, para que ninguna lista
+     desplegable dependa del fondo que traiga su campo. */
+  select option {
+    background-color: #ffffff;
+    color: #1f2937;
+  }
+
   ::-webkit-scrollbar {
     width: 10px;
     height: 10px;
@@ -90,8 +98,13 @@
     @apply text-sm font-medium text-slate-700;
   }
 
+  /* 16px en movil por el mismo motivo que drawer-field-input: por debajo de
+     16px iOS Safari amplia la pagina entera al enfocar el campo. A partir de sm
+     vuelve a 14px. Como field-select, field-search y field-textarea se
+     construyen sobre esta clase, el arreglo alcanza a todos los campos. */
   .field-input {
-    @apply w-full border-2 border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-slate-50/60 text-gray-900
+    @apply w-full border-2 border-slate-200 rounded-xl px-3 py-2.5
+      text-[16px] sm:text-sm bg-slate-50/60 text-gray-900
       outline-none transition-all duration-150
       focus:bg-white focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15;
   }
@@ -100,6 +113,9 @@
     @apply border-red-300 focus:ring-red-500/15;
   }
 
+  /* El bg-white no es decorativo: field-input trae bg-slate-50/60, que es
+     semitransparente, y un <select> le pasa su fondo a la lista desplegable.
+     Todo <select> debe usar esta clase, nunca field-input a secas. */
   .field-select {
     @apply field-input bg-white;
   }
@@ -240,11 +256,30 @@
   .drawer-field-label {
     @apply text-[11px] font-bold uppercase tracking-wider text-slate-500;
   }
+  /* 16px en movil, no 14: por debajo de 16px iOS Safari amplia la pagina entera
+     al enfocar un campo, y dentro de un drawer fixed eso descoloca todo el
+     panel. A partir de sm vuelve a 14px, como estaba. */
   .drawer-field-input {
-    @apply w-full bg-transparent border-0 border-b border-gray-200 pb-2 text-sm text-gray-800
+    @apply w-full bg-transparent border-0 border-b border-gray-200 pb-2
+      text-[16px] sm:text-sm text-gray-800
       placeholder-gray-400 outline-none focus:border-amber-400 transition-colors;
   }
   .drawer-field-input.border-red-400 {
+    @apply border-red-300;
+  }
+
+  /* Un <select> no puede heredar el bg-transparent de drawer-field-input: el
+     navegador pinta la lista desplegable con el fondo del propio select, y
+     transparente hacia que las opciones salieran encimadas sobre lo que
+     hubiera detras. El fondo blanco no se nota en el drawer (que ya es
+     blanco), pero arregla el desplegable.
+     El pt extra sube el area tactil de 29 a 44px en movil; en escritorio se
+     mantiene la altura del resto de campos del drawer. */
+  .drawer-field-select {
+    @apply drawer-field-input bg-white appearance-none cursor-pointer
+      pr-7 pt-3 sm:pt-0;
+  }
+  .drawer-field-select.border-red-400 {
     @apply border-red-300;
   }
 }

@@ -174,7 +174,7 @@
           <label class="drawer-field-label">Rol</label>
           <div class="relative">
             <select formControlName="rol"
-              class="drawer-field-input appearance-none pr-6"
+              class="drawer-field-select"
               [class.border-red-400]="campoInvalidoCrear('rol')">
               <option [value]="null" disabled>Seleccione un rol</option>
               @for (r of roles; track r.idCatalogo) {
@@ -289,7 +289,7 @@
           <label class="drawer-field-label">Rol</label>
           <div class="relative">
             <select formControlName="rol"
-              class="drawer-field-input appearance-none pr-6"
+              class="drawer-field-select"
               [class.border-red-400]="campoInvalidoEditar('rol')">
               <option [value]="null" disabled>Seleccione un rol</option>
               @for (r of roles; track r.idCatalogo) {

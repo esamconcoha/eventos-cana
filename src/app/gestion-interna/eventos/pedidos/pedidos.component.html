@@ -276,7 +276,7 @@
                   <tr [formGroupName]="i" class="row-hover">
                     <td class="px-4 py-2">
                       <select formControlName="idItem"
-                        class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-sm bg-white outline-none focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/15"
+                        class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-[16px] sm:text-sm bg-white outline-none focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/15"
                         [class.border-red-400]="detalleInvalido(i, 'idItem')">
                         <option [value]="null" disabled>Seleccione un item</option>
                         @for (item of items; track item.idItem) {
@@ -286,7 +286,7 @@
                     </td>
                     <td class="px-4 py-2">
                       <input formControlName="cantidadItemPedido" type="number" min="1"
-                        class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-sm text-right outline-none focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/15"
+                        class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-[16px] sm:text-sm text-right outline-none focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/15"
                         [class.border-red-400]="detalleInvalido(i, 'cantidadItemPedido')">
                     </td>
                     <td class="px-4 py-2 text-right text-gray-600">
@@ -354,7 +354,7 @@
                     <tr [formGroupName]="i" class="row-hover">
                       <td class="px-4 py-2">
                         <select formControlName="idServicio"
-                          class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-sm bg-white outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
+                          class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-[16px] sm:text-sm bg-white outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
                           [class.border-red-400]="detalleServicioInvalido(i, 'idServicio')">
                           <option [value]="null" disabled>Seleccione un servicio</option>
                           @for (s of servicios; track s.idServicio) {
@@ -364,18 +364,18 @@
                       </td>
                       <td class="px-4 py-2">
                         <input formControlName="cantidad" type="number" min="1"
-                          class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-sm text-right outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
+                          class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-[16px] sm:text-sm text-right outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
                           [class.border-red-400]="detalleServicioInvalido(i, 'cantidad')">
                       </td>
                       <td class="px-4 py-2">
                         <input formControlName="precioAcordado" type="number" min="0" step="0.01"
-                          class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-sm text-right outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
+                          class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-[16px] sm:text-sm text-right outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
                           [class.border-red-400]="detalleServicioInvalido(i, 'precioAcordado')"
                           placeholder="0.00">
                       </td>
                       <td class="px-4 py-2">
                         <input formControlName="especificaciones" type="text"
-                          class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-sm outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
+                          class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-[16px] sm:text-sm outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
                           placeholder="Opcional">
                       </td>
                       <td class="px-4 py-2 text-right font-medium text-gray-800">
@@ -923,12 +923,17 @@
 
             <div class="flex flex-col gap-2">
               <label class="drawer-field-label">Salón de entrega</label>
-              <select formControlName="salonEntrega" class="drawer-field-input">
-                <option [value]="null">Sin salón asignado</option>
-                @for (s of salones; track s.idSalon) {
-                  <option [value]="s.idSalon">{{ s.nombreSalon }}</option>
-                }
-              </select>
+              <!-- Mismo patron que el select de rol en Usuarios: drawer-field-select
+                   quita la flecha nativa, asi que el chevron va aparte. -->
+              <div class="relative">
+                <select formControlName="salonEntrega" class="drawer-field-select">
+                  <option [value]="null">Sin salón asignado</option>
+                  @for (s of salones; track s.idSalon) {
+                    <option [value]="s.idSalon">{{ s.nombreSalon }}</option>
+                  }
+                </select>
+                <span class="material-icons absolute right-0 bottom-1.5 text-[18px] text-gray-400 pointer-events-none">expand_more</span>
+              </div>
             </div>
 
             <div class="flex flex-col gap-2">
@@ -1085,7 +1090,7 @@
                     <tr [formGroupName]="i" class="row-hover">
                       <td class="px-4 py-2">
                         <select formControlName="idItem"
-                          class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-sm bg-white outline-none focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/15"
+                          class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-[16px] sm:text-sm bg-white outline-none focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/15"
                           [class.border-red-400]="detalleInvalidoEditar(i, 'idItem')">
                           <option [value]="null" disabled>Seleccione un item</option>
                           @for (item of items; track item.idItem) {
@@ -1095,7 +1100,7 @@
                       </td>
                       <td class="px-4 py-2">
                         <input formControlName="cantidadItemPedido" type="number" min="1"
-                          class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-sm text-right outline-none focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/15"
+                          class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-[16px] sm:text-sm text-right outline-none focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/15"
                           [class.border-red-400]="detalleInvalidoEditar(i, 'cantidadItemPedido')">
                       </td>
                       <td class="px-4 py-2 text-right text-gray-600">
@@ -1163,7 +1168,7 @@
                       <tr [formGroupName]="i" class="row-hover">
                         <td class="px-4 py-2">
                           <select formControlName="idServicio"
-                            class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-sm bg-white outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
+                            class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-[16px] sm:text-sm bg-white outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
                             [class.border-red-400]="detalleServicioInvalidoEditar(i, 'idServicio')">
                             <option [value]="null" disabled>Seleccione un servicio</option>
                             @for (s of servicios; track s.idServicio) {
@@ -1173,18 +1178,18 @@
                         </td>
                         <td class="px-4 py-2">
                           <input formControlName="cantidad" type="number" min="1"
-                            class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-sm text-right outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
+                            class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-[16px] sm:text-sm text-right outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
                             [class.border-red-400]="detalleServicioInvalidoEditar(i, 'cantidad')">
                         </td>
                         <td class="px-4 py-2">
                           <input formControlName="precioAcordado" type="number" min="0" step="0.01"
-                            class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-sm text-right outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
+                            class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-[16px] sm:text-sm text-right outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
                             [class.border-red-400]="detalleServicioInvalidoEditar(i, 'precioAcordado')"
                             placeholder="0.00">
                         </td>
                         <td class="px-4 py-2">
                           <input formControlName="especificaciones" type="text"
-                            class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-sm outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
+                            class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-[16px] sm:text-sm outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
                             placeholder="Opcional">
                         </td>
                         <td class="px-4 py-2 text-right font-medium text-gray-800">
