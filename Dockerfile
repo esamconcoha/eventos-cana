@@ -20,4 +20,15 @@ COPY --from=build /app/target/CANA-0.0.1-SNAPSHOT.jar app.jar
 # de despliegue inyecta PORT y este EXPOSE es solo documentacion.
 EXPOSE 8082
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Antes de arrancar el JVM se imprime el limite de memoria REAL del contenedor,
+# leido del cgroup. Es la forma de saber si la maquina de Fly quedo en 256 MB o
+# en 1 GB sin depender de lo que diga el dashboard (memory vs memory_mb en
+# fly.toml se contradecian y ganaba el valor chico).
+#   -XX:MaxRAMPercentage=75  el heap usa el 75% de la RAM del contenedor; el
+#                            default es 25%, que desperdicia la mayor parte.
+#   -Xlog:gc+init=info       imprime que tamano de heap eligio el JVM.
+# Se usa la forma shell + "exec" para que java reemplace al sh y siga recibiendo
+# los SIGINT/SIGTERM que manda el init de Fly.
+ENTRYPOINT echo "[ARRANQUE] limite de memoria del contenedor: $(cat /sys/fs/cgroup/memory.max 2>/dev/null || cat /sys/fs/cgroup/memory/memory.limit_in_bytes 2>/dev/null || echo desconocido) bytes" ; \
+    free -m 2>/dev/null ; \
+    exec java -XX:MaxRAMPercentage=75.0 -Xlog:gc+init=info -jar app.jar

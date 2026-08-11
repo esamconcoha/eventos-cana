@@ -1,6 +1,11 @@
 app = "eventos-cana"
 primary_region = "ord"
 
+[env]
+  # Apaga el logging de cada consulta SQL y de cada parametro, que en local si
+  # se quiere. Ver application.properties.
+  SQL_LOG_LEVEL = "warn"
+
 [http_service]
   internal_port = 8082
   force_https = true

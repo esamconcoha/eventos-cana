@@ -10,7 +10,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class CanaApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(CanaApplication.class, args);
+        SpringApplication app = new SpringApplication(CanaApplication.class);
+        // Se registra a mano y no con @Bean para que alcance a escuchar los
+        // eventos tempranos, que ocurren antes de que exista el contexto.
+        app.addListeners(new StartupProbe());
+        app.run(args);
     }
 
     @Bean
