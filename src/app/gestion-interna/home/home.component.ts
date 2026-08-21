@@ -4,6 +4,7 @@ import { DashboardService } from '../../services/dashboard.service';
 import { TokenService } from '../../services/token.service';
 import { DashboardResumen, EventoProximo } from '../../interfaces/dashboard';
 import { estadoLogisticoPorCodigo } from '../../interfaces/estado-logistico';
+import { pantallasPorRol } from '../../security/permisos';
 
 interface TarjetaKpi {
   label: string;
@@ -38,6 +39,10 @@ export class HomeComponent implements OnInit {
   rol = '';
   hoyLargo = '';
 
+  // Pantallas que el rol puede ver. Se usa para mostrar solo los KPIs y
+  // accesos rápidos a los que el usuario realmente tiene acceso.
+  private permitidas: string[] = [];
+
   // Accesos directos a las tareas más frecuentes del día. No pretende reflejar
   // todo el menú: es una lista corta de atajos, no un índice de pantallas.
   accesos: AccesoRapido[] = [
@@ -58,6 +63,7 @@ export class HomeComponent implements OnInit {
     this.nombreUsuario = this.tokenService.getUserName() ?? '';
     // El nombre del rol, no el id: antes se mostraba "1" en el badge.
     this.rol = this.tokenService.getNombreRol();
+    this.permitidas = pantallasPorRol(this.tokenService.getCodigoRol());
     this.hoyLargo = this.fechaLarga(new Date());
     this.cargar();
   }
@@ -81,7 +87,7 @@ export class HomeComponent implements OnInit {
    */
   get tarjetas(): TarjetaKpi[] {
     if (!this.resumen) { return []; }
-    return [
+    const todas: TarjetaKpi[] = [
       {
         label: 'Entregas de hoy', valor: this.resumen.entregasHoy,
         icono: 'local_shipping', chip: 'bg-amber-100 text-amber-700',
@@ -119,6 +125,19 @@ export class HomeComponent implements OnInit {
         ruta: '/gestion-interna/administracion/usuarios'
       }
     ];
+    // Solo los KPIs de pantallas a las que el rol tiene acceso.
+    return todas.filter(t => this.puede(t.ruta));
+  }
+
+  /** Accesos rápidos filtrados según lo que el rol puede ver. */
+  get accesosVisibles(): AccesoRapido[] {
+    return this.accesos.filter(a => this.puede(a.ruta));
+  }
+
+  /** true si el rol puede ver la pantalla de una ruta '/gestion-interna/...'. */
+  puede(ruta: string): boolean {
+    const pantalla = ruta.replace('/gestion-interna/', '');
+    return this.permitidas.includes(pantalla);
   }
 
   ir(ruta: string): void {

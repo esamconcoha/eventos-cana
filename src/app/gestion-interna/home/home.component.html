@@ -53,8 +53,10 @@
       <div class="surface-card overflow-hidden flex flex-col">
         <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
           <h2 class="font-serif italic text-xl text-gray-900">Próximos eventos</h2>
-          <a routerLink="/gestion-interna/eventos/calendario"
-             class="text-sm text-amber-600 hover:text-amber-700 font-medium">Ver calendario →</a>
+          @if (puede('/gestion-interna/eventos/calendario')) {
+            <a routerLink="/gestion-interna/eventos/calendario"
+               class="text-sm text-amber-600 hover:text-amber-700 font-medium">Ver calendario →</a>
+          }
         </div>
 
         @if (resumen.proximosEventos.length === 0) {
@@ -97,7 +99,7 @@
       <div class="surface-card p-6 flex flex-col">
         <h2 class="font-serif italic text-xl text-gray-900">Accesos rápidos</h2>
         <div class="mt-4 flex-1 flex flex-col gap-2">
-          @for (a of accesos; track a.ruta) {
+          @for (a of accesosVisibles; track a.ruta) {
             <button (click)="ir(a.ruta)"
               class="flex-1 flex items-center gap-3 rounded-xl ring-1 ring-slate-100 px-4 py-3 text-left
                      hover:ring-amber-200 hover:bg-amber-50/40 transition-all">

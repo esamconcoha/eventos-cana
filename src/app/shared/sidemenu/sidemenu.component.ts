@@ -2,6 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { SharedDataService } from '../../services/SharedDataService.service';
+import { TokenService } from '../../services/token.service';
+import { pantallasPorRol } from '../../security/permisos';
 
 export interface MenuItem {
   path?: string;
@@ -69,18 +71,34 @@ export class SidemenuComponent implements OnInit {
   ];
   // ==============================================================
 
-  constructor(private sharedData: SharedDataService, private router: Router) {}
+  constructor(
+    private sharedData: SharedDataService,
+    private router: Router,
+    private tokenService: TokenService
+  ) {}
 
   ngOnInit(): void {
-    this.sharedData.pantallas$.subscribe((pantallasPermitidas: string[]) => {
-      if (pantallasPermitidas.length === 0) {
-        this.menuItems = this.configuracionMenu;
-      } else {
-        this.menuItems = this.configuracionMenu.filter(item =>
-          item.path ? pantallasPermitidas.includes(item.path) : true
-        );
+    // El menú se arma según el rol del usuario (su código en el catálogo).
+    // Se lee del token (sessionStorage), así que sobrevive a un refresco.
+    const permitidas = pantallasPorRol(this.tokenService.getCodigoRol());
+    this.menuItems = this.filtrarMenu(this.configuracionMenu, permitidas);
+  }
+
+  /**
+   * Deja solo lo que el rol puede ver. Filtra tanto los items simples
+   * (por su path) como los hijos de cada grupo; un grupo que se queda sin
+   * hijos no se muestra.
+   */
+  private filtrarMenu(config: MenuItem[], permitidas: string[]): MenuItem[] {
+    return config.reduce<MenuItem[]>((acc, item) => {
+      if (item.children) {
+        const children = item.children.filter(c => permitidas.includes(c.path));
+        if (children.length > 0) { acc.push({ ...item, children }); }
+      } else if (item.path && permitidas.includes(item.path)) {
+        acc.push(item);
       }
-    });
+      return acc;
+    }, []);
   }
 
   toggleItem(item: MenuItem): void {
