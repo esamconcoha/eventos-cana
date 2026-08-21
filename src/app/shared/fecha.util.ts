@@ -16,3 +16,18 @@ export function fechaISOLocal(fecha: Date): string {
 export function hoyISOLocal(): string {
   return fechaISOLocal(new Date());
 }
+
+/**
+ * Fecha y hora "yyyy-mm-ddThh:mm:ss" armada desde las partes LOCALES del reloj.
+ *
+ * Es lo que hay que mandar en los campos que el backend recibe como
+ * LocalDateTime (fechaEvento y compañía). Con toISOString() se mandaba la hora
+ * en UTC y Jackson, al llenar un LocalDateTime, descarta la "Z" y se queda con
+ * los dígitos literales: un evento a las 00:00 se guardaba como las 06:00, y
+ * uno de las 20:00 caía en el día siguiente.
+ */
+export function fechaHoraISOLocal(fecha: Date): string {
+  const hh = String(fecha.getHours()).padStart(2, '0');
+  const mm = String(fecha.getMinutes()).padStart(2, '0');
+  return `${fechaISOLocal(fecha)}T${hh}:${mm}:00`;
+}

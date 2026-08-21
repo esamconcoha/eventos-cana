@@ -13,6 +13,7 @@ import { ItemCana } from '../../../interfaces/item-cana';
 import { ServicioDecoracion } from '../../../interfaces/servicio';
 import { Catalogo } from '../../../interfaces/catalogo';
 import { TrazaEvento } from '../../../interfaces/trazabilidad';
+import { fechaHoraISOLocal } from '../../../shared/fecha.util';
 
 @Component({
   selector: 'app-cotizaciones',
@@ -379,7 +380,7 @@ export class CotizacionesComponent implements OnInit {
     const [h, m] = (this.horaEvento || '00:00').split(':').map(Number);
     const dt = new Date(this.fechaEventoSeleccionada);
     dt.setHours(h || 0, m || 0, 0, 0);
-    this.form.patchValue({ fechaHoraEvento: dt.toISOString() });
+    this.form.patchValue({ fechaHoraEvento: fechaHoraISOLocal(dt) });
   }
 
   esHoy(dia: Date): boolean {

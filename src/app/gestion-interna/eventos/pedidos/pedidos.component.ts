@@ -16,6 +16,7 @@ import { Catalogo } from '../../../interfaces/catalogo';
 import { Salon } from '../../../interfaces/salon';
 import { EstadoLogisticoDef, ESTADOS_LOGISTICOS, ESTADO_CANCELADO_DEF, esCodigoCancelado } from '../../../interfaces/estado-logistico';
 import { TrazaEvento } from '../../../interfaces/trazabilidad';
+import { fechaHoraISOLocal } from '../../../shared/fecha.util';
 
 
 @Component({
@@ -627,7 +628,7 @@ export class PedidosComponent implements OnInit {
     const [h, m] = (this.horaEvento || '00:00').split(':').map(Number);
     const dt = new Date(this.fechaEventoSeleccionada);
     dt.setHours(h || 0, m || 0, 0, 0);
-    this.form.patchValue({ fechaEventoHora: dt.toISOString() });
+    this.form.patchValue({ fechaEventoHora: fechaHoraISOLocal(dt) });
   }
 
   esHoy(dia: Date): boolean {
@@ -721,7 +722,7 @@ export class PedidosComponent implements OnInit {
     const [h, m] = (this.horaEventoEditar || '00:00').split(':').map(Number);
     const dt = new Date(this.fechaEventoSeleccionadaEditar);
     dt.setHours(h || 0, m || 0, 0, 0);
-    this.formEditar.patchValue({ fechaEventoHora: dt.toISOString() });
+    this.formEditar.patchValue({ fechaEventoHora: fechaHoraISOLocal(dt) });
   }
 
   esSeleccionadoEditar(dia: Date): boolean {
@@ -1085,7 +1086,11 @@ export class PedidosComponent implements OnInit {
           salonEntrega: data.salonEntrega ?? null,
           fechaEntrega: data.fechaEntrega ? data.fechaEntrega.substring(0, 10) : '',
           fechaRecoleccion: data.fechaRecoleccion ? data.fechaRecoleccion.substring(0, 10) : '',
-          fechaEventoHora: fe.toISOString()
+          // Con toISOString() aqui el desfase era acumulativo: el backend manda
+          // la fecha sin zona, new Date() la lee como local y toISOString() le
+          // sumaba 6h, asi que cada vez que se abria y guardaba la edicion el
+          // evento se corria otras seis horas.
+          fechaEventoHora: fechaHoraISOLocal(fe)
         });
 
         const detalles = data.detalles ?? [];
