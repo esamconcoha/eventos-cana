@@ -51,6 +51,7 @@ const PANTALLAS_POR_ROL: Record<string, string[]> = {
     'administracion/inventario',
     'administracion/servicios',
     'eventos/pedidos',
+    'eventos/cotizaciones',
     'reportes'
   ],
   // Operativo: únicamente entregas, recolecciones y pedidos.
