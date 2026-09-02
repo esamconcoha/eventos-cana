@@ -172,17 +172,10 @@
 
         <div class="flex flex-col gap-2">
           <label class="drawer-field-label">Rol</label>
-          <div class="relative">
-            <select formControlName="rol"
-              class="drawer-field-select"
-              [class.border-red-400]="campoInvalidoCrear('rol')">
-              <option [value]="null" disabled>Seleccione un rol</option>
-              @for (r of roles; track r.idCatalogo) {
-                <option [value]="r.idCatalogo">{{ r.nombre }}</option>
-              }
-            </select>
-            <span class="material-icons absolute right-0 bottom-1.5 text-[18px] text-gray-400 pointer-events-none">expand_more</span>
-          </div>
+          <app-select formControlName="rol" variante="drawer"
+            [opciones]="roles" campoValor="idCatalogo" campoEtiqueta="nombre"
+            placeholder="Seleccione un rol"
+            [invalido]="campoInvalidoCrear('rol')"></app-select>
           @if (campoInvalidoCrear('rol')) {
             <span class="field-error">Seleccione un rol</span>
           }
@@ -287,17 +280,10 @@
 
         <div class="flex flex-col gap-2">
           <label class="drawer-field-label">Rol</label>
-          <div class="relative">
-            <select formControlName="rol"
-              class="drawer-field-select"
-              [class.border-red-400]="campoInvalidoEditar('rol')">
-              <option [value]="null" disabled>Seleccione un rol</option>
-              @for (r of roles; track r.idCatalogo) {
-                <option [value]="r.idCatalogo">{{ r.nombre }}</option>
-              }
-            </select>
-            <span class="material-icons absolute right-0 bottom-1.5 text-[18px] text-gray-400 pointer-events-none">expand_more</span>
-          </div>
+          <app-select formControlName="rol" variante="drawer"
+            [opciones]="roles" campoValor="idCatalogo" campoEtiqueta="nombre"
+            placeholder="Seleccione un rol"
+            [invalido]="campoInvalidoEditar('rol')"></app-select>
           @if (campoInvalidoEditar('rol')) {
             <span class="field-error">Seleccione un rol</span>
           }

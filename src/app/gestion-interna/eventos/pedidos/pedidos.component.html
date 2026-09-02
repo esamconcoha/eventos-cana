@@ -70,14 +70,10 @@
 
             <div class="flex flex-col gap-1">
               <label class="field-label">Tipo de evento <span class="text-red-500">*</span></label>
-              <select formControlName="codTipoEvento"
-                class="field-select"
-                [class.border-red-400]="campoInvalido('codTipoEvento')">
-                <option [value]="null" disabled>Selecciona un tipo de evento</option>
-                @for (tipo of tiposEvento; track tipo.idCatalogo) {
-                  <option [value]="tipo.codigo">{{ tipo.nombre }}</option>
-                }
-              </select>
+              <app-select formControlName="codTipoEvento"
+                [opciones]="tiposEvento" campoValor="codigo" campoEtiqueta="nombre"
+                placeholder="Selecciona un tipo de evento"
+                [invalido]="campoInvalido('codTipoEvento')"></app-select>
               @if (campoInvalido('codTipoEvento')) {
                 <span class="text-xs text-red-500">Campo requerido</span>
               }
@@ -206,12 +202,9 @@
 
             <div class="flex flex-col gap-1">
               <label class="field-label">Salón de entrega</label>
-              <select formControlName="salonEntrega" class="field-select">
-                <option [value]="null">Sin salón asignado</option>
-                @for (s of salones; track s.idSalon) {
-                  <option [value]="s.idSalon">{{ s.nombreSalon }}</option>
-                }
-              </select>
+              <app-select formControlName="salonEntrega"
+                [opciones]="salones" campoValor="idSalon" campoEtiqueta="nombreSalon"
+                placeholder="Sin salón asignado" etiquetaVacio="Sin salón asignado"></app-select>
             </div>
 
             <div class="flex flex-col gap-1">
@@ -275,14 +268,10 @@
                 @for (detalle of detalles.controls; let i = $index; track i) {
                   <tr [formGroupName]="i" class="row-hover">
                     <td class="px-4 py-2">
-                      <select formControlName="idItem"
-                        class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-[16px] sm:text-sm bg-white outline-none focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/15"
-                        [class.border-red-400]="detalleInvalido(i, 'idItem')">
-                        <option [value]="null" disabled>Seleccione un item</option>
-                        @for (item of items; track item.idItem) {
-                          <option [value]="item.idItem">{{ item.descripcionItem }}</option>
-                        }
-                      </select>
+                      <app-select formControlName="idItem" variante="tabla" acento="cyan"
+                        [opciones]="items" campoValor="idItem" campoEtiqueta="descripcionItem"
+                        placeholder="Seleccione un item"
+                        [invalido]="detalleInvalido(i, 'idItem')"></app-select>
                     </td>
                     <td class="px-4 py-2">
                       <input formControlName="cantidadItemPedido" type="number" min="1"
@@ -353,14 +342,10 @@
                   @for (detalle of detallesServicios.controls; let i = $index; track i) {
                     <tr [formGroupName]="i" class="row-hover">
                       <td class="px-4 py-2">
-                        <select formControlName="idServicio"
-                          class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-[16px] sm:text-sm bg-white outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
-                          [class.border-red-400]="detalleServicioInvalido(i, 'idServicio')">
-                          <option [value]="null" disabled>Seleccione un servicio</option>
-                          @for (s of servicios; track s.idServicio) {
-                            <option [value]="s.idServicio">{{ s.nombreServicio }}</option>
-                          }
-                        </select>
+                        <app-select formControlName="idServicio" variante="tabla"
+                          [opciones]="servicios" campoValor="idServicio" campoEtiqueta="nombreServicio"
+                          placeholder="Seleccione un servicio"
+                          [invalido]="detalleServicioInvalido(i, 'idServicio')"></app-select>
                       </td>
                       <td class="px-4 py-2">
                         <input formControlName="cantidad" type="number" min="1"
@@ -449,7 +434,11 @@
   <div class="flex flex-col lg:flex-row gap-6 items-start">
 
     <!-- Panel de filtros -->
-    <aside class="surface-card w-full lg:w-64 shrink-0 p-5 space-y-6">
+    <!-- relative z-30: surface-card lleva backdrop-blur, que crea un contexto de
+         apilamiento y atrapaba el calendario del date-picker (z-50) dentro del
+         aside; la tarjeta del listado, hermana posterior, lo tapaba. Al elevar
+         todo el aside por encima del listado, el calendario se despliega encima. -->
+    <aside class="surface-card relative z-30 w-full lg:w-64 shrink-0 p-5 space-y-6">
 
       <!-- Fecha del evento: por defecto los eventos de esta semana. -->
       <div>
@@ -848,24 +837,19 @@
                   </div>
                   <div class="flex flex-col gap-1">
                     <label class="drawer-field-label">Tipo de pago</label>
-                    <select formControlName="tipoPago" class="field-select" [class.border-red-400]="campoInvalidoPago('tipoPago')">
-                      <option [value]="null" disabled>Seleccione</option>
-                      @for (t of tiposPago; track t.idCatalogo) {
-                        <option [value]="t.codigo">{{ t.nombre }}</option>
-                      }
-                    </select>
+                    <app-select formControlName="tipoPago"
+                      [opciones]="tiposPago" campoValor="codigo" campoEtiqueta="nombre"
+                      placeholder="Seleccione"
+                      [invalido]="campoInvalidoPago('tipoPago')"></app-select>
                   </div>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div class="flex flex-col gap-1">
                     <label class="drawer-field-label">Método de pago</label>
-                    <select formControlName="metodoPago" class="field-select"
-                      [class.border-red-400]="campoInvalidoPago('metodoPago')">
-                      <option [value]="null" disabled>Seleccione</option>
-                      @for (m of modalidadesPago; track m.idCatalogo) {
-                        <option [value]="m.codigo">{{ m.nombre }}</option>
-                      }
-                    </select>
+                    <app-select formControlName="metodoPago"
+                      [opciones]="modalidadesPago" campoValor="codigo" campoEtiqueta="nombre"
+                      placeholder="Seleccione"
+                      [invalido]="campoInvalidoPago('metodoPago')"></app-select>
                   </div>
                   <div class="flex flex-col gap-1">
                     <label class="drawer-field-label">Referencia</label>
@@ -923,17 +907,9 @@
 
             <div class="flex flex-col gap-2">
               <label class="drawer-field-label">Salón de entrega</label>
-              <!-- Mismo patron que el select de rol en Usuarios: drawer-field-select
-                   quita la flecha nativa, asi que el chevron va aparte. -->
-              <div class="relative">
-                <select formControlName="salonEntrega" class="drawer-field-select">
-                  <option [value]="null">Sin salón asignado</option>
-                  @for (s of salones; track s.idSalon) {
-                    <option [value]="s.idSalon">{{ s.nombreSalon }}</option>
-                  }
-                </select>
-                <span class="material-icons absolute right-0 bottom-1.5 text-[18px] text-gray-400 pointer-events-none">expand_more</span>
-              </div>
+              <app-select formControlName="salonEntrega" variante="drawer"
+                [opciones]="salones" campoValor="idSalon" campoEtiqueta="nombreSalon"
+                placeholder="Sin salón asignado" etiquetaVacio="Sin salón asignado"></app-select>
             </div>
 
             <div class="flex flex-col gap-2">
@@ -1089,14 +1065,10 @@
                   @for (detalle of detallesEditar.controls; let i = $index; track i) {
                     <tr [formGroupName]="i" class="row-hover">
                       <td class="px-4 py-2">
-                        <select formControlName="idItem"
-                          class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-[16px] sm:text-sm bg-white outline-none focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/15"
-                          [class.border-red-400]="detalleInvalidoEditar(i, 'idItem')">
-                          <option [value]="null" disabled>Seleccione un item</option>
-                          @for (item of items; track item.idItem) {
-                            <option [value]="item.idItem">{{ item.descripcionItem }}</option>
-                          }
-                        </select>
+                        <app-select formControlName="idItem" variante="tabla" acento="cyan"
+                          [opciones]="items" campoValor="idItem" campoEtiqueta="descripcionItem"
+                          placeholder="Seleccione un item"
+                          [invalido]="detalleInvalidoEditar(i, 'idItem')"></app-select>
                       </td>
                       <td class="px-4 py-2">
                         <input formControlName="cantidadItemPedido" type="number" min="1"
@@ -1167,14 +1139,10 @@
                     @for (detalle of detallesServiciosEditar.controls; let i = $index; track i) {
                       <tr [formGroupName]="i" class="row-hover">
                         <td class="px-4 py-2">
-                          <select formControlName="idServicio"
-                            class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-[16px] sm:text-sm bg-white outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
-                            [class.border-red-400]="detalleServicioInvalidoEditar(i, 'idServicio')">
-                            <option [value]="null" disabled>Seleccione un servicio</option>
-                            @for (s of servicios; track s.idServicio) {
-                              <option [value]="s.idServicio">{{ s.nombreServicio }}</option>
-                            }
-                          </select>
+                          <app-select formControlName="idServicio" variante="tabla"
+                            [opciones]="servicios" campoValor="idServicio" campoEtiqueta="nombreServicio"
+                            placeholder="Seleccione un servicio"
+                            [invalido]="detalleServicioInvalidoEditar(i, 'idServicio')"></app-select>
                         </td>
                         <td class="px-4 py-2">
                           <input formControlName="cantidad" type="number" min="1"

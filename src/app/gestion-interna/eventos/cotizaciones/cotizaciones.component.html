@@ -78,14 +78,10 @@
 
             <div class="flex flex-col gap-1 md:col-span-2">
               <label class="field-label">Tipo de evento <span class="text-red-500">*</span></label>
-              <select formControlName="codTipoEvento"
-                class="field-select"
-                [class.border-red-400]="campoInvalido('codTipoEvento')">
-                <option [value]="null" disabled>Selecciona un tipo de evento</option>
-                @for (tipo of tiposEvento; track tipo.idCatalogo) {
-                  <option [value]="tipo.codigo">{{ tipo.nombre }}</option>
-                }
-              </select>
+              <app-select formControlName="codTipoEvento"
+                [opciones]="tiposEvento" campoValor="codigo" campoEtiqueta="nombre"
+                placeholder="Selecciona un tipo de evento"
+                [invalido]="campoInvalido('codTipoEvento')"></app-select>
               @if (campoInvalido('codTipoEvento')) {
                 <span class="text-xs text-red-500">Campo requerido</span>
               }
@@ -244,14 +240,10 @@
                 @for (detalle of detalles.controls; let i = $index; track i) {
                   <tr [formGroupName]="i" class="row-hover">
                     <td class="px-4 py-2">
-                      <select formControlName="idItem"
-                        class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-[16px] sm:text-sm bg-white outline-none focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/15"
-                        [class.border-red-400]="detalleInvalido(i, 'idItem')">
-                        <option [value]="null" disabled>Seleccione un item</option>
-                        @for (item of items; track item.idItem) {
-                          <option [value]="item.idItem">{{ item.descripcionItem }}</option>
-                        }
-                      </select>
+                      <app-select formControlName="idItem" variante="tabla" acento="cyan"
+                        [opciones]="items" campoValor="idItem" campoEtiqueta="descripcionItem"
+                        placeholder="Seleccione un item"
+                        [invalido]="detalleInvalido(i, 'idItem')"></app-select>
                     </td>
                     <td class="px-4 py-2">
                       <input formControlName="cantidadItemCotizacion" type="number" min="1"
@@ -322,14 +314,10 @@
                   @for (detalle of detallesServicios.controls; let i = $index; track i) {
                     <tr [formGroupName]="i" class="row-hover">
                       <td class="px-4 py-2">
-                        <select formControlName="idServicio"
-                          class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-[16px] sm:text-sm bg-white outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
-                          [class.border-red-400]="detalleServicioInvalido(i, 'idServicio')">
-                          <option [value]="null" disabled>Seleccione un servicio</option>
-                          @for (s of servicios; track s.idServicio) {
-                            <option [value]="s.idServicio">{{ s.nombreServicio }}</option>
-                          }
-                        </select>
+                        <app-select formControlName="idServicio" variante="tabla"
+                          [opciones]="servicios" campoValor="idServicio" campoEtiqueta="nombreServicio"
+                          placeholder="Seleccione un servicio"
+                          [invalido]="detalleServicioInvalido(i, 'idServicio')"></app-select>
                       </td>
                       <td class="px-4 py-2">
                         <input formControlName="cantidad" type="number" min="1"
@@ -397,7 +385,11 @@
   <div class="flex flex-col lg:flex-row gap-6 items-start">
 
     <!-- Panel de filtros -->
-    <aside class="surface-card w-full lg:w-56 shrink-0 p-5 space-y-6">
+    <!-- relative z-30: surface-card lleva backdrop-blur, que crea un contexto de
+         apilamiento y atrapaba el calendario del date-picker (z-50) dentro del
+         aside; la tarjeta del listado, hermana posterior, lo tapaba. Al elevar
+         todo el aside por encima del listado, el calendario se despliega encima. -->
+    <aside class="surface-card relative z-30 w-full lg:w-56 shrink-0 p-5 space-y-6">
 
       <!-- Fecha del evento -->
       <div>
@@ -604,7 +596,11 @@
       (click)="cerrarConfirmar()"></div>
 
     <div class="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
-      <div class="pointer-events-auto w-full max-w-sm bg-white rounded-[2rem] shadow-2xl overflow-hidden animate-modal-in"
+      <!-- Sin overflow-hidden: el calendario del date-picker se despliega
+           `absolute` por debajo del campo y overflow-hidden lo recortaba (no se
+           podian elegir dias mas alla de la primera fila). Mismo motivo por el
+           que .modal-panel en styles.css tampoco lleva overflow. -->
+      <div class="pointer-events-auto w-full max-w-sm bg-white rounded-[2rem] shadow-2xl animate-modal-in"
         (click)="$event.stopPropagation()">
 
         <div class="flex items-start justify-between px-6 pt-6">

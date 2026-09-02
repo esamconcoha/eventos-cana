@@ -7,6 +7,7 @@ import { SidemenuComponent } from '../shared/sidemenu/sidemenu.component';
 import { ToastComponent } from '../shared/toast/toast.component';
 import { DocumentViewerComponent } from '../shared/document-viewer/document-viewer.component';
 import { DatePickerComponent } from '../shared/date-picker/date-picker.component';
+import { SelectComponent } from '../shared/select/select.component';
 import { TrazabilidadModalComponent } from '../shared/trazabilidad/trazabilidad-modal.component';
 
 import { GestionInterna } from './gestion-interna';
@@ -55,6 +56,7 @@ import { GraficoRankingComponent } from '../shared/graficos/grafico-ranking.comp
     ToastComponent,
     DocumentViewerComponent,
     DatePickerComponent,
+    SelectComponent,
     TrazabilidadModalComponent,
     GraficoBarrasComponent,
     GraficoDonaComponent,

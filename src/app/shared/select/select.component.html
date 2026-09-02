@@ -1,0 +1,58 @@
+<div class="relative">
+
+  <button #disparador type="button" (click)="alternar()" [disabled]="deshabilitado"
+    [class]="claseBase + ' ' + claseBorde">
+    <span class="truncate" [class.text-gray-400]="!etiquetaSeleccionada" [class.text-gray-800]="etiquetaSeleccionada">
+      {{ etiquetaSeleccionada || placeholder }}
+    </span>
+    <span class="material-icons text-[18px] text-gray-400 transition-transform shrink-0" [class.rotate-180]="abierto">
+      expand_more
+    </span>
+  </button>
+
+  @if (abierto) {
+    <div class="fixed inset-0 z-40" (click)="cerrar()"></div>
+
+    <!-- absolute, no fixed: dentro de un modal/drawer con animacion el ancestro
+         tiene transform y pasa a ser el bloque contenedor, con lo que las
+         coordenadas de viewport de un fixed dejan de valer. -->
+    <div #panel class="absolute z-50 top-full mt-2 left-0 w-full min-w-[10rem] max-h-64 overflow-y-auto
+                bg-white rounded-2xl shadow-2xl border border-slate-100 py-2 animate-fade-in-up"
+      (click)="$event.stopPropagation()">
+
+      @if (!opciones.length && !etiquetaVacio) {
+        <div class="px-4 py-2.5 text-sm text-gray-400">Sin opciones disponibles</div>
+      }
+
+      @if (etiquetaVacio) {
+        <button type="button" (click)="seleccionarVacio()"
+          class="w-full flex items-center justify-between gap-2 px-4 py-2.5 text-sm text-left transition-colors"
+          [class.bg-amber-50]="valorActual === null"
+          [class.text-amber-700]="valorActual === null"
+          [class.font-semibold]="valorActual === null"
+          [class.text-gray-500]="valorActual !== null"
+          [class.hover:bg-slate-50]="valorActual !== null">
+          <span class="truncate italic">{{ etiquetaVacio }}</span>
+          @if (valorActual === null) {
+            <span class="material-icons text-[16px] shrink-0">check</span>
+          }
+        </button>
+      }
+
+      @for (opcion of opciones; track opcion[campoValor]) {
+        <button type="button" (click)="seleccionar(opcion)"
+          class="w-full flex items-center justify-between gap-2 px-4 py-2.5 text-sm text-left transition-colors"
+          [class.bg-amber-50]="esSeleccionado(opcion)"
+          [class.text-amber-700]="esSeleccionado(opcion)"
+          [class.font-semibold]="esSeleccionado(opcion)"
+          [class.text-gray-700]="!esSeleccionado(opcion)"
+          [class.hover:bg-slate-50]="!esSeleccionado(opcion)">
+          <span class="truncate">{{ opcion[campoEtiqueta] }}</span>
+          @if (esSeleccionado(opcion)) {
+            <span class="material-icons text-[16px] shrink-0">check</span>
+          }
+        </button>
+      }
+    </div>
+  }
+</div>

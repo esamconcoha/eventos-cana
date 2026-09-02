@@ -1,5 +1,6 @@
 /* tslint:disable:no-unused-variable */
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { By } from '@angular/platform-browser';
 import { DebugElement } from '@angular/core';
 
@@ -9,12 +10,13 @@ describe('SidemenuComponent', () => {
   let component: SidemenuComponent;
   let fixture: ComponentFixture<SidemenuComponent>;
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [ SidemenuComponent ]
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [ SidemenuComponent ],
+      providers: [ provideRouter([]) ]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(SidemenuComponent);
