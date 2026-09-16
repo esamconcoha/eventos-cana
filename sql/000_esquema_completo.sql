@@ -24,6 +24,82 @@ CREATE SCHEMA cana;
 
 
 --
+-- Name: unaccent; Type: EXTENSION; Schema: cana; Owner: -
+--
+-- El pg_dump original no la incluyo (se creo a mano en la BD local), y por eso
+-- al levantar la BD en Neon las consultas que usan cana.unaccent(...) fallaban
+-- con "function cana.unaccent(text) does not exist". Las queries la invocan
+-- siempre calificada con el esquema cana, asi que la extension tiene que vivir
+-- ahi y no en public. Ver ItemsCanaRepository y ServiciosDecoracionRepository.
+--
+
+CREATE EXTENSION IF NOT EXISTS unaccent WITH SCHEMA cana;
+
+
+--
+-- Name: fn_descuento_linea(numeric, character varying, numeric); Type: FUNCTION; Schema: cana; Owner: -
+--
+-- Monto de descuento de una linea de detalle (articulo o servicio). El calculo
+-- vive aca y no repetido en cada query porque el total se arma en tres lugares
+-- distintos (estado de cuenta, reporteria y el PDF de la cotizacion); si la
+-- formula se copia, tarde o temprano se separan y el saldo deja de cuadrar.
+-- Ver sql/002_descuentos_linea.sql.
+--
+
+CREATE FUNCTION cana.fn_descuento_linea(p_bruto numeric, p_tipo character varying, p_valor numeric) RETURNS numeric
+    LANGUAGE sql IMMUTABLE
+    AS $$
+    SELECT CASE
+        WHEN p_bruto IS NULL OR p_bruto <= 0 THEN 0::numeric
+        WHEN p_tipo = 'EXO' THEN p_bruto
+        WHEN p_tipo = 'POR' THEN
+            round(p_bruto * LEAST(GREATEST(COALESCE(p_valor, 0), 0), 100) / 100, 2)
+        WHEN p_tipo = 'MON' THEN
+            LEAST(GREATEST(COALESCE(p_valor, 0), 0), p_bruto)
+        ELSE 0::numeric
+    END;
+$$;
+
+
+--
+-- Name: fn_etiqueta_descuento(character varying, numeric, character varying); Type: FUNCTION; Schema: cana; Owner: -
+--
+-- Texto corto del descuento para documentos. NULL cuando la linea no lleva
+-- descuento, para que el PDF no imprima una fila vacia.
+--
+
+CREATE FUNCTION cana.fn_etiqueta_descuento(p_tipo character varying, p_valor numeric, p_motivo character varying) RETURNS text
+    LANGUAGE sql IMMUTABLE
+    AS $$
+    SELECT CASE
+        WHEN p_tipo = 'EXO' THEN 'Exonerado'
+        WHEN p_tipo = 'POR' THEN '-' || CASE WHEN p_valor = trunc(p_valor)
+                                             THEN to_char(p_valor, 'FM999999990')
+                                             ELSE to_char(p_valor, 'FM999999990.00') END || '%'
+        WHEN p_tipo = 'MON' THEN '-Q ' || to_char(COALESCE(p_valor, 0), 'FM999999990.00')
+        ELSE NULL
+    END
+    || CASE WHEN p_tipo IN ('EXO', 'POR', 'MON')
+                 AND p_motivo IS NOT NULL AND btrim(p_motivo) <> ''
+            THEN ' (' || btrim(p_motivo) || ')'
+            ELSE '' END;
+$$;
+
+
+--
+-- Name: fn_neto_linea(numeric, character varying, numeric); Type: FUNCTION; Schema: cana; Owner: -
+--
+-- Subtotal de la linea ya con el descuento aplicado: es la cifra que factura.
+--
+
+CREATE FUNCTION cana.fn_neto_linea(p_bruto numeric, p_tipo character varying, p_valor numeric) RETURNS numeric
+    LANGUAGE sql IMMUTABLE
+    AS $$
+    SELECT COALESCE(p_bruto, 0) - cana.fn_descuento_linea(p_bruto, p_tipo, p_valor);
+$$;
+
+
+--
 -- Name: fn_trazabilidad_estado_cotizacion(); Type: FUNCTION; Schema: cana; Owner: -
 --
 
@@ -213,7 +289,12 @@ CREATE TABLE cana.detalle_cotizacion (
     id_detalle_cotizacion bigint NOT NULL,
     id_item integer,
     cantidad_item_cotizacion numeric(7,2),
-    id_cotizacion bigint
+    id_cotizacion bigint,
+    tipo_descuento character varying(3) DEFAULT 'NIN'::character varying NOT NULL,
+    valor_descuento numeric(10,2) DEFAULT 0 NOT NULL,
+    motivo_descuento character varying(200),
+    CONSTRAINT ck_detalle_cotizacion_tipo_descuento CHECK (((tipo_descuento)::text = ANY ((ARRAY['NIN'::character varying, 'POR'::character varying, 'MON'::character varying, 'EXO'::character varying])::text[]))),
+    CONSTRAINT ck_detalle_cotizacion_valor_descuento CHECK (((valor_descuento >= (0)::numeric) AND (((tipo_descuento)::text <> 'POR'::text) OR (valor_descuento <= (100)::numeric))))
 );
 
 
@@ -244,7 +325,12 @@ CREATE TABLE cana.detalle_pedido (
     id_detalle bigint NOT NULL,
     id_item integer,
     cantidad_item_pedido numeric(7,2),
-    correlativo_pedido character varying(20)
+    correlativo_pedido character varying(20),
+    tipo_descuento character varying(3) DEFAULT 'NIN'::character varying NOT NULL,
+    valor_descuento numeric(10,2) DEFAULT 0 NOT NULL,
+    motivo_descuento character varying(200),
+    CONSTRAINT ck_detalle_pedido_tipo_descuento CHECK (((tipo_descuento)::text = ANY ((ARRAY['NIN'::character varying, 'POR'::character varying, 'MON'::character varying, 'EXO'::character varying])::text[]))),
+    CONSTRAINT ck_detalle_pedido_valor_descuento CHECK (((valor_descuento >= (0)::numeric) AND (((tipo_descuento)::text <> 'POR'::text) OR (valor_descuento <= (100)::numeric))))
 );
 
 
@@ -277,7 +363,12 @@ CREATE TABLE cana.detalle_servicio_cotizacion (
     id_servicio integer NOT NULL,
     cantidad numeric(10,2) DEFAULT 1 NOT NULL,
     precio_cotizado numeric(10,2) NOT NULL,
-    especificaciones text
+    especificaciones text,
+    tipo_descuento character varying(3) DEFAULT 'NIN'::character varying NOT NULL,
+    valor_descuento numeric(10,2) DEFAULT 0 NOT NULL,
+    motivo_descuento character varying(200),
+    CONSTRAINT ck_detalle_servicio_cotizacion_tipo_descuento CHECK (((tipo_descuento)::text = ANY ((ARRAY['NIN'::character varying, 'POR'::character varying, 'MON'::character varying, 'EXO'::character varying])::text[]))),
+    CONSTRAINT ck_detalle_servicio_cotizacion_valor_descuento CHECK (((valor_descuento >= (0)::numeric) AND (((tipo_descuento)::text <> 'POR'::text) OR (valor_descuento <= (100)::numeric))))
 );
 
 
@@ -311,7 +402,12 @@ CREATE TABLE cana.detalle_servicio_pedido (
     cantidad numeric(10,2) DEFAULT 1 NOT NULL,
     precio_acordado numeric(10,2) NOT NULL,
     especificaciones text,
-    fecha_realizado timestamp without time zone
+    fecha_realizado timestamp without time zone,
+    tipo_descuento character varying(3) DEFAULT 'NIN'::character varying NOT NULL,
+    valor_descuento numeric(10,2) DEFAULT 0 NOT NULL,
+    motivo_descuento character varying(200),
+    CONSTRAINT ck_detalle_servicio_pedido_tipo_descuento CHECK (((tipo_descuento)::text = ANY ((ARRAY['NIN'::character varying, 'POR'::character varying, 'MON'::character varying, 'EXO'::character varying])::text[]))),
+    CONSTRAINT ck_detalle_servicio_pedido_valor_descuento CHECK (((valor_descuento >= (0)::numeric) AND (((tipo_descuento)::text <> 'POR'::text) OR (valor_descuento <= (100)::numeric))))
 );
 
 

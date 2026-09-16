@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "eventos-cana-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "start", "--prefix", "C:/Users/conco/OneDrive/Escritorio/Cana/DESARROLLO/FRONTEND/eventos-cana"],
+      "port": 4200
+    }
+  ]
+}
