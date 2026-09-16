@@ -18,9 +18,21 @@
     <field name="cantidad" class="java.lang.Double"/>
     <field name="precioUnitario" class="java.lang.Double"/>
     <field name="subtotal" class="java.lang.Double"/>
+    <field name="montoDescuento" class="java.lang.Double"/>
+    <field name="etiquetaDescuento" class="java.lang.String"/>
+    <field name="subtotalNeto" class="java.lang.Double"/>
 
+    <!-- SUBTOTAL es lo que suman las lineas antes de descuento y TOTAL lo que
+         realmente se cobra. Se calculan por separado para que el cliente vea en
+         el PDF cuanto se le rebajo, no solo la cifra final. -->
+    <variable name="SUBTOTAL" calculation="Sum" class="java.lang.Double">
+        <expression><![CDATA[$F{subtotal} == null ? 0.0 : $F{subtotal}]]></expression>
+    </variable>
+    <variable name="DESCUENTOS" calculation="Sum" class="java.lang.Double">
+        <expression><![CDATA[$F{montoDescuento} == null ? 0.0 : $F{montoDescuento}]]></expression>
+    </variable>
     <variable name="TOTAL" calculation="Sum" class="java.lang.Double">
-        <expression><![CDATA[$F{subtotal}]]></expression>
+        <expression><![CDATA[$F{subtotalNeto} == null ? 0.0 : $F{subtotalNeto}]]></expression>
     </variable>
 
     <title height="255">
@@ -119,23 +131,27 @@
         <element kind="rectangle" x="0" y="0" width="545" height="22" forecolor="#22366B" backcolor="#22366B">
             <pen lineWidth="0.0"/>
         </element>
-        <element kind="staticText" mode="Transparent" x="6" y="0" width="70" height="22" forecolor="#FFFFFF"
+        <element kind="staticText" mode="Transparent" x="6" y="0" width="50" height="22" forecolor="#FFFFFF"
                  fontName="SansSerif" fontSize="9.0" bold="true" vTextAlign="Middle">
             <text><![CDATA[Tipo]]></text>
         </element>
-        <element kind="staticText" mode="Transparent" x="76" y="0" width="244" height="22" forecolor="#FFFFFF"
+        <element kind="staticText" mode="Transparent" x="58" y="0" width="196" height="22" forecolor="#FFFFFF"
                  fontName="SansSerif" fontSize="9.0" bold="true" vTextAlign="Middle">
             <text><![CDATA[Descripción]]></text>
         </element>
-        <element kind="staticText" mode="Transparent" x="320" y="0" width="55" height="22" forecolor="#FFFFFF"
+        <element kind="staticText" mode="Transparent" x="254" y="0" width="40" height="22" forecolor="#FFFFFF"
                  fontName="SansSerif" fontSize="9.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
             <text><![CDATA[Cant.]]></text>
         </element>
-        <element kind="staticText" mode="Transparent" x="375" y="0" width="85" height="22" forecolor="#FFFFFF"
+        <element kind="staticText" mode="Transparent" x="294" y="0" width="76" height="22" forecolor="#FFFFFF"
                  fontName="SansSerif" fontSize="9.0" bold="true" hTextAlign="Right" vTextAlign="Middle">
             <text><![CDATA[P. Unitario]]></text>
         </element>
-        <element kind="staticText" mode="Transparent" x="460" y="0" width="85" height="22" forecolor="#FFFFFF"
+        <element kind="staticText" mode="Transparent" x="370" y="0" width="80" height="22" forecolor="#FFFFFF"
+                 fontName="SansSerif" fontSize="9.0" bold="true" hTextAlign="Right" vTextAlign="Middle">
+            <text><![CDATA[Descuento]]></text>
+        </element>
+        <element kind="staticText" mode="Transparent" x="450" y="0" width="95" height="22" forecolor="#FFFFFF"
                  fontName="SansSerif" fontSize="9.0" bold="true" hTextAlign="Right" vTextAlign="Middle">
             <text><![CDATA[Subtotal]]></text>
         </element>
@@ -143,25 +159,32 @@
 
     <detail>
         <band height="18">
-            <element kind="textField" x="6" y="0" width="70" height="16" positionType="Float"
+            <element kind="textField" x="6" y="0" width="50" height="16" positionType="Float"
                      fontName="SansSerif" fontSize="8.0" vTextAlign="Top">
                 <expression><![CDATA[$F{tipo}]]></expression>
             </element>
-            <element kind="textField" x="76" y="0" width="244" height="16" positionType="Float"
+            <!-- El motivo del descuento va dentro de la descripcion y no en una
+                 columna aparte: es texto libre y en una columna angosta se corta. -->
+            <element kind="textField" x="58" y="0" width="196" height="16" positionType="Float"
                      fontName="SansSerif" fontSize="8.0" vTextAlign="Top" textAdjust="StretchHeight">
-                <expression><![CDATA[$F{descripcion} + ($F{especificaciones} != null && $F{especificaciones}.trim().length() > 0 ? "\n" + $F{especificaciones} : "")]]></expression>
+                <expression><![CDATA[$F{descripcion} + ($F{especificaciones} != null && $F{especificaciones}.trim().length() > 0 ? "\n" + $F{especificaciones} : "") + ($F{etiquetaDescuento} != null && $F{etiquetaDescuento}.trim().length() > 0 ? "\nDescuento: " + $F{etiquetaDescuento} : "")]]></expression>
             </element>
-            <element kind="textField" x="320" y="0" width="55" height="16" positionType="Float" pattern="#,##0.##"
+            <element kind="textField" x="254" y="0" width="40" height="16" positionType="Float" pattern="#,##0.##"
                      fontName="SansSerif" fontSize="8.0" hTextAlign="Center" vTextAlign="Top">
                 <expression><![CDATA[$F{cantidad}]]></expression>
             </element>
-            <element kind="textField" x="375" y="0" width="85" height="16" positionType="Float" pattern="Q #,##0.00"
+            <element kind="textField" x="294" y="0" width="76" height="16" positionType="Float" pattern="Q #,##0.00"
                      fontName="SansSerif" fontSize="8.0" hTextAlign="Right" vTextAlign="Top">
                 <expression><![CDATA[$F{precioUnitario}]]></expression>
             </element>
-            <element kind="textField" x="460" y="0" width="85" height="16" positionType="Float" pattern="Q #,##0.00"
+            <element kind="textField" x="370" y="0" width="80" height="16" positionType="Float" pattern="-Q #,##0.00"
+                     blankWhenNull="true" fontName="SansSerif" fontSize="8.0" forecolor="#B03030"
+                     hTextAlign="Right" vTextAlign="Top">
+                <expression><![CDATA[$F{montoDescuento} != null && $F{montoDescuento}.doubleValue() > 0 ? $F{montoDescuento} : null]]></expression>
+            </element>
+            <element kind="textField" x="450" y="0" width="95" height="16" positionType="Float" pattern="Q #,##0.00"
                      fontName="SansSerif" fontSize="8.0" bold="true" hTextAlign="Right" vTextAlign="Top">
-                <expression><![CDATA[$F{subtotal}]]></expression>
+                <expression><![CDATA[$F{subtotalNeto}]]></expression>
             </element>
             <element kind="line" x="0" y="17" width="545" height="1" positionType="Float" forecolor="#DDDDDD">
                 <pen lineWidth="0.5" lineColor="#DDDDDD"/>
@@ -169,25 +192,47 @@
         </band>
     </detail>
 
-    <summary height="92">
-        <element kind="rectangle" x="335" y="8" width="210" height="26" radius="4" forecolor="#22366B" backcolor="#22366B" mode="Opaque">
+    <summary height="128">
+        <!-- Subtotal y descuento se imprimen siempre, aun en cero: asi una
+             cotizacion con descuentos y una sin ellos se leen igual. -->
+        <element kind="staticText" x="335" y="6" width="102" height="14" forecolor="#444444"
+                 fontName="SansSerif" fontSize="9.0" hTextAlign="Right" vTextAlign="Middle">
+            <text><![CDATA[Subtotal]]></text>
+        </element>
+        <element kind="textField" x="437" y="6" width="98" height="14" forecolor="#444444"
+                 fontName="SansSerif" fontSize="9.0" pattern="Q #,##0.00" hTextAlign="Right" vTextAlign="Middle">
+            <expression><![CDATA[$V{SUBTOTAL}]]></expression>
+        </element>
+        <element kind="staticText" x="335" y="22" width="102" height="14" forecolor="#B03030"
+                 fontName="SansSerif" fontSize="9.0" hTextAlign="Right" vTextAlign="Middle">
+            <text><![CDATA[Descuentos]]></text>
+        </element>
+        <element kind="textField" x="437" y="22" width="98" height="14" forecolor="#B03030"
+                 fontName="SansSerif" fontSize="9.0" pattern="-Q #,##0.00" hTextAlign="Right" vTextAlign="Middle">
+            <expression><![CDATA[$V{DESCUENTOS}]]></expression>
+        </element>
+        <element kind="rectangle" x="335" y="42" width="210" height="26" radius="4" forecolor="#22366B" backcolor="#22366B" mode="Opaque">
             <pen lineWidth="0.0"/>
         </element>
-        <element kind="staticText" mode="Transparent" x="347" y="8" width="90" height="26" forecolor="#FFFFFF"
+        <element kind="staticText" mode="Transparent" x="347" y="42" width="90" height="26" forecolor="#FFFFFF"
                  fontName="SansSerif" fontSize="12.0" bold="true" vTextAlign="Middle">
             <text><![CDATA[TOTAL]]></text>
         </element>
-        <element kind="textField" mode="Transparent" x="437" y="8" width="98" height="26" forecolor="#FFFFFF"
+        <element kind="textField" mode="Transparent" x="437" y="42" width="98" height="26" forecolor="#FFFFFF"
                  fontName="SansSerif" fontSize="12.0" bold="true" pattern="Q #,##0.00" hTextAlign="Right" vTextAlign="Middle">
             <expression><![CDATA[$V{TOTAL}]]></expression>
         </element>
-        <element kind="staticText" x="0" y="50" width="545" height="14" forecolor="#666666"
+        <element kind="staticText" x="0" y="86" width="545" height="14" forecolor="#666666"
                  fontName="SansSerif" fontSize="8.0" italic="true">
             <text><![CDATA[Precios expresados en Quetzales (Q). Esta cotización tiene una validez de 15 días a partir de la fecha de emisión.]]></text>
         </element>
-        <element kind="staticText" x="0" y="64" width="545" height="14" forecolor="#666666"
+        <element kind="staticText" x="0" y="100" width="545" height="14" forecolor="#666666"
                  fontName="SansSerif" fontSize="8.0" italic="true">
             <text><![CDATA[Los precios pueden variar según disponibilidad y condiciones finales del evento.]]></text>
+        </element>
+        <element kind="staticText" x="0" y="114" width="545" height="14" forecolor="#666666"
+                 fontName="SansSerif" fontSize="8.0" italic="true">
+            <text><![CDATA[Los descuentos detallados por línea se respetan al confirmar la cotización y convertirla en pedido.]]></text>
         </element>
     </summary>
 

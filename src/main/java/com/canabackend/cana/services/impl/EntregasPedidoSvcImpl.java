@@ -408,7 +408,9 @@ public class EntregasPedidoSvcImpl implements EntregasPedidoSvc {
                 this.detalleServicioPedidoRepository.findDetallesConNombre(entrega.getCorrelativoPedido())) {
             servicios.add(new DetalleServicioPedidoListDto(
                     p.getIdServicio(), p.getNombreServicio(), p.getCantidad(), p.getPrecioAcordado(),
-                    p.getEspecificaciones(), p.getFechaRealizado(), p.getIdDetalleServPedido()));
+                    p.getEspecificaciones(), p.getFechaRealizado(), p.getIdDetalleServPedido(),
+                    p.getTipoDescuento(), p.getValorDescuento(), p.getMotivoDescuento(),
+                    p.getMontoDescuento(), p.getSubtotalNeto()));
         }
         dto.setServicios(servicios);
 

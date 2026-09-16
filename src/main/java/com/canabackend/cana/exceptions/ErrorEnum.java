@@ -54,7 +54,9 @@ public enum ErrorEnum {
     TIPO_ARCHIVO_NO_PERMITIDO               (4037, EstadoHttp.BAD_REQUEST, "El archivo debe ser PDF, JPG, PNG o WEBP"),
     ARCHIVO_EXCEDE_TAMANO_MAXIMO            (4038, EstadoHttp.BAD_REQUEST, "El archivo no puede superar los 10MB"),
     CONSTANCIA_FIRMADA_NOT_FOUND            (4039, EstadoHttp.BAD_REQUEST, "Esta entrega todavia no tiene una constancia firmada subida"),
-    I_ERROR_SUBIR_CONSTANCIA_FIRMADA        (4040, EstadoHttp.INTERNAL_SERVER_ERROR, "Ocurrio un error al guardar la constancia firmada");
+    I_ERROR_SUBIR_CONSTANCIA_FIRMADA        (4040, EstadoHttp.INTERNAL_SERVER_ERROR, "Ocurrio un error al guardar la constancia firmada"),
+    DESCUENTO_TIPO_INVALIDO                 (4041, EstadoHttp.BAD_REQUEST, "El tipo de descuento no es valido"),
+    DESCUENTO_VALOR_INVALIDO                (4042, EstadoHttp.BAD_REQUEST, "El descuento debe ser mayor a cero, y si es porcentaje no puede pasar de 100");
 //______________________________________________________________________________
     /**
      * <p>Codigo de error.</p>

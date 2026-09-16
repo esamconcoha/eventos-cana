@@ -87,7 +87,10 @@ public class ReporteCotizacionSvcImpl implements ReporteCotizacionSvc {
                     p.getEspecificaciones(),
                     p.getCantidad(),
                     p.getPrecioUnitario(),
-                    p.getSubtotal()));
+                    p.getSubtotal(),
+                    p.getMontoDescuento(),
+                    p.getEtiquetaDescuento(),
+                    p.getSubtotalNeto()));
         }
         return lineas;
     }

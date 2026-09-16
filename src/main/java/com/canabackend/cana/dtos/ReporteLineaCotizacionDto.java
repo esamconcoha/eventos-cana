@@ -13,5 +13,11 @@ public class ReporteLineaCotizacionDto {
     private String especificaciones;
     private Double cantidad;
     private Double precioUnitario;
+    /** Subtotal ANTES del descuento. */
     private Double subtotal;
+    private Double montoDescuento;
+    /** Texto corto del descuento ("-20% (Cliente frecuente)"); null si no lleva. */
+    private String etiquetaDescuento;
+    /** Subtotal ya con el descuento aplicado; es el que suma el TOTAL. */
+    private Double subtotalNeto;
 }

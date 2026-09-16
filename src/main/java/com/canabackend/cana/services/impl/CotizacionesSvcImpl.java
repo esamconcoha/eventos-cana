@@ -75,6 +75,8 @@ public class CotizacionesSvcImpl implements CotizacionesSvc {
                 detalleCotizacion.setIdItem(detalle.getIdItem());
                 detalleCotizacion.setCantidadItemCotizacion(detalle.getCantidadItemCotizacion());
                 detalleCotizacion.setIdCotizacion(cotizacionNueva.getIdCotizacion());
+                detalleCotizacion.aplicarDescuento(detalle.getTipoDescuento(),
+                        detalle.getValorDescuento(), detalle.getMotivoDescuento());
                 detalles.add(detalleCotizacion);
             }
             this.detalleCotizacionRepository.saveAll(detalles);
@@ -89,6 +91,8 @@ public class CotizacionesSvcImpl implements CotizacionesSvc {
                 detalleServicioCotizacion.setCantidad(detalleServicio.getCantidad());
                 detalleServicioCotizacion.setPrecioCotizado(detalleServicio.getPrecioCotizado());
                 detalleServicioCotizacion.setEspecificaciones(detalleServicio.getEspecificaciones());
+                detalleServicioCotizacion.aplicarDescuento(detalleServicio.getTipoDescuento(),
+                        detalleServicio.getValorDescuento(), detalleServicio.getMotivoDescuento());
                 detallesServicio.add(detalleServicioCotizacion);
             }
             this.detalleServicioCotizacionRepository.saveAll(detallesServicio);
@@ -160,6 +164,7 @@ public class CotizacionesSvcImpl implements CotizacionesSvc {
             e.setIdItem(d.getIdItem());
             e.setCantidadItemCotizacion(d.getCantidadItemCotizacion());
             e.setIdCotizacion(idCotizacion);
+            e.aplicarDescuento(d.getTipoDescuento(), d.getValorDescuento(), d.getMotivoDescuento());
             entidades.add(e);
         }
         this.detalleCotizacionRepository.saveAll(entidades);
@@ -175,6 +180,7 @@ public class CotizacionesSvcImpl implements CotizacionesSvc {
             e.setCantidad(d.getCantidad());
             e.setPrecioCotizado(d.getPrecioCotizado());
             e.setEspecificaciones(d.getEspecificaciones());
+            e.aplicarDescuento(d.getTipoDescuento(), d.getValorDescuento(), d.getMotivoDescuento());
             entidades.add(e);
         }
         this.detalleServicioCotizacionRepository.saveAll(entidades);
@@ -218,7 +224,9 @@ public class CotizacionesSvcImpl implements CotizacionesSvc {
             List<DetalleItemCotizacionListDto> detallesItems = new ArrayList<>();
             for (DetalleItemCotizacionProjection p : items) {
                 detallesItems.add(new DetalleItemCotizacionListDto(
-                        p.getIdItem(), p.getNombreItem(), p.getCostoItem(), p.getCantidadItemCotizacion()));
+                        p.getIdItem(), p.getNombreItem(), p.getCostoItem(), p.getCantidadItemCotizacion(),
+                        p.getTipoDescuento(), p.getValorDescuento(), p.getMotivoDescuento(),
+                        p.getMontoDescuento(), p.getSubtotalNeto()));
             }
             dto.setDetalles(detallesItems);
 
@@ -230,7 +238,9 @@ public class CotizacionesSvcImpl implements CotizacionesSvc {
                         p.getIdServicio(), p.getNombreServicio(),
                         p.getCantidad() != null ? p.getCantidad() : 0,
                         p.getPrecioCotizado() != null ? p.getPrecioCotizado() : 0,
-                        p.getEspecificaciones()));
+                        p.getEspecificaciones(),
+                        p.getTipoDescuento(), p.getValorDescuento(), p.getMotivoDescuento(),
+                        p.getMontoDescuento(), p.getSubtotalNeto()));
             }
             dto.setDetallesServicios(detallesServ);
 

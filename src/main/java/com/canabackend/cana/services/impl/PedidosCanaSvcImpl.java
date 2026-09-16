@@ -242,6 +242,11 @@ public class PedidosCanaSvcImpl implements PedidosCanaSvc {
                 detalle.setIdItem(d.getIdItem());
                 detalle.setCantidadItemPedido(d.getCantidadItemCotizacion());
                 detalle.setCorrelativoPedido(pedido.getCorrelativoPedido());
+                // El descuento se copia tal cual quedo pactado en la cotizacion:
+                // el precio que vio el cliente en el PDF es el que se le cobra.
+                detalle.setTipoDescuento(d.getTipoDescuento());
+                detalle.setValorDescuento(d.getValorDescuento());
+                detalle.setMotivoDescuento(d.getMotivoDescuento());
                 detalles.add(detalle);
             }
             this.detallePedidoRepository.saveAll(detalles);
@@ -258,6 +263,9 @@ public class PedidosCanaSvcImpl implements PedidosCanaSvc {
                 detalle.setPrecioAcordado(d.getPrecioCotizado());
                 detalle.setEspecificaciones(d.getEspecificaciones());
                 detalle.setCorrelativoPedido(pedido.getCorrelativoPedido());
+                detalle.setTipoDescuento(d.getTipoDescuento());
+                detalle.setValorDescuento(d.getValorDescuento());
+                detalle.setMotivoDescuento(d.getMotivoDescuento());
                 detallesServicio.add(detalle);
             }
             this.detalleServicioPedidoRepository.saveAll(detallesServicio);
@@ -331,6 +339,7 @@ public class PedidosCanaSvcImpl implements PedidosCanaSvc {
                 detalle.setIdItem(d.getIdItem());
                 detalle.setCantidadItemPedido(d.getCantidadItemPedido());
                 detalle.setCorrelativoPedido(correlativoPedido);
+                detalle.aplicarDescuento(d.getTipoDescuento(), d.getValorDescuento(), d.getMotivoDescuento());
                 entidades.add(detalle);
             }
             this.detallePedidoRepository.saveAll(entidades);
@@ -344,6 +353,7 @@ public class PedidosCanaSvcImpl implements PedidosCanaSvc {
                 detalle.setPrecioAcordado(d.getPrecioAcordado());
                 detalle.setEspecificaciones(d.getEspecificaciones());
                 detalle.setCorrelativoPedido(correlativoPedido);
+                detalle.aplicarDescuento(d.getTipoDescuento(), d.getValorDescuento(), d.getMotivoDescuento());
                 entidades.add(detalle);
             }
             this.detalleServicioPedidoRepository.saveAll(entidades);
@@ -385,7 +395,10 @@ public class PedidosCanaSvcImpl implements PedidosCanaSvc {
         List<DetallePedidoListDto> detalles = new ArrayList<>();
         for (DetalleItemPedidoProjection p :
                 this.detallePedidoRepository.findDetallesConNombre(pedido.getCorrelativoPedido())) {
-            detalles.add(new DetallePedidoListDto(p.getIdItem(), p.getNombreItem(), p.getCostoItem(), p.getCantidadItemPedido()));
+            detalles.add(new DetallePedidoListDto(
+                    p.getIdItem(), p.getNombreItem(), p.getCostoItem(), p.getCantidadItemPedido(),
+                    p.getTipoDescuento(), p.getValorDescuento(), p.getMotivoDescuento(),
+                    p.getMontoDescuento(), p.getSubtotalNeto()));
         }
         dto.setDetalles(detalles);
 
@@ -394,7 +407,9 @@ public class PedidosCanaSvcImpl implements PedidosCanaSvc {
                 this.detalleServicioPedidoRepository.findDetallesConNombre(pedido.getCorrelativoPedido())) {
             detallesServicios.add(new DetalleServicioPedidoListDto(
                     p.getIdServicio(), p.getNombreServicio(), p.getCantidad(), p.getPrecioAcordado(),
-                    p.getEspecificaciones(), p.getFechaRealizado(), p.getIdDetalleServPedido()));
+                    p.getEspecificaciones(), p.getFechaRealizado(), p.getIdDetalleServPedido(),
+                    p.getTipoDescuento(), p.getValorDescuento(), p.getMotivoDescuento(),
+                    p.getMontoDescuento(), p.getSubtotalNeto()));
         }
         dto.setDetallesServicios(detallesServicios);
 

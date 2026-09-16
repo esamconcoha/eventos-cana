@@ -16,18 +16,32 @@ public interface CotizacionesRepository extends JpaRepository<Cotizaciones, Long
     /**
      * Devuelve las lineas (articulos + servicios) de una cotizacion unificadas
      * para alimentar el reporte Jasper.
+     *
+     * <p>El descuento sale resuelto de la BD (monto y etiqueta) para que el PDF
+     * muestre exactamente lo mismo que suma el total del pedido cuando la
+     * cotizacion se confirme.
      */
     @Query(value =
             "select 'Articulo' as tipo, ic.descripcion_item as descripcion, cast(null as text) as especificaciones, \n" +
             "       dc.cantidad_item_cotizacion as cantidad, ic.costo_item as precioUnitario, \n" +
-            "       (dc.cantidad_item_cotizacion * ic.costo_item) as subtotal \n" +
+            "       (dc.cantidad_item_cotizacion * ic.costo_item) as subtotal, \n" +
+            "       cana.fn_descuento_linea(dc.cantidad_item_cotizacion * ic.costo_item, \n" +
+            "            dc.tipo_descuento, dc.valor_descuento) as montoDescuento, \n" +
+            "       cana.fn_etiqueta_descuento(dc.tipo_descuento, dc.valor_descuento, dc.motivo_descuento) as etiquetaDescuento, \n" +
+            "       cana.fn_neto_linea(dc.cantidad_item_cotizacion * ic.costo_item, \n" +
+            "            dc.tipo_descuento, dc.valor_descuento) as subtotalNeto \n" +
             "from cana.detalle_cotizacion dc \n" +
             "inner join cana.items_cana ic on ic.id_item = dc.id_item \n" +
             "where dc.id_cotizacion = :idCotizacion \n" +
             "union all \n" +
             "select 'Servicio' as tipo, sd.nombre_servicio as descripcion, dsc.especificaciones as especificaciones, \n" +
             "       dsc.cantidad as cantidad, dsc.precio_cotizado as precioUnitario, \n" +
-            "       (dsc.cantidad * dsc.precio_cotizado) as subtotal \n" +
+            "       (dsc.cantidad * dsc.precio_cotizado) as subtotal, \n" +
+            "       cana.fn_descuento_linea(dsc.cantidad * dsc.precio_cotizado, \n" +
+            "            dsc.tipo_descuento, dsc.valor_descuento) as montoDescuento, \n" +
+            "       cana.fn_etiqueta_descuento(dsc.tipo_descuento, dsc.valor_descuento, dsc.motivo_descuento) as etiquetaDescuento, \n" +
+            "       cana.fn_neto_linea(dsc.cantidad * dsc.precio_cotizado, \n" +
+            "            dsc.tipo_descuento, dsc.valor_descuento) as subtotalNeto \n" +
             "from cana.detalle_servicio_cotizacion dsc \n" +
             "inner join cana.servicios_decoracion sd on sd.id_servicio = dsc.id_servicio \n" +
             "where dsc.id_cotizacion = :idCotizacion \n" +

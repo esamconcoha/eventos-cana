@@ -112,10 +112,14 @@ public class PagosPedidoSvcImpl implements PagosPedidoSvc {
                 .orElseThrow(() -> new MSCanaException(ErrorEnum.PEDIDO_NOT_FOUND));
 
         double totalPedido = nvl(this.pagosPedidoRepository.getTotalPedido(correlativoPedido));
+        double totalDescuentos = nvl(this.pagosPedidoRepository.getTotalDescuentoPedido(correlativoPedido));
         double totalPagado = totalPagado(pagosActivos(correlativoPedido));
 
+        // El bruto se reconstruye sumando lo descontado en vez de consultarlo
+        // aparte: son las mismas lineas y asi las tres cifras siempre cuadran.
         return new EstadoCuentaPedidoDto(
-                correlativoPedido, totalPedido, totalPagado, totalPedido - totalPagado, pedido.getEstadoPago());
+                correlativoPedido, totalPedido + totalDescuentos, totalDescuentos,
+                totalPedido, totalPagado, totalPedido - totalPagado, pedido.getEstadoPago());
     }
 
     @Override

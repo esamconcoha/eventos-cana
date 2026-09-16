@@ -28,8 +28,10 @@ import java.util.List;
  *
  * <p><b>Criterio de monto</b>: el total del pedido se calcula igual que en
  * {@link PagosPedidoRepository#getTotalPedido} (items x costo_item + servicios x
- * precio_acordado). Si las dos formulas se separan, el saldo del reporte
- * discreparia del estado de cuenta de cada pedido.
+ * precio_acordado), cada linea NETA de su descuento via cana.fn_neto_linea. Si
+ * las dos formulas se separan, el saldo del reporte discreparia del estado de
+ * cuenta de cada pedido. Lo facturado que reporta este modulo es, entonces, lo
+ * que el cliente realmente debe pagar: los descuentos ya vienen restados.
  */
 public interface ReportesRepository extends Repository<PedidosCana, String> {
 
@@ -50,11 +52,13 @@ public interface ReportesRepository extends Repository<PedidosCana, String> {
             "), " +
             "tot as ( " +
             "  select pe.*, " +
-            "    coalesce((select sum(dp.cantidad_item_pedido * ic.costo_item) " +
+            "    coalesce((select sum(cana.fn_neto_linea(dp.cantidad_item_pedido * ic.costo_item, " +
+            "                                        dp.tipo_descuento, dp.valor_descuento)) " +
             "                from cana.detalle_pedido dp " +
             "                join cana.items_cana ic on ic.id_item = dp.id_item " +
             "               where dp.correlativo_pedido = pe.correlativo_pedido), 0) " +
-            "  + coalesce((select sum(dsp.cantidad * dsp.precio_acordado) " +
+            "  + coalesce((select sum(cana.fn_neto_linea(dsp.cantidad * dsp.precio_acordado, " +
+            "                                            dsp.tipo_descuento, dsp.valor_descuento)) " +
             "                from cana.detalle_servicio_pedido dsp " +
             "               where dsp.correlativo_pedido = pe.correlativo_pedido), 0) as total, " +
             "    coalesce((select sum(case when pp.tipo_pago = 'DEVOLUCION' then -pp.monto_pago " +
@@ -167,7 +171,8 @@ public interface ReportesRepository extends Repository<PedidosCana, String> {
             "select ic.descripcion_item as etiqueta, " +
             "       coalesce(cc.nombre, 'Sin categoria') as categoria, " +
             "       sum(dp.cantidad_item_pedido) as cantidad, " +
-            "       sum(dp.cantidad_item_pedido * ic.costo_item) as monto, " +
+            "       sum(cana.fn_neto_linea(dp.cantidad_item_pedido * ic.costo_item, " +
+            "               dp.tipo_descuento, dp.valor_descuento)) as monto, " +
             "       count(distinct t.correlativo_pedido) as eventos, " +
             "       max(ic.cantidad_item) as disponible " +
             "  from tot t " +
@@ -187,7 +192,8 @@ public interface ReportesRepository extends Repository<PedidosCana, String> {
             "select sd.nombre_servicio as etiqueta, " +
             "       coalesce(cs.nombre_categoria, 'Sin categoria') as categoria, " +
             "       sum(dsp.cantidad) as cantidad, " +
-            "       sum(dsp.cantidad * dsp.precio_acordado) as monto, " +
+            "       sum(cana.fn_neto_linea(dsp.cantidad * dsp.precio_acordado, " +
+            "               dsp.tipo_descuento, dsp.valor_descuento)) as monto, " +
             "       count(distinct t.correlativo_pedido) as eventos, " +
             "       cast(null as bigint) as disponible " +
             "  from tot t " +
