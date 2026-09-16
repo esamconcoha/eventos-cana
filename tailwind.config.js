@@ -28,6 +28,17 @@ module.exports = {
         'glow-blue': '0 0 0 1px rgba(37,99,235,0.15), 0 8px 24px -8px rgba(37,99,235,0.5)',
         'glow-amber': '0 0 0 1px rgba(217,119,6,0.12), 0 10px 24px -10px rgba(180,83,9,0.45)',
         card: '0 1px 2px rgba(15,23,42,0.04), 0 12px 32px -14px rgba(15,23,42,0.16)',
+        // Sombras del vidrio: un borde luminoso arriba (el reflejo del canto),
+        // un borde tenue abajo y una sombra ambiental larga y suave. Es lo que
+        // separa un panel de vidrio de un simple rectangulo semitransparente.
+        glass: 'inset 0 1px 0 rgba(255,255,255,0.75), inset 0 -1px 0 rgba(2,25,48,0.04), 0 8px 32px -12px rgba(2,25,48,0.22)',
+        'glass-lg': 'inset 0 1px 0 rgba(255,255,255,0.85), inset 0 -1px 0 rgba(2,25,48,0.05), 0 24px 64px -20px rgba(2,25,48,0.35)',
+        'glass-navy': 'inset 0 1px 0 rgba(255,255,255,0.12), 0 12px 40px -16px rgba(2,12,26,0.6)',
+        'inner-glass': 'inset 0 1px 2px rgba(2,25,48,0.07), inset 0 1px 0 rgba(255,255,255,0.6)',
+      },
+      backdropBlur: {
+        xs: '2px',
+        '4xl': '72px',
       },
       keyframes: {
         'blob-float': {
@@ -62,6 +73,17 @@ module.exports = {
           '0%': { opacity: '0', transform: 'scale(0.95) translateY(8px)' },
           '100%': { opacity: '1', transform: 'scale(1) translateY(0)' },
         },
+        // El vidrio "se levanta" al aparecer: sube unos px y pierde el desenfoque
+        // inicial, como si se enfocara. Es la entrada de tarjetas y paneles.
+        'glass-rise': {
+          '0%': { opacity: '0', transform: 'translateY(14px) scale(0.985)' },
+          '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
+        },
+        // Reflejo que cruza los botones principales al pasar el mouse.
+        sheen: {
+          '0%': { transform: 'translateX(-130%) skewX(-18deg)' },
+          '100%': { transform: 'translateX(230%) skewX(-18deg)' },
+        },
       },
       animation: {
         'blob-float': 'blob-float 9s ease-in-out infinite',
@@ -69,9 +91,11 @@ module.exports = {
         'fade-in-up': 'fade-in-up 0.45s ease-out both',
         'fade-in': 'fade-in 0.35s ease-out both',
         shimmer: 'shimmer 1.6s linear infinite',
-        'drawer-in': 'drawer-in 0.35s cubic-bezier(0.16,1,0.3,1) both',
-        'backdrop-in': 'backdrop-in 0.25s ease-out both',
-        'modal-in': 'modal-in 0.25s cubic-bezier(0.16,1,0.3,1) both',
+        'drawer-in': 'drawer-in 0.38s cubic-bezier(0.16,1,0.3,1) both',
+        'backdrop-in': 'backdrop-in 0.3s ease-out both',
+        'modal-in': 'modal-in 0.32s cubic-bezier(0.16,1,0.3,1) both',
+        'glass-rise': 'glass-rise 0.55s cubic-bezier(0.16,1,0.3,1) both',
+        sheen: 'sheen 0.9s ease-in-out',
       },
     },
   },

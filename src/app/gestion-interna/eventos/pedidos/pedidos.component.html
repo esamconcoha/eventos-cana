@@ -82,7 +82,7 @@
             <div class="flex flex-col gap-1 relative">
               <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Fecha del evento <span class="text-red-500">*</span></label>
               <button type="button" (click)="abrirCalendario()"
-                class="w-full flex items-center justify-between border-2 rounded-xl px-3 py-2.5 text-sm text-left bg-white transition-colors"
+                class="w-full flex items-center justify-between border-2 rounded-xl px-3 py-2.5 text-sm text-left bg-white/45 shadow-inner-glass transition-colors"
                 [class.border-amber-400]="calendarioAbierto"
                 [class.border-slate-200]="!calendarioAbierto"
                 [class.border-red-400]="campoInvalido('fechaEventoHora') && !calendarioAbierto">
@@ -97,15 +97,15 @@
 
               @if (calendarioAbierto) {
                 <div class="fixed inset-0 z-40" (click)="cerrarCalendario()"></div>
-                <div class="absolute z-50 top-full mt-2 left-0 w-full max-w-sm bg-white rounded-3xl shadow-2xl border border-slate-100 p-5 animate-fade-in-up"
+                <div class="absolute z-50 top-full mt-2 left-0 w-full max-w-sm glass-pop rounded-3xl p-5 animate-fade-in-up"
                   (click)="horaPickerAbierto = false; $event.stopPropagation()">
 
                   <div class="flex items-center justify-between mb-4">
-                    <button type="button" (click)="mesAnterior()" class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-gray-500 transition-colors">
+                    <button type="button" (click)="mesAnterior()" class="w-8 h-8 rounded-full hover:bg-white/70 flex items-center justify-center text-gray-500 transition-colors">
                       <span class="material-icons text-[18px]">chevron_left</span>
                     </button>
                     <span class="font-serif italic text-lg text-gray-900">{{ nombreMesVisible }}</span>
-                    <button type="button" (click)="mesSiguiente()" class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-gray-500 transition-colors">
+                    <button type="button" (click)="mesSiguiente()" class="w-8 h-8 rounded-full hover:bg-white/70 flex items-center justify-center text-gray-500 transition-colors">
                       <span class="material-icons text-[18px]">chevron_right</span>
                     </button>
                   </div>
@@ -128,7 +128,7 @@
                             [class.ring-2]="esSeleccionado(dia) && !esHoy(dia)"
                             [class.ring-brand-900]="esSeleccionado(dia) && !esHoy(dia)"
                             [class.text-gray-700]="!esHoy(dia)"
-                            [class.hover:bg-slate-100]="!esHoy(dia)">
+                            [class.hover:bg-white/70]="!esHoy(dia)">
                             {{ dia.getDate() }}
                           </button>
                         }
@@ -136,9 +136,9 @@
                     }
                   </div>
 
-                  <div class="relative mt-3 pt-3 border-t border-slate-100">
+                  <div class="relative mt-3 pt-3 border-t border-brand-900/[0.06]">
                     <button type="button" (click)="toggleHoraPicker($event)"
-                      class="w-full flex items-center gap-2 border-2 rounded-lg px-3 py-2 text-sm transition-colors bg-white"
+                      class="w-full flex items-center gap-2 border-2 rounded-lg px-3 py-2 text-sm transition-colors bg-white/45 shadow-inner-glass"
                       [class.border-amber-400]="horaPickerAbierto"
                       [class.border-slate-200]="!horaPickerAbierto">
                       <span class="material-icons text-[18px] text-slate-400">schedule</span>
@@ -146,7 +146,7 @@
                     </button>
 
                     @if (horaPickerAbierto) {
-                      <div class="absolute z-10 top-full mt-1 left-0 flex bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden"
+                      <div class="absolute z-10 top-full mt-1 left-0 flex glass-pop rounded-2xl overflow-hidden"
                         (click)="$event.stopPropagation()">
                         <div class="w-16 max-h-48 overflow-y-auto py-1">
                           @for (h of horasDisponibles; track h) {
@@ -156,12 +156,12 @@
                               [class.text-gray-900]="horaSeleccionadaNum === h"
                               [class.font-bold]="horaSeleccionadaNum === h"
                               [class.text-gray-600]="horaSeleccionadaNum !== h"
-                              [class.hover:bg-slate-50]="horaSeleccionadaNum !== h">
+                              [class.hover:bg-white/60]="horaSeleccionadaNum !== h">
                               {{ h < 10 ? '0' + h : h }}
                             </button>
                           }
                         </div>
-                        <div class="w-16 max-h-48 overflow-y-auto py-1 border-l border-slate-100">
+                        <div class="w-16 max-h-48 overflow-y-auto py-1 border-l border-brand-900/[0.06]">
                           @for (m of minutosDisponibles; track m) {
                             <button type="button" (click)="seleccionarMinuto(m)"
                               class="w-full text-center py-1.5 text-sm font-montserrat transition-colors"
@@ -169,7 +169,7 @@
                               [class.text-gray-900]="minutoSeleccionadoNum === m"
                               [class.font-bold]="minutoSeleccionadoNum === m"
                               [class.text-gray-600]="minutoSeleccionadoNum !== m"
-                              [class.hover:bg-slate-50]="minutoSeleccionadoNum !== m">
+                              [class.hover:bg-white/60]="minutoSeleccionadoNum !== m">
                               {{ m < 10 ? '0' + m : m }}
                             </button>
                           }
@@ -178,7 +178,7 @@
                     }
                   </div>
 
-                  <div class="flex items-center justify-between mt-3 pt-3 border-t border-slate-100 text-xs">
+                  <div class="flex items-center justify-between mt-3 pt-3 border-t border-brand-900/[0.06] text-xs">
                     <span class="flex items-center gap-1.5 text-gray-500">
                       <span class="w-2 h-2 rounded-full ring-2 ring-brand-900 inline-block"></span>
                       Seleccionado
@@ -252,19 +252,20 @@
 
           <!-- overflow-x-auto + min-w: son cinco columnas con selects e inputs
                adentro; sin ancho minimo se aplastan en movil. -->
-          <div class="rounded-xl border border-gray-200 overflow-hidden">
+          <div class="rounded-xl border border-white/80 overflow-hidden">
             <div class="overflow-x-auto">
-            <table class="w-full min-w-[680px] text-sm">
+            <table class="w-full min-w-[880px] text-sm">
               <thead class="table-head">
                 <tr>
                   <th class="px-4 py-3 text-left">Item</th>
-                  <th class="px-4 py-3 text-right w-32">Cantidad</th>
-                  <th class="px-4 py-3 text-right w-32">Costo unit.</th>
+                  <th class="px-4 py-3 text-right w-28">Cantidad</th>
+                  <th class="px-4 py-3 text-right w-28">Costo unit.</th>
+                  <th class="px-4 py-3 text-left w-56">Descuento</th>
                   <th class="px-4 py-3 text-right w-32">Subtotal</th>
                   <th class="px-4 py-3 w-12"></th>
                 </tr>
               </thead>
-              <tbody formArrayName="detalles" class="divide-y divide-gray-100">
+              <tbody formArrayName="detalles" class="divide-y divide-brand-900/[0.06]">
                 @for (detalle of detalles.controls; let i = $index; track i) {
                   <tr [formGroupName]="i" class="row-hover">
                     <td class="px-4 py-2">
@@ -275,7 +276,7 @@
                     </td>
                     <td class="px-4 py-2">
                       <input formControlName="cantidadItemPedido" type="number" min="1"
-                        class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-[16px] sm:text-sm text-right outline-none focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/15"
+                        class="w-full border-2 border-white/80 bg-white/45 shadow-inner-glass rounded-lg px-2 py-1.5 text-[16px] sm:text-sm text-right outline-none focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/15"
                         [class.border-red-400]="detalleInvalido(i, 'cantidadItemPedido')">
                     </td>
                     <td class="px-4 py-2 text-right text-gray-600">
@@ -286,8 +287,32 @@
                         <span class="text-gray-300">—</span>
                       }
                     </td>
-                    <td class="px-4 py-2 text-right font-medium text-gray-800">
-                      @if (subtotalDetalle(i) > 0) {
+                    <td class="px-4 py-2 align-top">
+                      <div class="flex items-center gap-1.5">
+                        <app-select formControlName="tipoDescuento" variante="tabla" acento="amber"
+                          [opciones]="tiposDescuento" campoValor="codigo" campoEtiqueta="label"
+                          placeholder="Sin descuento"></app-select>
+                        @if (descuentoPideValor(detalles, i)) {
+                          <input formControlName="valorDescuento" type="number" min="0" step="0.01"
+                            class="w-20 shrink-0 border-2 border-white/80 bg-white/45 shadow-inner-glass rounded-lg px-2 py-1.5 text-[16px] sm:text-sm text-right outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
+                            [class.border-red-400]="descuentoLineaInvalido(detalles, i)"
+                            placeholder="0">
+                        }
+                      </div>
+                      @if (descuentoActivo(detalles, i)) {
+                        <input formControlName="motivoDescuento" type="text" maxlength="200"
+                          class="mt-1.5 w-full border-2 border-white/80 bg-white/45 shadow-inner-glass rounded-lg px-2 py-1 text-[16px] sm:text-xs outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
+                          placeholder="Motivo (opcional)">
+                      }
+                      @if (descuentoLineaInvalido(detalles, i)) {
+                        <p class="mt-1 text-xs text-red-500">Indica un descuento válido (el porcentaje no pasa de 100)</p>
+                      }
+                    </td>
+                    <td class="px-4 py-2 text-right font-medium text-gray-800 align-top">
+                      @if (subtotalBrutoDetalle(i) > 0) {
+                        @if (descuentoDetalle(i) > 0) {
+                          <span class="block text-xs text-gray-400 line-through">Q {{ subtotalBrutoDetalle(i) | number:'1.2-2' }}</span>
+                        }
                         Q {{ subtotalDetalle(i) | number:'1.2-2' }}
                       } @else {
                         <span class="text-gray-300">—</span>
@@ -296,7 +321,7 @@
                     <td class="px-4 py-2 text-center">
                       @if (detalles.length > 1) {
                         <button type="button" (click)="eliminarDetalle(i)"
-                          class="p-1 rounded hover:bg-red-50 text-red-400 transition-colors">
+                          class="p-1 rounded hover:bg-red-100/50 text-red-400 transition-colors">
                           <span class="material-icons text-[18px]">delete_outline</span>
                         </button>
                       }
@@ -321,24 +346,25 @@
           </div>
 
           @if (detallesServicios.length === 0) {
-            <div class="rounded-xl border border-dashed border-gray-200 py-6 text-center text-sm text-gray-400">
+            <div class="rounded-xl border border-dashed border-white/80 py-6 text-center text-sm text-gray-400">
               Ningún servicio agregado (opcional)
             </div>
           } @else {
-            <div class="rounded-xl border border-gray-200 overflow-hidden">
+            <div class="rounded-xl border border-white/80 overflow-hidden">
               <div class="overflow-x-auto">
-              <table class="w-full min-w-[900px] text-sm">
+              <table class="w-full min-w-[1100px] text-sm">
                 <thead class="table-head">
                   <tr>
                     <th class="px-4 py-3 text-left">Servicio</th>
                     <th class="px-4 py-3 text-right w-24">Cantidad</th>
-                    <th class="px-4 py-3 text-right w-32">Precio acordado</th>
+                    <th class="px-4 py-3 text-right w-28">Precio acordado</th>
                     <th class="px-4 py-3 text-left">Especificaciones</th>
+                    <th class="px-4 py-3 text-left w-56">Descuento</th>
                     <th class="px-4 py-3 text-right w-32">Subtotal</th>
                     <th class="px-4 py-3 w-12"></th>
                   </tr>
                 </thead>
-                <tbody formArrayName="detallesServicios" class="divide-y divide-gray-100">
+                <tbody formArrayName="detallesServicios" class="divide-y divide-brand-900/[0.06]">
                   @for (detalle of detallesServicios.controls; let i = $index; track i) {
                     <tr [formGroupName]="i" class="row-hover">
                       <td class="px-4 py-2">
@@ -349,22 +375,46 @@
                       </td>
                       <td class="px-4 py-2">
                         <input formControlName="cantidad" type="number" min="1"
-                          class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-[16px] sm:text-sm text-right outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
+                          class="w-full border-2 border-white/80 bg-white/45 shadow-inner-glass rounded-lg px-2 py-1.5 text-[16px] sm:text-sm text-right outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
                           [class.border-red-400]="detalleServicioInvalido(i, 'cantidad')">
                       </td>
                       <td class="px-4 py-2">
                         <input formControlName="precioAcordado" type="number" min="0" step="0.01"
-                          class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-[16px] sm:text-sm text-right outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
+                          class="w-full border-2 border-white/80 bg-white/45 shadow-inner-glass rounded-lg px-2 py-1.5 text-[16px] sm:text-sm text-right outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
                           [class.border-red-400]="detalleServicioInvalido(i, 'precioAcordado')"
                           placeholder="0.00">
                       </td>
                       <td class="px-4 py-2">
                         <input formControlName="especificaciones" type="text"
-                          class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-[16px] sm:text-sm outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
+                          class="w-full border-2 border-white/80 bg-white/45 shadow-inner-glass rounded-lg px-2 py-1.5 text-[16px] sm:text-sm outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
                           placeholder="Opcional">
                       </td>
-                      <td class="px-4 py-2 text-right font-medium text-gray-800">
-                        @if (subtotalDetalleServicio(i) > 0) {
+                      <td class="px-4 py-2 align-top">
+                        <div class="flex items-center gap-1.5">
+                          <app-select formControlName="tipoDescuento" variante="tabla" acento="amber"
+                            [opciones]="tiposDescuento" campoValor="codigo" campoEtiqueta="label"
+                            placeholder="Sin descuento"></app-select>
+                          @if (descuentoPideValor(detallesServicios, i)) {
+                            <input formControlName="valorDescuento" type="number" min="0" step="0.01"
+                              class="w-20 shrink-0 border-2 border-white/80 bg-white/45 shadow-inner-glass rounded-lg px-2 py-1.5 text-[16px] sm:text-sm text-right outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
+                              [class.border-red-400]="descuentoLineaInvalido(detallesServicios, i)"
+                              placeholder="0">
+                          }
+                        </div>
+                        @if (descuentoActivo(detallesServicios, i)) {
+                          <input formControlName="motivoDescuento" type="text" maxlength="200"
+                            class="mt-1.5 w-full border-2 border-white/80 bg-white/45 shadow-inner-glass rounded-lg px-2 py-1 text-[16px] sm:text-xs outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
+                            placeholder="Motivo (opcional)">
+                        }
+                        @if (descuentoLineaInvalido(detallesServicios, i)) {
+                          <p class="mt-1 text-xs text-red-500">Indica un descuento válido (el porcentaje no pasa de 100)</p>
+                        }
+                      </td>
+                      <td class="px-4 py-2 text-right font-medium text-gray-800 align-top">
+                        @if (subtotalBrutoDetalleServicio(i) > 0) {
+                          @if (descuentoDetalleServicio(i) > 0) {
+                            <span class="block text-xs text-gray-400 line-through">Q {{ subtotalBrutoDetalleServicio(i) | number:'1.2-2' }}</span>
+                          }
                           Q {{ subtotalDetalleServicio(i) | number:'1.2-2' }}
                         } @else {
                           <span class="text-gray-300">—</span>
@@ -372,7 +422,7 @@
                       </td>
                       <td class="px-4 py-2 text-center">
                         <button type="button" (click)="eliminarDetalleServicio(i)"
-                          class="p-1 rounded hover:bg-red-50 text-red-400 transition-colors">
+                          class="p-1 rounded hover:bg-red-100/50 text-red-400 transition-colors">
                           <span class="material-icons text-[18px]">delete_outline</span>
                         </button>
                       </td>
@@ -386,13 +436,25 @@
         </div>
 
         <!-- Total general -->
-        <div class="rounded-xl bg-slate-50 px-5 py-4 flex items-center justify-between">
-          <span class="text-sm font-semibold text-gray-700">Total del pedido</span>
-          <span class="font-montserrat font-bold text-xl text-gray-900">Q {{ totalPedido | number:'1.2-2' }}</span>
+        <div class="rounded-xl bg-white/40 px-5 py-4 space-y-2">
+          @if (totalDescuentosPedido > 0) {
+            <div class="flex items-center justify-between text-sm text-gray-500">
+              <span>Subtotal</span>
+              <span>Q {{ totalBrutoPedido | number:'1.2-2' }}</span>
+            </div>
+            <div class="flex items-center justify-between text-sm font-semibold text-amber-700">
+              <span>Descuentos</span>
+              <span>- Q {{ totalDescuentosPedido | number:'1.2-2' }}</span>
+            </div>
+          }
+          <div class="flex items-center justify-between pt-1">
+            <span class="text-sm font-semibold text-gray-700">Total del pedido</span>
+            <span class="font-montserrat font-bold text-xl text-gray-900">Q {{ totalPedido | number:'1.2-2' }}</span>
+          </div>
         </div>
 
         <!-- Acciones -->
-        <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+        <div class="flex justify-end gap-3 pt-4 border-t border-brand-900/[0.06]">
           <button type="button" (click)="cancelar()" class="btn-cancel">Cancelar</button>
           <button type="submit" [disabled]="form.invalid" class="btn-submit">Guardar pedido</button>
         </div>
@@ -406,7 +468,7 @@
   ══════════════════════════════════════════════════════ -->
   <div class="surface-card px-6 pt-4">
     <!-- overflow-x-auto como en entregas: las dos pestañas no caben en 360px. -->
-    <div class="flex items-center gap-6 border-b border-slate-100 overflow-x-auto">
+    <div class="flex items-center gap-6 border-b border-brand-900/[0.06] overflow-x-auto">
       <button type="button" (click)="cambiarTab('todos')"
         class="pb-3 text-sm font-semibold whitespace-nowrap transition-colors border-b-2 -mb-px"
         [class.text-gray-900]="tabActiva === 'todos'"
@@ -451,7 +513,7 @@
               [class.text-gray-900]="rangoPreset === preset.id"
               [class.bg-slate-100]="rangoPreset !== preset.id"
               [class.text-gray-600]="rangoPreset !== preset.id"
-              [class.hover:bg-slate-200]="rangoPreset !== preset.id">
+              [class.hover:bg-white/90]="rangoPreset !== preset.id">
               {{ preset.label }}
             </button>
           }
@@ -472,7 +534,7 @@
         </div>
       </div>
 
-      <div class="pt-5 border-t border-slate-100">
+      <div class="pt-5 border-t border-brand-900/[0.06]">
         <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-3">Estado logístico</p>
         <div class="space-y-2.5">
           @for (e of estadosLogisticos; track e.idEstado) {
@@ -488,7 +550,7 @@
         </div>
       </div>
 
-      <div class="pt-5 border-t border-slate-100">
+      <div class="pt-5 border-t border-brand-900/[0.06]">
         <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-3">Cliente</p>
         <input type="text"
           [(ngModel)]="textoClienteFiltro"
@@ -557,7 +619,7 @@
                       class="inline-flex items-center gap-2 pl-2.5 pr-2 py-1.5 rounded-full border-2 transition-colors text-sm text-gray-700"
                       [class.border-amber-400]="estadoDropdownPedido?.correlativoPedido === p.correlativoPedido"
                       [class.border-slate-200]="estadoDropdownPedido?.correlativoPedido !== p.correlativoPedido"
-                      [class.hover:border-slate-300]="estadoDropdownPedido?.correlativoPedido !== p.correlativoPedido">
+                      [class.hover:border-white]="estadoDropdownPedido?.correlativoPedido !== p.correlativoPedido">
                       <span class="w-2 h-2 rounded-full shrink-0" [ngClass]="dotEstadoPedido(p)"></span>
                       {{ labelEstadoPedido(p) }}
                       <span class="material-icons text-[16px] text-gray-400">expand_more</span>
@@ -566,7 +628,7 @@
                   <td class="px-4 py-3 text-center">
                     <div class="flex justify-center gap-2">
                       <button (click)="verDetalle(p)" title="Ver detalle"
-                        class="p-2 rounded-xl hover:bg-amber-50 text-amber-500 transition-colors">
+                        class="p-2 rounded-xl hover:bg-amber-100/60 text-amber-500 transition-colors">
                         <span class="material-icons text-[18px]">visibility</span>
                       </button>
                       <!-- Un pedido cancelado es terminal: solo se puede consultar
@@ -604,12 +666,12 @@
   ══════════════════════════════════════════════════════ -->
   @if (estadoDropdownPedido && estadoDropdownPos) {
     <div class="fixed inset-0 z-40" (click)="cerrarEstadoDropdown()"></div>
-    <div class="fixed z-50 w-56 bg-white rounded-2xl shadow-2xl border border-slate-100 py-1.5 animate-fade-in-up max-h-72 overflow-y-auto"
+    <div class="fixed z-50 w-56 glass-pop rounded-2xl py-1.5 animate-fade-in-up max-h-72 overflow-y-auto"
       [style.top.px]="estadoDropdownPos.top" [style.left.px]="estadoDropdownPos.left"
       (click)="$event.stopPropagation()">
       @for (e of estadosLogisticos; track e.idEstado) {
         <button type="button" (click)="seleccionarEstadoDropdown(e)"
-          class="w-full flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-amber-50 transition-colors text-left">
+          class="w-full flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-amber-100/60 transition-colors text-left">
           <span class="w-2 h-2 rounded-full shrink-0" [ngClass]="e.dot"></span>
           <span class="flex-1 text-gray-700">{{ e.label }}</span>
           @if (estadoDropdownPedido.estadoActual?.idEstado === e.idEstado) {
@@ -633,7 +695,7 @@
           <p class="text-xs text-gray-400 mt-1">{{ pedidoSeleccionado.nombreClientePedido }}</p>
         </div>
         <button type="button" (click)="cerrarDetalle()"
-          class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 transition-colors shrink-0">
+          class="w-8 h-8 rounded-full bg-white/50 hover:bg-white/90 flex items-center justify-center text-gray-500 transition-colors shrink-0">
           <span class="material-icons text-[18px]">close</span>
         </button>
       </div>
@@ -714,10 +776,28 @@
               <p class="drawer-field-label mb-2">Items y servicios</p>
               <div class="space-y-1.5">
                 @for (d of pedidoSeleccionado.detalles ?? []; track d.idItem) {
-                  <div class="flex items-center justify-between text-sm">
-                    <span class="text-gray-600">{{ d.cantidadItemPedido }}x {{ d.nombreItem || ('Item #' + d.idItem) }}</span>
+                  <div class="flex items-start justify-between text-sm gap-2">
+                    <span class="text-gray-600 min-w-0">
+                      {{ d.cantidadItemPedido }}x {{ d.nombreItem || ('Item #' + d.idItem) }}
+                      <!-- El motivo se muestra completo: es la trazabilidad de por
+                           qué este pedido cobra menos que su lista de precios. -->
+                      @if (d.montoDescuento) {
+                        <span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded-full
+                                     bg-amber-100 text-amber-800 text-[10px] font-bold">
+                          {{ textoDescuento(d.tipoDescuento, d.valorDescuento) }}
+                        </span>
+                        @if (d.motivoDescuento) {
+                          <span class="block text-[11px] text-gray-400 italic">{{ d.motivoDescuento }}</span>
+                        }
+                      }
+                    </span>
                     @if (d.costoItem) {
-                      <span class="text-gray-800 font-medium">Q {{ (d.costoItem * d.cantidadItemPedido) | number:'1.2-2' }}</span>
+                      <span class="text-gray-800 font-medium shrink-0 text-right">
+                        @if (d.montoDescuento) {
+                          <span class="block text-[11px] text-gray-400 line-through">Q {{ (d.costoItem * d.cantidadItemPedido) | number:'1.2-2' }}</span>
+                        }
+                        Q {{ (d.subtotalNeto ?? d.costoItem * d.cantidadItemPedido) | number:'1.2-2' }}
+                      </span>
                     }
                   </div>
                 }
@@ -728,11 +808,25 @@
                     [class.ring-emerald-200]="d.fechaRealizado"
                     [class.bg-emerald-50/50]="d.fechaRealizado"
                     [class.ring-slate-200]="!d.fechaRealizado">
-                    <div class="flex items-center justify-between text-sm gap-2">
+                    <div class="flex items-start justify-between text-sm gap-2">
                       <span class="text-gray-700 font-medium flex-1 min-w-0">
                         {{ d.cantidad }}x {{ d.nombreServicio || ('Servicio #' + d.idServicio) }}
+                        @if (d.montoDescuento) {
+                          <span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded-full
+                                       bg-amber-100 text-amber-800 text-[10px] font-bold">
+                            {{ textoDescuento(d.tipoDescuento, d.valorDescuento) }}
+                          </span>
+                          @if (d.motivoDescuento) {
+                            <span class="block text-[11px] text-gray-400 italic font-normal">{{ d.motivoDescuento }}</span>
+                          }
+                        }
                       </span>
-                      <span class="text-gray-800 font-medium shrink-0">Q {{ (d.precioAcordado * d.cantidad) | number:'1.2-2' }}</span>
+                      <span class="text-gray-800 font-medium shrink-0 text-right">
+                        @if (d.montoDescuento) {
+                          <span class="block text-[11px] text-gray-400 line-through">Q {{ (d.precioAcordado * d.cantidad) | number:'1.2-2' }}</span>
+                        }
+                        Q {{ (d.subtotalNeto ?? d.precioAcordado * d.cantidad) | number:'1.2-2' }}
+                      </span>
                     </div>
 
                     @if (d.idDetalleServPedido) {
@@ -750,7 +844,7 @@
                         <button type="button" (click)="alternarServicioRealizado(d)"
                           class="mt-2 w-full inline-flex items-center justify-center gap-2 py-2 rounded-xl
                                  border-2 border-dashed border-slate-300 text-slate-500 text-xs font-bold
-                                 hover:border-emerald-400 hover:text-emerald-600 hover:bg-emerald-50/50 transition-all">
+                                 hover:border-emerald-400 hover:text-emerald-600 hover:bg-emerald-100/50 transition-all">
                           <span class="material-icons text-[16px]">check_circle_outline</span>
                           CONFIRMAR REALIZADO
                         </button>
@@ -767,10 +861,24 @@
             <p class="drawer-field-label mb-3">Cuenta de cobro</p>
 
             @if (estadoCuenta) {
-              <div class="rounded-xl bg-slate-50 p-4 grid grid-cols-3 gap-3 text-center mb-4">
+              <!-- El bruto y el descuento solo aparecen si hubo descuento: en un
+                   pedido sin descuentos serian dos cifras iguales al total. -->
+              @if (estadoCuenta.totalDescuentos > 0) {
+                <div class="rounded-xl bg-amber-100/60 ring-1 ring-amber-200 px-4 py-3 mb-3 text-sm">
+                  <div class="flex items-center justify-between text-gray-600">
+                    <span>Subtotal sin descuento</span>
+                    <span class="font-medium">Q {{ estadoCuenta.totalBruto | number:'1.2-2' }}</span>
+                  </div>
+                  <div class="flex items-center justify-between text-amber-700 font-semibold mt-1">
+                    <span>Descuentos aplicados</span>
+                    <span>- Q {{ estadoCuenta.totalDescuentos | number:'1.2-2' }}</span>
+                  </div>
+                </div>
+              }
+              <div class="rounded-xl bg-white/40 p-4 grid grid-cols-3 gap-3 text-center mb-4">
                 <div>
                   <p class="text-[10px] uppercase tracking-wider text-gray-400 mb-1">Total</p>
-                  <p class="font-montserrat font-bold text-gray-900">Q {{ estadoCuenta.montoTotalPedido | number:'1.0-0' }}</p>
+                  <p class="font-montserrat font-bold text-gray-900">Q {{ estadoCuenta.totalPedido | number:'1.0-0' }}</p>
                 </div>
                 <div>
                   <p class="text-[10px] uppercase tracking-wider text-gray-400 mb-1">Pagado</p>
@@ -798,7 +906,7 @@
             } @else {
               <div class="space-y-2 mb-4">
                 @for (pago of pagos; track pago.idPago) {
-                  <div class="flex items-center justify-between text-sm rounded-lg border border-slate-100 px-3 py-2"
+                  <div class="flex items-center justify-between text-sm rounded-lg border border-brand-900/[0.06] px-3 py-2"
                     [class.opacity-40]="!pago.estadoRegistro">
                     <div>
                       <p class="font-medium text-gray-800">Q {{ pago.montoPago | number:'1.2-2' }} <span class="text-xs text-gray-400 font-normal">{{ pago.metodoPago }}</span></p>
@@ -817,7 +925,7 @@
             }
 
             @if (esPedidoCancelado(pedidoSeleccionado)) {
-              <p class="flex items-center justify-center gap-1.5 text-xs text-gray-400 border-2 border-dashed border-slate-200 rounded-xl py-2.5">
+              <p class="flex items-center justify-center gap-1.5 text-xs text-gray-400 border-2 border-dashed border-white/80 rounded-xl py-2.5">
                 <span class="material-icons text-[16px] text-red-400">block</span>
                 No se pueden registrar pagos en un pedido cancelado
               </p>
@@ -828,7 +936,7 @@
                 Registrar pago
               </button>
             } @else {
-              <form [formGroup]="formPago" (ngSubmit)="registrarPago()" class="space-y-3 rounded-xl bg-slate-50 p-4">
+              <form [formGroup]="formPago" (ngSubmit)="registrarPago()" class="space-y-3 rounded-xl bg-white/40 p-4">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div class="flex flex-col gap-1">
                     <label class="drawer-field-label">Monto</label>
@@ -882,7 +990,7 @@
           <p class="text-xs text-gray-400 mt-1">{{ pedidoEditando.correlativoPedido }}</p>
         </div>
         <button type="button" (click)="cerrarEditar()"
-          class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 transition-colors shrink-0">
+          class="w-8 h-8 rounded-full bg-white/50 hover:bg-white/90 flex items-center justify-center text-gray-500 transition-colors shrink-0">
           <span class="material-icons text-[18px]">close</span>
         </button>
       </div>
@@ -930,7 +1038,7 @@
             <div class="flex flex-col gap-2 md:col-span-2 relative">
               <label class="drawer-field-label">Fecha del evento <span class="text-red-500">*</span></label>
               <button type="button" (click)="abrirCalendarioEditar()"
-                class="w-full flex items-center justify-between border-2 rounded-xl px-3 py-2.5 text-sm text-left bg-white transition-colors"
+                class="w-full flex items-center justify-between border-2 rounded-xl px-3 py-2.5 text-sm text-left bg-white/45 shadow-inner-glass transition-colors"
                 [class.border-amber-400]="calendarioEditarAbierto"
                 [class.border-slate-200]="!calendarioEditarAbierto"
                 [class.border-red-400]="campoInvalidoEditar('fechaEventoHora') && !calendarioEditarAbierto">
@@ -945,15 +1053,15 @@
 
               @if (calendarioEditarAbierto) {
                 <div class="fixed inset-0 z-40" (click)="cerrarCalendarioEditar()"></div>
-                <div class="absolute z-50 top-full mt-2 left-0 w-full max-w-sm bg-white rounded-3xl shadow-2xl border border-slate-100 p-5 animate-fade-in-up"
+                <div class="absolute z-50 top-full mt-2 left-0 w-full max-w-sm glass-pop rounded-3xl p-5 animate-fade-in-up"
                   (click)="horaPickerEditarAbierto = false; $event.stopPropagation()">
 
                   <div class="flex items-center justify-between mb-4">
-                    <button type="button" (click)="mesAnteriorEditar()" class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-gray-500 transition-colors">
+                    <button type="button" (click)="mesAnteriorEditar()" class="w-8 h-8 rounded-full hover:bg-white/70 flex items-center justify-center text-gray-500 transition-colors">
                       <span class="material-icons text-[18px]">chevron_left</span>
                     </button>
                     <span class="font-serif italic text-lg text-gray-900">{{ nombreMesVisibleEditar }}</span>
-                    <button type="button" (click)="mesSiguienteEditar()" class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-gray-500 transition-colors">
+                    <button type="button" (click)="mesSiguienteEditar()" class="w-8 h-8 rounded-full hover:bg-white/70 flex items-center justify-center text-gray-500 transition-colors">
                       <span class="material-icons text-[18px]">chevron_right</span>
                     </button>
                   </div>
@@ -976,7 +1084,7 @@
                             [class.ring-2]="esSeleccionadoEditar(dia) && !esHoy(dia)"
                             [class.ring-brand-900]="esSeleccionadoEditar(dia) && !esHoy(dia)"
                             [class.text-gray-700]="!esHoy(dia)"
-                            [class.hover:bg-slate-100]="!esHoy(dia)">
+                            [class.hover:bg-white/70]="!esHoy(dia)">
                             {{ dia.getDate() }}
                           </button>
                         }
@@ -984,9 +1092,9 @@
                     }
                   </div>
 
-                  <div class="relative mt-3 pt-3 border-t border-slate-100">
+                  <div class="relative mt-3 pt-3 border-t border-brand-900/[0.06]">
                     <button type="button" (click)="toggleHoraPickerEditar($event)"
-                      class="w-full flex items-center gap-2 border-2 rounded-lg px-3 py-2 text-sm transition-colors bg-white"
+                      class="w-full flex items-center gap-2 border-2 rounded-lg px-3 py-2 text-sm transition-colors bg-white/45 shadow-inner-glass"
                       [class.border-amber-400]="horaPickerEditarAbierto"
                       [class.border-slate-200]="!horaPickerEditarAbierto">
                       <span class="material-icons text-[18px] text-slate-400">schedule</span>
@@ -994,7 +1102,7 @@
                     </button>
 
                     @if (horaPickerEditarAbierto) {
-                      <div class="absolute z-10 top-full mt-1 left-0 flex bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden"
+                      <div class="absolute z-10 top-full mt-1 left-0 flex glass-pop rounded-2xl overflow-hidden"
                         (click)="$event.stopPropagation()">
                         <div class="w-16 max-h-48 overflow-y-auto py-1">
                           @for (h of horasDisponibles; track h) {
@@ -1004,12 +1112,12 @@
                               [class.text-gray-900]="horaSeleccionadaNumEditar === h"
                               [class.font-bold]="horaSeleccionadaNumEditar === h"
                               [class.text-gray-600]="horaSeleccionadaNumEditar !== h"
-                              [class.hover:bg-slate-50]="horaSeleccionadaNumEditar !== h">
+                              [class.hover:bg-white/60]="horaSeleccionadaNumEditar !== h">
                               {{ h < 10 ? '0' + h : h }}
                             </button>
                           }
                         </div>
-                        <div class="w-16 max-h-48 overflow-y-auto py-1 border-l border-slate-100">
+                        <div class="w-16 max-h-48 overflow-y-auto py-1 border-l border-brand-900/[0.06]">
                           @for (m of minutosDisponibles; track m) {
                             <button type="button" (click)="seleccionarMinutoEditar(m)"
                               class="w-full text-center py-1.5 text-sm font-montserrat transition-colors"
@@ -1017,7 +1125,7 @@
                               [class.text-gray-900]="minutoSeleccionadoNumEditar === m"
                               [class.font-bold]="minutoSeleccionadoNumEditar === m"
                               [class.text-gray-600]="minutoSeleccionadoNumEditar !== m"
-                              [class.hover:bg-slate-50]="minutoSeleccionadoNumEditar !== m">
+                              [class.hover:bg-white/60]="minutoSeleccionadoNumEditar !== m">
                               {{ m < 10 ? '0' + m : m }}
                             </button>
                           }
@@ -1031,7 +1139,7 @@
 
           </div>
 
-          <div class="flex items-start gap-2 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3">
+          <div class="flex items-start gap-2 rounded-xl bg-amber-100/60 border border-amber-200 px-4 py-3">
             <span class="material-icons text-amber-500 text-[18px] mt-0.5">info</span>
             <p class="text-xs text-amber-800 leading-relaxed">
               Editar items o servicios recalculará el saldo pendiente del pedido; los pagos ya registrados se conservan.
@@ -1049,19 +1157,20 @@
               </button>
             </div>
 
-            <div class="rounded-xl border border-gray-200 overflow-hidden">
+            <div class="rounded-xl border border-white/80 overflow-hidden">
               <div class="overflow-x-auto">
-              <table class="w-full min-w-[680px] text-sm">
+              <table class="w-full min-w-[880px] text-sm">
                 <thead class="table-head">
                   <tr>
                     <th class="px-4 py-3 text-left">Item</th>
-                    <th class="px-4 py-3 text-right w-32">Cantidad</th>
-                    <th class="px-4 py-3 text-right w-32">Costo unit.</th>
+                    <th class="px-4 py-3 text-right w-28">Cantidad</th>
+                    <th class="px-4 py-3 text-right w-28">Costo unit.</th>
+                    <th class="px-4 py-3 text-left w-56">Descuento</th>
                     <th class="px-4 py-3 text-right w-32">Subtotal</th>
                     <th class="px-4 py-3 w-12"></th>
                   </tr>
                 </thead>
-                <tbody formArrayName="detalles" class="divide-y divide-gray-100">
+                <tbody formArrayName="detalles" class="divide-y divide-brand-900/[0.06]">
                   @for (detalle of detallesEditar.controls; let i = $index; track i) {
                     <tr [formGroupName]="i" class="row-hover">
                       <td class="px-4 py-2">
@@ -1072,7 +1181,7 @@
                       </td>
                       <td class="px-4 py-2">
                         <input formControlName="cantidadItemPedido" type="number" min="1"
-                          class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-[16px] sm:text-sm text-right outline-none focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/15"
+                          class="w-full border-2 border-white/80 bg-white/45 shadow-inner-glass rounded-lg px-2 py-1.5 text-[16px] sm:text-sm text-right outline-none focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/15"
                           [class.border-red-400]="detalleInvalidoEditar(i, 'cantidadItemPedido')">
                       </td>
                       <td class="px-4 py-2 text-right text-gray-600">
@@ -1083,8 +1192,32 @@
                           <span class="text-gray-300">—</span>
                         }
                       </td>
-                      <td class="px-4 py-2 text-right font-medium text-gray-800">
-                        @if (subtotalDetalleEditar(i) > 0) {
+                      <td class="px-4 py-2 align-top">
+                        <div class="flex items-center gap-1.5">
+                          <app-select formControlName="tipoDescuento" variante="tabla" acento="amber"
+                            [opciones]="tiposDescuento" campoValor="codigo" campoEtiqueta="label"
+                            placeholder="Sin descuento"></app-select>
+                          @if (descuentoPideValor(detallesEditar, i)) {
+                            <input formControlName="valorDescuento" type="number" min="0" step="0.01"
+                              class="w-20 shrink-0 border-2 border-white/80 bg-white/45 shadow-inner-glass rounded-lg px-2 py-1.5 text-[16px] sm:text-sm text-right outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
+                              [class.border-red-400]="descuentoLineaInvalido(detallesEditar, i)"
+                              placeholder="0">
+                          }
+                        </div>
+                        @if (descuentoActivo(detallesEditar, i)) {
+                          <input formControlName="motivoDescuento" type="text" maxlength="200"
+                            class="mt-1.5 w-full border-2 border-white/80 bg-white/45 shadow-inner-glass rounded-lg px-2 py-1 text-[16px] sm:text-xs outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
+                            placeholder="Motivo (opcional)">
+                        }
+                        @if (descuentoLineaInvalido(detallesEditar, i)) {
+                          <p class="mt-1 text-xs text-red-500">Indica un descuento válido (el porcentaje no pasa de 100)</p>
+                        }
+                      </td>
+                      <td class="px-4 py-2 text-right font-medium text-gray-800 align-top">
+                        @if (subtotalBrutoDetalleEditar(i) > 0) {
+                          @if (descuentoDetalleEditar(i) > 0) {
+                            <span class="block text-xs text-gray-400 line-through">Q {{ subtotalBrutoDetalleEditar(i) | number:'1.2-2' }}</span>
+                          }
                           Q {{ subtotalDetalleEditar(i) | number:'1.2-2' }}
                         } @else {
                           <span class="text-gray-300">—</span>
@@ -1093,7 +1226,7 @@
                       <td class="px-4 py-2 text-center">
                         @if (detallesEditar.length > 1) {
                           <button type="button" (click)="eliminarDetalleEditar(i)"
-                            class="p-1 rounded hover:bg-red-50 text-red-400 transition-colors">
+                            class="p-1 rounded hover:bg-red-100/50 text-red-400 transition-colors">
                             <span class="material-icons text-[18px]">delete_outline</span>
                           </button>
                         }
@@ -1118,24 +1251,25 @@
             </div>
 
             @if (detallesServiciosEditar.length === 0) {
-              <div class="rounded-xl border border-dashed border-gray-200 py-6 text-center text-sm text-gray-400">
+              <div class="rounded-xl border border-dashed border-white/80 py-6 text-center text-sm text-gray-400">
                 Ningún servicio agregado (opcional)
               </div>
             } @else {
-              <div class="rounded-xl border border-gray-200 overflow-hidden">
+              <div class="rounded-xl border border-white/80 overflow-hidden">
                 <div class="overflow-x-auto">
-                <table class="w-full min-w-[900px] text-sm">
+                <table class="w-full min-w-[1100px] text-sm">
                   <thead class="table-head">
                     <tr>
                       <th class="px-4 py-3 text-left">Servicio</th>
                       <th class="px-4 py-3 text-right w-24">Cantidad</th>
-                      <th class="px-4 py-3 text-right w-32">Precio acordado</th>
+                      <th class="px-4 py-3 text-right w-28">Precio acordado</th>
                       <th class="px-4 py-3 text-left">Especificaciones</th>
+                      <th class="px-4 py-3 text-left w-56">Descuento</th>
                       <th class="px-4 py-3 text-right w-32">Subtotal</th>
                       <th class="px-4 py-3 w-12"></th>
                     </tr>
                   </thead>
-                  <tbody formArrayName="detallesServicios" class="divide-y divide-gray-100">
+                  <tbody formArrayName="detallesServicios" class="divide-y divide-brand-900/[0.06]">
                     @for (detalle of detallesServiciosEditar.controls; let i = $index; track i) {
                       <tr [formGroupName]="i" class="row-hover">
                         <td class="px-4 py-2">
@@ -1146,22 +1280,46 @@
                         </td>
                         <td class="px-4 py-2">
                           <input formControlName="cantidad" type="number" min="1"
-                            class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-[16px] sm:text-sm text-right outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
+                            class="w-full border-2 border-white/80 bg-white/45 shadow-inner-glass rounded-lg px-2 py-1.5 text-[16px] sm:text-sm text-right outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
                             [class.border-red-400]="detalleServicioInvalidoEditar(i, 'cantidad')">
                         </td>
                         <td class="px-4 py-2">
                           <input formControlName="precioAcordado" type="number" min="0" step="0.01"
-                            class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-[16px] sm:text-sm text-right outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
+                            class="w-full border-2 border-white/80 bg-white/45 shadow-inner-glass rounded-lg px-2 py-1.5 text-[16px] sm:text-sm text-right outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
                             [class.border-red-400]="detalleServicioInvalidoEditar(i, 'precioAcordado')"
                             placeholder="0.00">
                         </td>
                         <td class="px-4 py-2">
                           <input formControlName="especificaciones" type="text"
-                            class="w-full border-2 border-slate-200 rounded-lg px-2 py-1.5 text-[16px] sm:text-sm outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
+                            class="w-full border-2 border-white/80 bg-white/45 shadow-inner-glass rounded-lg px-2 py-1.5 text-[16px] sm:text-sm outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
                             placeholder="Opcional">
                         </td>
-                        <td class="px-4 py-2 text-right font-medium text-gray-800">
-                          @if (subtotalDetalleServicioEditar(i) > 0) {
+                        <td class="px-4 py-2 align-top">
+                          <div class="flex items-center gap-1.5">
+                            <app-select formControlName="tipoDescuento" variante="tabla" acento="amber"
+                              [opciones]="tiposDescuento" campoValor="codigo" campoEtiqueta="label"
+                              placeholder="Sin descuento"></app-select>
+                            @if (descuentoPideValor(detallesServiciosEditar, i)) {
+                              <input formControlName="valorDescuento" type="number" min="0" step="0.01"
+                                class="w-20 shrink-0 border-2 border-white/80 bg-white/45 shadow-inner-glass rounded-lg px-2 py-1.5 text-[16px] sm:text-sm text-right outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
+                                [class.border-red-400]="descuentoLineaInvalido(detallesServiciosEditar, i)"
+                                placeholder="0">
+                            }
+                          </div>
+                          @if (descuentoActivo(detallesServiciosEditar, i)) {
+                            <input formControlName="motivoDescuento" type="text" maxlength="200"
+                              class="mt-1.5 w-full border-2 border-white/80 bg-white/45 shadow-inner-glass rounded-lg px-2 py-1 text-[16px] sm:text-xs outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15"
+                              placeholder="Motivo (opcional)">
+                          }
+                          @if (descuentoLineaInvalido(detallesServiciosEditar, i)) {
+                            <p class="mt-1 text-xs text-red-500">Indica un descuento válido (el porcentaje no pasa de 100)</p>
+                          }
+                        </td>
+                        <td class="px-4 py-2 text-right font-medium text-gray-800 align-top">
+                          @if (subtotalBrutoDetalleServicioEditar(i) > 0) {
+                            @if (descuentoDetalleServicioEditar(i) > 0) {
+                              <span class="block text-xs text-gray-400 line-through">Q {{ subtotalBrutoDetalleServicioEditar(i) | number:'1.2-2' }}</span>
+                            }
                             Q {{ subtotalDetalleServicioEditar(i) | number:'1.2-2' }}
                           } @else {
                             <span class="text-gray-300">—</span>
@@ -1169,7 +1327,7 @@
                         </td>
                         <td class="px-4 py-2 text-center">
                           <button type="button" (click)="eliminarDetalleServicioEditar(i)"
-                            class="p-1 rounded hover:bg-red-50 text-red-400 transition-colors">
+                            class="p-1 rounded hover:bg-red-100/50 text-red-400 transition-colors">
                             <span class="material-icons text-[18px]">delete_outline</span>
                           </button>
                         </td>
@@ -1183,12 +1341,24 @@
           </div>
 
           <!-- Total -->
-          <div class="rounded-xl bg-slate-50 px-5 py-4 flex items-center justify-between">
-            <span class="text-sm font-semibold text-gray-700">Total del pedido</span>
-            <span class="font-montserrat font-bold text-xl text-gray-900">Q {{ totalPedidoEditar | number:'1.2-2' }}</span>
+          <div class="rounded-xl bg-white/40 px-5 py-4 space-y-2">
+            @if (totalDescuentosPedidoEditar > 0) {
+              <div class="flex items-center justify-between text-sm text-gray-500">
+                <span>Subtotal</span>
+                <span>Q {{ totalBrutoPedidoEditar | number:'1.2-2' }}</span>
+              </div>
+              <div class="flex items-center justify-between text-sm font-semibold text-amber-700">
+                <span>Descuentos</span>
+                <span>- Q {{ totalDescuentosPedidoEditar | number:'1.2-2' }}</span>
+              </div>
+            }
+            <div class="flex items-center justify-between pt-1">
+              <span class="text-sm font-semibold text-gray-700">Total del pedido</span>
+              <span class="font-montserrat font-bold text-xl text-gray-900">Q {{ totalPedidoEditar | number:'1.2-2' }}</span>
+            </div>
           </div>
 
-          <div class="flex gap-3 pt-4 border-t border-gray-100">
+          <div class="flex gap-3 pt-4 border-t border-brand-900/[0.06]">
             <button type="button" (click)="cerrarEditar()" class="btn-cancel flex-1">Cancelar</button>
             <button type="submit" [disabled]="formEditar.invalid" class="btn-submit flex-1">Guardar cambios</button>
           </div>

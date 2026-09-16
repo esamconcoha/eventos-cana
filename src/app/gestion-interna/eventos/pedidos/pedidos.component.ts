@@ -17,6 +17,9 @@ import { Salon } from '../../../interfaces/salon';
 import { EstadoLogisticoDef, ESTADOS_LOGISTICOS, ESTADO_CANCELADO_DEF, esCodigoCancelado } from '../../../interfaces/estado-logistico';
 import { TrazaEvento } from '../../../interfaces/trazabilidad';
 import { fechaHoraISOLocal } from '../../../shared/fecha.util';
+import { TIPOS_DESCUENTO, etiquetaDescuento, montoDescuento, netoLinea,
+         payloadDescuento, requiereValor, validadorDescuentoLinea } from '../../../shared/descuento.util';
+import { DescuentoLineaResponse, TipoDescuento } from '../../../interfaces/descuento';
 
 
 @Component({
@@ -72,6 +75,9 @@ export class PedidosComponent implements OnInit {
   get pedidosNoPagados(): Pedido[] {
     return this.pedidos.filter(p => p.estadoPago !== 'PAGADO');
   }
+
+  /** Opciones del selector de descuento de cada línea. */
+  readonly tiposDescuento = TIPOS_DESCUENTO;
 
   form: FormGroup;
 
@@ -399,8 +405,8 @@ export class PedidosComponent implements OnInit {
       next: (ec) => {
         pedido.estadoPago = ec.estadoPago;
         pedido.saldoPendiente = ec.saldoPendiente;
-        pedido.montoTotalPedido = ec.montoTotalPedido;
-        pedido.pagado = ec.pagado;
+        pedido.montoTotalPedido = ec.totalPedido;
+        pedido.pagado = ec.estadoPago === 'PAGADO';
         this.aplicarFiltros();
         this.toast.success('Actualizado', `${pedido.correlativoPedido}: saldo Q ${ec.saldoPendiente.toFixed(2)}`);
         this.cdr.detectChanges();
@@ -414,11 +420,16 @@ export class PedidosComponent implements OnInit {
     return this.form.get('detalles') as FormArray;
   }
 
+  // El descuento se valida a nivel de fila y no de control: si el valor es
+  // obligatorio y cuál es su tope depende del tipo elegido en la misma fila.
   nuevoDetalle(): FormGroup {
     return this.fb.group({
       idItem: [null, Validators.required],
-      cantidadItemPedido: [1, [Validators.required, Validators.min(1)]]
-    });
+      cantidadItemPedido: [1, [Validators.required, Validators.min(1)]],
+      tipoDescuento: ['NIN'],
+      valorDescuento: [null],
+      motivoDescuento: ['']
+    }, { validators: validadorDescuentoLinea });
   }
 
   agregarDetalle(): void {
@@ -437,10 +448,22 @@ export class PedidosComponent implements OnInit {
     return this.items.find(i => i.idItem === Number(idItem));
   }
 
-  subtotalDetalle(index: number): number {
+  subtotalBrutoDetalle(index: number): number {
     const row = this.detalles.at(index).value;
     const item = this.getItem(row.idItem);
     return item ? (item.costoItem * (row.cantidadItemPedido || 0)) : 0;
+  }
+
+  descuentoDetalle(index: number): number {
+    const row = this.detalles.at(index).value;
+    return montoDescuento(this.subtotalBrutoDetalle(index), row.tipoDescuento, row.valorDescuento);
+  }
+
+  // Lo que realmente cobra la fila. El backend recalcula lo mismo al guardar;
+  // acá solo se previsualiza mientras se llena el formulario.
+  subtotalDetalle(index: number): number {
+    const row = this.detalles.at(index).value;
+    return netoLinea(this.subtotalBrutoDetalle(index), row.tipoDescuento, row.valorDescuento);
   }
 
   // ─── Detalle de servicios (FormArray) ─────────────────────
@@ -453,8 +476,11 @@ export class PedidosComponent implements OnInit {
       idServicio:       [null, Validators.required],
       cantidad:         [1,   [Validators.required, Validators.min(1)]],
       precioAcordado:   [null, [Validators.required, Validators.min(0)]],
-      especificaciones: ['']
-    });
+      especificaciones: [''],
+      tipoDescuento:    ['NIN'],
+      valorDescuento:   [null],
+      motivoDescuento:  ['']
+    }, { validators: validadorDescuentoLinea });
   }
 
   agregarDetalleServicio(): void {
@@ -469,21 +495,64 @@ export class PedidosComponent implements OnInit {
     return this.servicios.find(s => s.idServicio === Number(idServicio));
   }
 
-  subtotalDetalleServicio(index: number): number {
+  subtotalBrutoDetalleServicio(index: number): number {
     const row = this.detallesServicios.at(index).value;
     return (row.precioAcordado || 0) * (row.cantidad || 0);
   }
 
-  get totalPedido(): number {
-    const totalItems = this.detalles.controls.reduce((acc, _, i) => acc + this.subtotalDetalle(i), 0);
-    const totalServicios = this.detallesServicios.controls.reduce((acc, _, i) => acc + this.subtotalDetalleServicio(i), 0);
-    return totalItems + totalServicios;
+  descuentoDetalleServicio(index: number): number {
+    const row = this.detallesServicios.at(index).value;
+    return montoDescuento(this.subtotalBrutoDetalleServicio(index), row.tipoDescuento, row.valorDescuento);
   }
 
+  subtotalDetalleServicio(index: number): number {
+    const row = this.detallesServicios.at(index).value;
+    return netoLinea(this.subtotalBrutoDetalleServicio(index), row.tipoDescuento, row.valorDescuento);
+  }
+
+  // ─── Descuentos (helpers de plantilla, sirven a los dos formularios) ──
+  /** true cuando el tipo elegido pide un número (POR o MON). */
+  descuentoPideValor(fa: FormArray, index: number): boolean {
+    return requiereValor(fa.at(index).get('tipoDescuento')?.value);
+  }
+
+  /** true cuando la fila tiene algún descuento: dispara el campo de motivo. */
+  descuentoActivo(fa: FormArray, index: number): boolean {
+    return (fa.at(index).get('tipoDescuento')?.value ?? 'NIN') !== 'NIN';
+  }
+
+  descuentoLineaInvalido(fa: FormArray, index: number): boolean {
+    const fila = fa.at(index);
+    return !!(fila.errors?.['descuentoSinValor'] || fila.errors?.['descuentoPorcentajeInvalido']) && fila.touched;
+  }
+
+  /** Texto corto del descuento de una línea, para chips en el drawer. */
+  textoDescuento(tipo: TipoDescuento | undefined, valor: number | undefined): string {
+    return etiquetaDescuento(tipo, valor);
+  }
+
+  get totalBrutoPedido(): number {
+    return this.detalles.controls.reduce((acc, _, i) => acc + this.subtotalBrutoDetalle(i), 0)
+      + this.detallesServicios.controls.reduce((acc, _, i) => acc + this.subtotalBrutoDetalleServicio(i), 0);
+  }
+
+  get totalDescuentosPedido(): number {
+    return this.detalles.controls.reduce((acc, _, i) => acc + this.descuentoDetalle(i), 0)
+      + this.detallesServicios.controls.reduce((acc, _, i) => acc + this.descuentoDetalleServicio(i), 0);
+  }
+
+  get totalPedido(): number {
+    return this.totalBrutoPedido - this.totalDescuentosPedido;
+  }
+
+  // Se prefiere lo que ya calculó el backend (montoTotalPedido / subtotalNeto);
+  // el cálculo local es el respaldo cuando el listado aún no lo trae.
   montoTotal(pedido: Pedido): number {
     if (pedido.montoTotalPedido != null) return pedido.montoTotalPedido;
-    const totalItems = (pedido.detalles ?? []).reduce((acc, d) => acc + (d.costoItem ?? 0) * d.cantidadItemPedido, 0);
-    const totalServicios = (pedido.detallesServicios ?? []).reduce((acc, d) => acc + d.precioAcordado * d.cantidad, 0);
+    const totalItems = (pedido.detalles ?? []).reduce((acc, d) =>
+      acc + (d.subtotalNeto ?? netoLinea((d.costoItem ?? 0) * d.cantidadItemPedido, d.tipoDescuento, d.valorDescuento)), 0);
+    const totalServicios = (pedido.detallesServicios ?? []).reduce((acc, d) =>
+      acc + (d.subtotalNeto ?? netoLinea(d.precioAcordado * d.cantidad, d.tipoDescuento, d.valorDescuento)), 0);
     return totalItems + totalServicios;
   }
 
@@ -492,11 +561,15 @@ export class PedidosComponent implements OnInit {
     return this.formEditar.get('detalles') as FormArray;
   }
 
-  nuevoDetalleEditar(idItem: number | null = null, cantidad = 1): FormGroup {
+  nuevoDetalleEditar(idItem: number | null = null, cantidad = 1,
+                     descuento: DescuentoLineaResponse = {}): FormGroup {
     return this.fb.group({
       idItem: [idItem, Validators.required],
-      cantidadItemPedido: [cantidad, [Validators.required, Validators.min(1)]]
-    });
+      cantidadItemPedido: [cantidad, [Validators.required, Validators.min(1)]],
+      tipoDescuento: [descuento.tipoDescuento ?? 'NIN'],
+      valorDescuento: [descuento.valorDescuento || null],
+      motivoDescuento: [descuento.motivoDescuento ?? '']
+    }, { validators: validadorDescuentoLinea });
   }
 
   agregarDetalleEditar(): void {
@@ -511,23 +584,38 @@ export class PedidosComponent implements OnInit {
     }
   }
 
-  subtotalDetalleEditar(index: number): number {
+  subtotalBrutoDetalleEditar(index: number): number {
     const row = this.detallesEditar.at(index).value;
     const item = this.getItem(row.idItem);
     return item ? (item.costoItem * (row.cantidadItemPedido || 0)) : 0;
+  }
+
+  descuentoDetalleEditar(index: number): number {
+    const row = this.detallesEditar.at(index).value;
+    return montoDescuento(this.subtotalBrutoDetalleEditar(index), row.tipoDescuento, row.valorDescuento);
+  }
+
+  subtotalDetalleEditar(index: number): number {
+    const row = this.detallesEditar.at(index).value;
+    return netoLinea(this.subtotalBrutoDetalleEditar(index), row.tipoDescuento, row.valorDescuento);
   }
 
   get detallesServiciosEditar(): FormArray {
     return this.formEditar.get('detallesServicios') as FormArray;
   }
 
-  nuevoDetalleServicioEditar(idServicio: number | null = null, cantidad = 1, precioAcordado: number | null = null, especificaciones = ''): FormGroup {
+  nuevoDetalleServicioEditar(idServicio: number | null = null, cantidad = 1,
+                             precioAcordado: number | null = null, especificaciones = '',
+                             descuento: DescuentoLineaResponse = {}): FormGroup {
     return this.fb.group({
       idServicio:       [idServicio, Validators.required],
       cantidad:         [cantidad,   [Validators.required, Validators.min(1)]],
       precioAcordado:   [precioAcordado, [Validators.required, Validators.min(0)]],
-      especificaciones: [especificaciones]
-    });
+      especificaciones: [especificaciones],
+      tipoDescuento:    [descuento.tipoDescuento ?? 'NIN'],
+      valorDescuento:   [descuento.valorDescuento || null],
+      motivoDescuento:  [descuento.motivoDescuento ?? '']
+    }, { validators: validadorDescuentoLinea });
   }
 
   agregarDetalleServicioEditar(): void {
@@ -538,15 +626,33 @@ export class PedidosComponent implements OnInit {
     this.detallesServiciosEditar.removeAt(i);
   }
 
-  subtotalDetalleServicioEditar(index: number): number {
+  subtotalBrutoDetalleServicioEditar(index: number): number {
     const row = this.detallesServiciosEditar.at(index).value;
     return (row.precioAcordado || 0) * (row.cantidad || 0);
   }
 
+  descuentoDetalleServicioEditar(index: number): number {
+    const row = this.detallesServiciosEditar.at(index).value;
+    return montoDescuento(this.subtotalBrutoDetalleServicioEditar(index), row.tipoDescuento, row.valorDescuento);
+  }
+
+  subtotalDetalleServicioEditar(index: number): number {
+    const row = this.detallesServiciosEditar.at(index).value;
+    return netoLinea(this.subtotalBrutoDetalleServicioEditar(index), row.tipoDescuento, row.valorDescuento);
+  }
+
+  get totalBrutoPedidoEditar(): number {
+    return this.detallesEditar.controls.reduce((acc, _, i) => acc + this.subtotalBrutoDetalleEditar(i), 0)
+      + this.detallesServiciosEditar.controls.reduce((acc, _, i) => acc + this.subtotalBrutoDetalleServicioEditar(i), 0);
+  }
+
+  get totalDescuentosPedidoEditar(): number {
+    return this.detallesEditar.controls.reduce((acc, _, i) => acc + this.descuentoDetalleEditar(i), 0)
+      + this.detallesServiciosEditar.controls.reduce((acc, _, i) => acc + this.descuentoDetalleServicioEditar(i), 0);
+  }
+
   get totalPedidoEditar(): number {
-    const totalItems = this.detallesEditar.controls.reduce((acc, _, i) => acc + this.subtotalDetalleEditar(i), 0);
-    const totalServicios = this.detallesServiciosEditar.controls.reduce((acc, _, i) => acc + this.subtotalDetalleServicioEditar(i), 0);
-    return totalItems + totalServicios;
+    return this.totalBrutoPedidoEditar - this.totalDescuentosPedidoEditar;
   }
 
   detalleInvalidoEditar(index: number, campo: string): boolean {
@@ -761,13 +867,15 @@ export class PedidosComponent implements OnInit {
       codTipoEvento: this.form.value.codTipoEvento,
       detalles: this.detalles.value.map((d: any) => ({
         idItem: Number(d.idItem),
-        cantidadItemPedido: d.cantidadItemPedido
+        cantidadItemPedido: d.cantidadItemPedido,
+        ...payloadDescuento(d)
       })),
       detallesServicios: this.detallesServicios.value.map((d: any) => ({
         idServicio: Number(d.idServicio),
         cantidad: d.cantidad,
         precioAcordado: d.precioAcordado,
-        especificaciones: d.especificaciones || undefined
+        especificaciones: d.especificaciones || undefined,
+        ...payloadDescuento(d)
       }))
     };
 
@@ -1095,14 +1203,15 @@ export class PedidosComponent implements OnInit {
 
         const detalles = data.detalles ?? [];
         if (detalles.length > 0) {
-          detalles.forEach(d => this.detallesEditar.push(this.nuevoDetalleEditar(d.idItem, d.cantidadItemPedido)));
+          detalles.forEach(d => this.detallesEditar.push(
+            this.nuevoDetalleEditar(d.idItem, d.cantidadItemPedido, d)));
         } else {
           this.detallesEditar.push(this.nuevoDetalleEditar());
         }
 
         (data.detallesServicios ?? []).forEach(d =>
           this.detallesServiciosEditar.push(
-            this.nuevoDetalleServicioEditar(d.idServicio, d.cantidad, d.precioAcordado, d.especificaciones ?? '')
+            this.nuevoDetalleServicioEditar(d.idServicio, d.cantidad, d.precioAcordado, d.especificaciones ?? '', d)
           )
         );
 
@@ -1141,13 +1250,15 @@ export class PedidosComponent implements OnInit {
       fechaEvento: this.formEditar.value.fechaEventoHora,
       detalles: this.detallesEditar.value.map((d: any) => ({
         idItem: Number(d.idItem),
-        cantidadItemPedido: d.cantidadItemPedido
+        cantidadItemPedido: d.cantidadItemPedido,
+        ...payloadDescuento(d)
       })),
       detallesServicios: this.detallesServiciosEditar.value.map((d: any) => ({
         idServicio: Number(d.idServicio),
         cantidad: d.cantidad,
         precioAcordado: d.precioAcordado,
-        especificaciones: d.especificaciones || undefined
+        especificaciones: d.especificaciones || undefined,
+        ...payloadDescuento(d)
       }))
     };
 

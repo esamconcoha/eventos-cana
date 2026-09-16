@@ -2,7 +2,7 @@
   <div class="modal-backdrop" (click)="cerrar()"></div>
 
   <div class="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
-    <div class="pointer-events-auto w-full max-w-2xl max-h-[88vh] bg-white rounded-[2rem] shadow-2xl
+    <div class="pointer-events-auto w-full max-w-2xl max-h-[88vh] glass-strong rounded-[2rem]
                 overflow-hidden animate-modal-in flex flex-col"
       (click)="$event.stopPropagation()">
 
@@ -38,7 +38,7 @@
             }
 
             <div class="flex items-center gap-2 mt-2 flex-wrap">
-              <span class="badge {{ estadoActual?.badgeClass ?? 'bg-slate-50 text-slate-600 ring-slate-200' }}">
+              <span class="badge {{ estadoActual?.badgeClass ?? 'bg-white/40 text-slate-600 ring-white/70' }}">
                 {{ nombreEstadoActual }}
               </span>
               @if (detenido) {
@@ -77,7 +77,7 @@
         <!-- El stepper scrollea dentro de su propia caja: con 6 pasos en un
              celular las etiquetas de pasos contiguos se pisan, y un min-w les
              garantiza ancho legible sin empujar el scroll horizontal a la página. -->
-        <div class="shrink-0 px-6 py-5 border-b border-slate-100 bg-slate-50/60 overflow-x-auto">
+        <div class="shrink-0 px-6 py-5 border-b border-brand-900/[0.06] bg-white/30 overflow-x-auto">
           <div class="flex items-start min-w-[420px]">
             @for (p of pasos; track p.def.codigo; let i = $index; let ultimo = $last) {
               <div class="flex-1 flex flex-col items-center relative min-w-0">
@@ -111,20 +111,20 @@
         </div>
 
         <!-- ── Métricas ── -->
-        <div class="shrink-0 grid grid-cols-2 sm:grid-cols-4 gap-px bg-slate-100 border-b border-slate-100">
-          <div class="bg-white px-4 py-3">
+        <div class="shrink-0 grid grid-cols-2 sm:grid-cols-4 gap-px bg-white/30 border-b border-brand-900/[0.06]">
+          <div class="bg-white/40 px-4 py-3">
             <p class="drawer-field-label">Tiempo total</p>
             <p class="text-sm font-semibold text-gray-900 mt-1">{{ duracionTotal }}</p>
           </div>
-          <div class="bg-white px-4 py-3">
+          <div class="bg-white/40 px-4 py-3">
             <p class="drawer-field-label">En estado actual</p>
             <p class="text-sm font-semibold text-gray-900 mt-1">{{ duracionEstadoActual }}</p>
           </div>
-          <div class="bg-white px-4 py-3">
+          <div class="bg-white/40 px-4 py-3">
             <p class="drawer-field-label">Cambios</p>
             <p class="text-sm font-semibold text-gray-900 mt-1">{{ totalCambios }}</p>
           </div>
-          <div class="bg-white px-4 py-3">
+          <div class="bg-white/40 px-4 py-3">
             <p class="drawer-field-label">Inicio</p>
             <p class="text-sm font-semibold text-gray-900 mt-1">
               {{ fechaInicioCiclo ? (fechaInicioCiclo | date: 'dd/MM/yy') : '—' }}

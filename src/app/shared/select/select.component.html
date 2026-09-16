@@ -17,7 +17,7 @@
          tiene transform y pasa a ser el bloque contenedor, con lo que las
          coordenadas de viewport de un fixed dejan de valer. -->
     <div #panel class="absolute z-50 top-full mt-2 left-0 w-full min-w-[10rem] max-h-64 overflow-y-auto
-                bg-white rounded-2xl shadow-2xl border border-slate-100 py-2 animate-fade-in-up"
+                glass-pop rounded-2xl py-2 animate-fade-in-up"
       (click)="$event.stopPropagation()">
 
       @if (!opciones.length && !etiquetaVacio) {
@@ -31,7 +31,7 @@
           [class.text-amber-700]="valorActual === null"
           [class.font-semibold]="valorActual === null"
           [class.text-gray-500]="valorActual !== null"
-          [class.hover:bg-slate-50]="valorActual !== null">
+          [class.hover:bg-white/60]="valorActual !== null">
           <span class="truncate italic">{{ etiquetaVacio }}</span>
           @if (valorActual === null) {
             <span class="material-icons text-[16px] shrink-0">check</span>
@@ -46,7 +46,7 @@
           [class.text-amber-700]="esSeleccionado(opcion)"
           [class.font-semibold]="esSeleccionado(opcion)"
           [class.text-gray-700]="!esSeleccionado(opcion)"
-          [class.hover:bg-slate-50]="!esSeleccionado(opcion)">
+          [class.hover:bg-white/60]="!esSeleccionado(opcion)">
           <span class="truncate">{{ opcion[campoEtiqueta] }}</span>
           @if (esSeleccionado(opcion)) {
             <span class="material-icons text-[16px] shrink-0">check</span>

@@ -190,6 +190,42 @@ export class CalendarioComponent implements OnInit {
     return estadoLogisticoPorCodigo(item.codigoEstadoPedido)?.dot ?? 'bg-slate-300';
   }
 
+  /**
+   * Borde de acento (izquierdo) por tipo para las tarjetas del panel del día:
+   * sobre el fondo de vidrio un anillo tenue casi no se distingue, así que el
+   * tipo de actividad se lee de un vistazo por el color del canto. Usa la misma
+   * paleta que el dot/chip de cada tipo.
+   */
+  acentoTipo(item: CalendarioItem): string {
+    switch (item.tipo) {
+      case 'EVENTO':      return 'border-l-purple-500';
+      case 'ENTREGA':     return 'border-l-amber-400';
+      case 'RECOLECCION': return 'border-l-sky-500';
+      default:            return 'border-l-slate-300';
+    }
+  }
+
+  /**
+   * Avance de una ENTREGA (viajes reales / aproximados), acotado a 0..100 para
+   * la barra. Otros tipos no tienen avance y devuelven 0.
+   */
+  avancePct(item: CalendarioItem): number {
+    if (item.tipo !== 'ENTREGA') { return 0; }
+    const aprox = item.cantidadViajesAproximados ?? 0;
+    const reales = item.cantidadViajesReales ?? 0;
+    if (aprox <= 0) { return reales > 0 ? 100 : 0; }
+    return Math.min(100, Math.round((reales / aprox) * 100));
+  }
+
+  /** Color de la barra de avance de la entrega, igual criterio que el listado. */
+  avanceColor(item: CalendarioItem): string {
+    const aprox = item.cantidadViajesAproximados ?? 0;
+    const reales = item.cantidadViajesReales ?? 0;
+    if (reales > aprox && aprox > 0) { return 'bg-red-500'; }
+    if (item.entregaFinalizada) { return 'bg-emerald-500'; }
+    return 'bg-amber-400';
+  }
+
   get tituloMes(): string {
     const texto = this.mesVisible.toLocaleDateString('es', { month: 'long', year: 'numeric' });
     return texto.charAt(0).toUpperCase() + texto.slice(1);

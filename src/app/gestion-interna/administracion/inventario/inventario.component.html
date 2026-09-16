@@ -93,7 +93,7 @@
             placeholder="Opcional">
         </div>
 
-        <div class="md:col-span-2 flex justify-end gap-3 pt-4 border-t border-gray-100">
+        <div class="md:col-span-2 flex justify-end gap-3 pt-4 border-t border-brand-900/[0.06]">
           <button type="button" (click)="cancelar()"
             class="btn-cancel">
             Cancelar
@@ -124,7 +124,7 @@
         [class.border-slate-200]="textoBusqueda !== ''"
         [class.text-slate-600]="textoBusqueda !== ''"
         [class.font-medium]="textoBusqueda !== ''"
-        [class.hover:border-slate-300]="textoBusqueda !== ''">
+        [class.hover:border-white]="textoBusqueda !== ''">
         Todas
       </button>
       @for (t of tiposItem; track t.idCatalogo) {
@@ -139,7 +139,7 @@
           [class.border-slate-200]="textoBusqueda !== t.nombre"
           [class.text-slate-600]="textoBusqueda !== t.nombre"
           [class.font-medium]="textoBusqueda !== t.nombre"
-          [class.hover:border-slate-300]="textoBusqueda !== t.nombre">
+          [class.hover:border-white]="textoBusqueda !== t.nombre">
           {{ t.nombre }}
         </button>
       }
@@ -214,7 +214,7 @@
                 <span class="font-montserrat font-bold text-2xl text-gray-900">{{ item.cantidadItem }}</span>
               </div>
               @if (item.cantidadFaltante > 0) {
-                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-300">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold text-amber-700 bg-amber-100/60 border border-amber-300">
                   Stock bajo
                 </span>
               }
@@ -232,7 +232,7 @@
         </span>
         <div class="flex items-center gap-1">
           <button (click)="cambiarPagina(paginaActual - 1)" [disabled]="paginaActual === 1"
-            class="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+            class="p-1.5 rounded-lg hover:bg-white/70 text-gray-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
             <span class="material-icons text-[18px]">chevron_left</span>
           </button>
           @for (p of paginas; track p) {
@@ -243,7 +243,7 @@
             </button>
           }
           <button (click)="cambiarPagina(paginaActual + 1)" [disabled]="paginaActual === totalPaginas"
-            class="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+            class="p-1.5 rounded-lg hover:bg-white/70 text-gray-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
             <span class="material-icons text-[18px]">chevron_right</span>
           </button>
         </div>
@@ -255,12 +255,12 @@
        DETALLE DEL ITEM (modal)
   ══════════════════════════════════════════════════════ -->
   @if (itemDetalle) {
-    <div class="fixed inset-0 z-40 bg-[#021930]/50 backdrop-blur-[2px] animate-backdrop-in"
+    <div class="fixed inset-0 z-40 bg-[#021930]/40 backdrop-blur-md animate-backdrop-in"
       (click)="itemDetalle = null">
     </div>
 
     <div class="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
-      <div class="pointer-events-auto w-full max-w-md bg-white rounded-[2rem] shadow-2xl overflow-hidden animate-modal-in"
+      <div class="pointer-events-auto w-full max-w-md glass-strong rounded-[2rem] overflow-hidden animate-modal-in"
         (click)="$event.stopPropagation()">
 
         <!-- Foto -->
@@ -281,13 +281,13 @@
 
           <!-- Estadísticas -->
           <div class="grid grid-cols-2 gap-3 mt-5">
-            <div class="rounded-2xl bg-slate-50 px-4 py-3">
+            <div class="rounded-2xl bg-white/40 px-4 py-3">
               <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Precio unitario</p>
               <p class="font-montserrat font-bold text-xl text-gray-900 mt-0.5">
                 <span class="text-base align-top mr-0.5">Q</span>{{ itemDetalle.costoItem | number:'1.2-2' }}
               </p>
             </div>
-            <div class="rounded-2xl bg-slate-50 px-4 py-3">
+            <div class="rounded-2xl bg-white/40 px-4 py-3">
               <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Cantidad en stock</p>
               <p class="font-montserrat font-bold text-xl text-gray-900 mt-0.5">
                 {{ itemDetalle.cantidadItem }} <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">uds</span>
@@ -302,14 +302,14 @@
               <span class="badge-danger">Inactivo</span>
             }
             @if (itemDetalle.cantidadFaltante > 0) {
-              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-300">
+              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold text-amber-700 bg-amber-100/60 border border-amber-300">
                 Faltan {{ itemDetalle.cantidadFaltante }} uds
               </span>
             }
           </div>
 
           @if (itemDetalle.observaciones) {
-            <div class="mt-4 pt-4 border-t border-slate-100">
+            <div class="mt-4 pt-4 border-t border-brand-900/[0.06]">
               <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-400 mb-1">Observaciones</p>
               <p class="text-sm text-gray-600 leading-relaxed">{{ itemDetalle.observaciones }}</p>
             </div>
@@ -318,7 +318,7 @@
           <p class="text-xs text-slate-300 font-mono mt-4">ID #{{ itemDetalle.idItem }}</p>
 
           <!-- Acciones -->
-          <div class="flex gap-3 mt-6 pt-5 border-t border-slate-100">
+          <div class="flex gap-3 mt-6 pt-5 border-t border-brand-900/[0.06]">
             <button type="button" (click)="itemDetalle = null" class="btn-cancel flex-1">Cerrar</button>
             <button type="button" (click)="abrirEditar(itemDetalle); itemDetalle = null" class="btn-submit flex-1">
               Editar item

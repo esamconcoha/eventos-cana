@@ -9,14 +9,89 @@
   to   { width: 0%; }
 }
 
+/* ─────────────────────────────────────────────────────────────────────────
+   GLASSMORPHISM
+   El vidrio solo se ve si hay algo de color detras que desenfocar: por eso el
+   fondo deja de ser beige plano y pasa a ser una malla de degradados (beige,
+   ambar y azul marino, la paleta de siempre) con dos manchas de luz que flotan
+   despacio. Todo panel de la app (tarjetas, drawers, modales, popovers, menu)
+   es una capa semitransparente con backdrop-filter sobre esa malla.
+
+   Reglas que conviene no romper:
+   - backdrop-filter convierte al elemento en bloque contenedor de sus hijos
+     `fixed`. Se aplica solo a superficies hoja (cards, paneles), NUNCA al
+     layout ni al <main>: los drawers y modales fixed que viven dentro de
+     router-outlet dejarian de pegarse al viewport.
+   - Los <select> nativos y los logos siguen con fondo blanco solido: el
+     desplegable hereda el fondo del select, y el logo lo necesita para leerse.
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* Deriva lenta de las manchas de luz del fondo. */
+@keyframes glass-drift-a {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  33%      { transform: translate3d(6vw, -4vh, 0) scale(1.08); }
+  66%      { transform: translate3d(-3vw, 5vh, 0) scale(0.96); }
+}
+@keyframes glass-drift-b {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50%      { transform: translate3d(-7vw, -6vh, 0) scale(1.12); }
+}
+
 @layer base {
   body {
     @apply font-opensans text-[15px] text-gray-800;
-    background-color: #eae3d5;
+    /* isolation: los pseudo-elementos con z-index negativo quedan bajo el
+       contenido de la app pero encima del fondo del body, sin colarse detras
+       del <html>. */
+    isolation: isolate;
+    /* Base un punto más tostada y apagada que el beige claro anterior: el fondo
+       claro lavaba el vidrio y dejaba todo con poco contraste. */
+    background-color: #ddd3c1;
+    /* La primera capa (linear-gradient plano) es un velo tostado uniforme que
+       baja el brillo general de forma pareja; debajo van las manchas de color
+       de la malla, ya menos intensas que antes. */
     background-image:
-      radial-gradient(circle at 1px 1px, rgba(2, 25, 48, 0.05) 1px, transparent 0);
-    background-size: 22px 22px;
+      linear-gradient(rgba(2, 25, 48, 0.10), rgba(2, 25, 48, 0.10)),
+      radial-gradient(at 12% 8%,   rgba(236, 178, 84, 0.36) 0px, transparent 45%),
+      radial-gradient(at 88% 12%,  rgba(21, 101, 168, 0.22) 0px, transparent 42%),
+      radial-gradient(at 70% 78%,  rgba(217, 119, 6, 0.22) 0px, transparent 48%),
+      radial-gradient(at 18% 88%,  rgba(2, 25, 48, 0.24) 0px, transparent 46%),
+      radial-gradient(at 50% 45%,  rgba(255, 255, 255, 0.12) 0px, transparent 55%);
     background-attachment: fixed;
+    background-size: cover;
+  }
+
+  /* Dos manchas de luz que derivan por detras de todo. Son fijas al viewport,
+     asi que al hacer scroll el vidrio "refracta" algo distinto en cada tramo. */
+  body::before,
+  body::after {
+    content: '';
+    position: fixed;
+    z-index: -1;
+    pointer-events: none;
+    border-radius: 9999px;
+    filter: blur(70px);
+    will-change: transform;
+  }
+  body::before {
+    width: 46vw;
+    height: 46vw;
+    min-width: 26rem;
+    min-height: 26rem;
+    top: -12vw;
+    right: -8vw;
+    background: radial-gradient(circle at 40% 40%, rgba(245, 176, 65, 0.34), rgba(245, 176, 65, 0) 68%);
+    animation: glass-drift-a 26s ease-in-out infinite;
+  }
+  body::after {
+    width: 40vw;
+    height: 40vw;
+    min-width: 22rem;
+    min-height: 22rem;
+    bottom: -14vw;
+    left: -10vw;
+    background: radial-gradient(circle at 60% 60%, rgba(15, 74, 122, 0.34), rgba(15, 74, 122, 0) 68%);
+    animation: glass-drift-b 32s ease-in-out infinite;
   }
 
   h1 {
@@ -57,40 +132,80 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: rgba(2, 25, 48, 0.25);
+    background: rgba(2, 25, 48, 0.22);
     border-radius: 999px;
     border: 2px solid transparent;
     background-clip: padding-box;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(2, 25, 48, 0.4);
+    background: rgba(2, 25, 48, 0.38);
     background-clip: padding-box;
   }
   * {
     scrollbar-width: thin;
-    scrollbar-color: rgba(2, 25, 48, 0.25) transparent;
+    scrollbar-color: rgba(2, 25, 48, 0.22) transparent;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    body::before,
+    body::after {
+      animation: none;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 
 @layer components {
+  /* ── Vidrio base ──
+     Cuatro intensidades, de mas translucida a mas opaca:
+       glass        tarjetas y paneles de contenido
+       glass-tint   bloques secundarios dentro de una tarjeta (resumenes, totales)
+       glass-pop    popovers, desplegables y calendarios (van sobre otro vidrio)
+       glass-strong drawers, modales y la tarjeta de login (contenido largo,
+                    necesita mas opacidad para que el texto siga legible)
+       glass-navy   superficies oscuras: menu lateral, barra movil */
+  .glass {
+    @apply bg-white/50 backdrop-blur-2xl backdrop-saturate-150 border border-white/70 shadow-glass;
+  }
+  .glass-tint {
+    @apply bg-white/40 backdrop-blur-md border border-white/60 shadow-inner-glass;
+  }
+  .glass-pop {
+    @apply bg-white/80 backdrop-blur-3xl backdrop-saturate-150 border border-white/80 shadow-glass-lg;
+  }
+  .glass-strong {
+    @apply bg-white/75 backdrop-blur-4xl backdrop-saturate-150 border border-white/80 shadow-glass-lg;
+  }
+  .glass-navy {
+    @apply bg-brand-900/80 backdrop-blur-2xl backdrop-saturate-150 border-white/10 shadow-glass-navy;
+  }
+
   /* ── Superficies ── */
   .surface-card {
-    @apply bg-white/90 backdrop-blur-sm rounded-2xl border border-slate-200/80 shadow-card;
+    @apply glass rounded-2xl animate-glass-rise
+      transition-[box-shadow,transform,background-color] duration-300;
   }
   .surface-card--edit {
-    @apply ring-2 ring-amber-400/60 border-amber-200;
+    @apply ring-2 ring-amber-400/60 border-amber-200/80 bg-amber-50/40;
   }
 
   .page-header-icon {
-    @apply flex items-center justify-center w-11 h-11 rounded-2xl bg-[#021930] text-amber-400 shadow-glow-amber shrink-0;
+    @apply flex items-center justify-center w-11 h-11 rounded-2xl text-amber-400 shrink-0
+      bg-gradient-to-br from-[#0f3057] to-[#021930] shadow-glass-navy ring-1 ring-white/15;
   }
 
   .card-title-bar {
-    @apply px-6 py-4 border-b border-slate-100;
+    @apply px-6 py-4 border-b border-brand-900/[0.06];
   }
 
   .section-divider {
-    @apply border-t border-slate-200 pt-5;
+    @apply border-t border-brand-900/[0.07] pt-5;
   }
 
   /* ── Campos de formulario ── */
@@ -103,19 +218,19 @@
      vuelve a 14px. Como field-select, field-search y field-textarea se
      construyen sobre esta clase, el arreglo alcanza a todos los campos. */
   .field-input {
-    @apply w-full border-2 border-slate-200 rounded-xl px-3 py-2.5
-      text-[16px] sm:text-sm bg-slate-50/60 text-gray-900
-      outline-none transition-all duration-150
-      focus:bg-white focus:border-amber-400 focus:ring-4 focus:ring-amber-400/15;
+    @apply w-full border-2 border-white/80 rounded-xl px-3 py-2.5
+      text-[16px] sm:text-sm bg-white/45 text-gray-900 shadow-inner-glass
+      outline-none transition-all duration-200
+      focus:bg-white/80 focus:border-amber-400 focus:ring-4 focus:ring-amber-400/20;
   }
 
   .field-input.border-red-400 {
     @apply border-red-300 focus:ring-red-500/15;
   }
 
-  /* El bg-white no es decorativo: field-input trae bg-slate-50/60, que es
-     semitransparente, y un <select> le pasa su fondo a la lista desplegable.
-     Todo <select> debe usar esta clase, nunca field-input a secas. */
+  /* El bg-white no es decorativo: field-input trae un fondo semitransparente y
+     un <select> le pasa su fondo a la lista desplegable. Todo <select> debe
+     usar esta clase, nunca field-input a secas. */
   .field-select {
     @apply field-input bg-white;
   }
@@ -132,51 +247,85 @@
     @apply text-xs text-red-500;
   }
 
-  /* ── Botones ── */
+  /* ── Botones ──
+     Los principales llevan un brillo que cruza al pasar el mouse (::after) y
+     un reflejo fijo en el canto superior, como un boton de vidrio ambar. */
+  .btn-primary,
+  .btn-submit {
+    position: relative;
+    overflow: hidden;
+    background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0) 55%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.55),
+      0 0 0 1px rgba(217, 119, 6, 0.18),
+      0 10px 26px -10px rgba(180, 83, 9, 0.55);
+  }
+  .btn-primary::after,
+  .btn-submit::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 45%;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0));
+    transform: translateX(-130%) skewX(-18deg);
+    pointer-events: none;
+  }
+  .btn-primary:hover::after,
+  .btn-submit:hover:not(:disabled)::after {
+    animation: sheen 0.9s ease-in-out;
+  }
+
   .btn-primary {
     @apply inline-flex items-center gap-2 bg-amber-400 text-gray-900
-      px-4 py-2.5 rounded-full font-bold text-sm shadow-glow-amber
-      transition-all duration-150 hover:bg-amber-500 hover:-translate-y-0.5 active:translate-y-0;
+      px-4 py-2.5 rounded-full font-bold text-sm
+      transition-all duration-200 hover:bg-amber-400 hover:-translate-y-0.5 hover:shadow-glow-amber
+      active:translate-y-0 active:scale-[0.98];
   }
 
   .btn-submit {
     @apply px-5 py-2.5 rounded-xl bg-amber-400 text-gray-900 font-bold
-      transition-all duration-150 text-sm shadow-glow-amber hover:bg-amber-500 hover:-translate-y-0.5
+      transition-all duration-200 text-sm hover:-translate-y-0.5 hover:shadow-glow-amber
+      active:translate-y-0 active:scale-[0.98]
       disabled:opacity-40 disabled:pointer-events-none disabled:translate-y-0 disabled:shadow-none;
   }
 
   .btn-cancel {
-    @apply px-4 py-2.5 rounded-xl border-2 border-slate-200 text-slate-600 font-medium
-      hover:bg-slate-50 hover:border-slate-300 transition-colors text-sm;
+    @apply px-4 py-2.5 rounded-xl border-2 border-white/80 bg-white/35 text-slate-600 font-medium
+      backdrop-blur-md shadow-inner-glass
+      hover:bg-white/70 hover:border-white transition-all duration-200 active:scale-[0.98] text-sm;
   }
 
   /* Acción secundaria junto a un btn-primary: mismo alto y forma, sin relleno. */
   .btn-secondary {
-    @apply inline-flex items-center gap-2 bg-white text-slate-600 border-2 border-slate-200
-      px-4 py-2.5 rounded-full font-semibold text-sm
-      transition-all duration-150 hover:bg-slate-50 hover:border-slate-300
-      disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center gap-2 bg-white/40 text-slate-700 border-2 border-white/80
+      px-4 py-2.5 rounded-full font-semibold text-sm backdrop-blur-md shadow-inner-glass
+      transition-all duration-200 hover:bg-white/75 hover:border-white hover:-translate-y-0.5
+      active:translate-y-0 active:scale-[0.98]
+      disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-y-0;
   }
 
   .btn-icon-edit {
-    @apply p-2 rounded-xl hover:bg-amber-50 text-[#021930] transition-colors;
+    @apply p-2 rounded-xl hover:bg-amber-100/60 text-[#021930] transition-all duration-200 active:scale-95;
   }
 
   .btn-icon-delete {
-    @apply p-2 rounded-xl hover:bg-red-50 text-red-400 transition-colors;
+    @apply p-2 rounded-xl hover:bg-red-100/60 text-red-400 transition-all duration-200 active:scale-95;
   }
 
   .btn-icon-success {
-    @apply p-2 rounded-xl hover:bg-emerald-50 text-emerald-500 transition-colors;
+    @apply p-2 rounded-xl hover:bg-emerald-100/60 text-emerald-500 transition-all duration-200 active:scale-95;
   }
 
   /* ── Tablas ── */
   .table-head {
-    @apply bg-slate-50/80 text-slate-500 uppercase text-[11px] tracking-wider;
+    @apply bg-white/45 backdrop-blur-md text-slate-500 uppercase text-[11px] tracking-wider
+      border-b border-white/70;
   }
 
   .row-hover {
-    @apply hover:bg-amber-50/50 transition-colors;
+    @apply hover:bg-white/45 transition-colors duration-200;
   }
 
   .empty-state {
@@ -189,29 +338,32 @@
     border-top-color: #d97706;
   }
 
-  /* ── Insignias de estado ── */
+  /* ── Insignias de estado ──
+     Translucidas con un desenfoque leve: sobre el vidrio siguen leyendose y no
+     parecen etiquetas pegadas. Mantienen sus colores de siempre. */
   .badge {
-    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ring-1;
+    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ring-1 backdrop-blur-sm;
   }
   .badge-success {
-    @apply badge bg-emerald-50 text-emerald-700 ring-emerald-200;
+    @apply badge bg-emerald-100/70 text-emerald-700 ring-emerald-200/80;
   }
   .badge-danger {
-    @apply badge bg-red-50 text-red-600 ring-red-200;
+    @apply badge bg-red-100/70 text-red-600 ring-red-200/80;
   }
   .badge-info {
-    @apply badge bg-[#021930] text-amber-300 ring-0;
+    @apply badge bg-[#021930]/85 text-amber-300 ring-white/10;
   }
   .badge-purple {
-    @apply badge bg-purple-50 text-purple-700 ring-purple-200;
+    @apply badge bg-purple-100/70 text-purple-700 ring-purple-200/80;
   }
   .badge-warning {
-    @apply badge bg-amber-50 text-amber-700 ring-amber-200;
+    @apply badge bg-amber-100/70 text-amber-700 ring-amber-200/80;
   }
 
   /* ── Paginación ── */
   .page-btn {
-    @apply w-8 h-8 rounded-lg text-xs font-medium transition-colors text-slate-600 hover:bg-slate-100;
+    @apply w-8 h-8 rounded-lg text-xs font-medium transition-all duration-200 text-slate-600
+      hover:bg-white/60 active:scale-95;
   }
   .page-btn--active {
     @apply bg-amber-400 text-gray-900 shadow-glow-amber hover:bg-amber-400;
@@ -228,7 +380,7 @@
      renderiza como contenido plano al final de la página: no falla el build,
      simplemente no se ve. El ancho lo fija quien lo usa con max-w-*. */
   .modal-backdrop {
-    @apply fixed inset-0 z-40 bg-[#021930]/50 backdrop-blur-[2px] animate-backdrop-in;
+    @apply fixed inset-0 z-40 bg-[#021930]/40 backdrop-blur-md animate-backdrop-in;
   }
   /* Se centra con inset-0 + m-auto, NO con -translate-x/y-1/2: los keyframes
      de animate-modal-in definen transform y pisarían ese centrado, dejando el
@@ -238,19 +390,19 @@
      su propia zona con scroll adentro (la lista de articulos, por ejemplo). */
   .modal-panel {
     @apply fixed inset-0 m-auto h-fit z-50
-      w-[calc(100%-2rem)] bg-white rounded-[2rem] shadow-2xl p-5 sm:p-6
+      w-[calc(100%-2rem)] glass-strong rounded-[2rem] p-5 sm:p-6
       animate-modal-in;
   }
 
   .drawer-backdrop {
-    @apply fixed inset-0 z-40 bg-[#021930]/50 backdrop-blur-[2px] animate-backdrop-in;
+    @apply fixed inset-0 z-40 bg-[#021930]/40 backdrop-blur-md animate-backdrop-in;
   }
   /* En movil el drawer ocupa todo el ancho y las esquinas redondeadas de la
      izquierda no se ven: se quitan abajo de sm para no recortar contenido, y el
      padding baja de 8 a 5 para recuperar 24px utiles en pantallas de 360-390px. */
   .drawer-panel {
-    @apply fixed top-0 right-0 z-50 h-full w-full max-w-md bg-white shadow-2xl
-      rounded-none sm:rounded-l-[2rem] overflow-y-auto px-5 sm:px-8 py-7 sm:py-9
+    @apply fixed top-0 right-0 z-50 h-full w-full max-w-md glass-strong
+      rounded-none sm:rounded-l-[2rem] border-y-0 border-r-0 overflow-y-auto px-5 sm:px-8 py-7 sm:py-9
       animate-drawer-in;
   }
   .drawer-field-label {
@@ -260,9 +412,9 @@
      al enfocar un campo, y dentro de un drawer fixed eso descoloca todo el
      panel. A partir de sm vuelve a 14px, como estaba. */
   .drawer-field-input {
-    @apply w-full bg-transparent border-0 border-b border-gray-200 pb-2
+    @apply w-full bg-transparent border-0 border-b border-brand-900/15 pb-2
       text-[16px] sm:text-sm text-gray-800
-      placeholder-gray-400 outline-none focus:border-amber-400 transition-colors;
+      placeholder-gray-400 outline-none focus:border-amber-400 transition-colors duration-200;
   }
   .drawer-field-input.border-red-400 {
     @apply border-red-300;
@@ -272,7 +424,7 @@
      navegador pinta la lista desplegable con el fondo del propio select, y
      transparente hacia que las opciones salieran encimadas sobre lo que
      hubiera detras. El fondo blanco no se nota en el drawer (que ya es
-     blanco), pero arregla el desplegable.
+     casi blanco), pero arregla el desplegable.
      El pt extra sube el area tactil de 29 a 44px en movil; en escritorio se
      mantiene la altura del resto de campos del drawer. */
   .drawer-field-select {

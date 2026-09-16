@@ -1,6 +1,10 @@
+import { DescuentoLineaResponse } from './descuento';
+
 export type EstadoCotizacion = 'C' | 'P' | 'CONF' | 'CAN';
 
-export interface DetalleCotizacion {
+// El descuento viaja en la línea (no en la cabecera) porque así se copia tal
+// cual al pedido cuando la cotización se confirma. Ver interfaces/descuento.ts.
+export interface DetalleCotizacion extends DescuentoLineaResponse {
   idItem: number;
   nombreItem?: string;       // solo para mostrar en UI
   costoItem?: number;        // solo para mostrar en UI
@@ -8,7 +12,7 @@ export interface DetalleCotizacion {
   subtotal?: number;         // calculado en UI
 }
 
-export interface DetalleServicioCotizacion {
+export interface DetalleServicioCotizacion extends DescuentoLineaResponse {
   idServicio: number;
   nombreServicio?: string;   // solo para mostrar en UI
   cantidad: number;

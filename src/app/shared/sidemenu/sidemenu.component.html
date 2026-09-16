@@ -3,7 +3,7 @@
      se aplicaba y el panel salia del ancho de su contenido. Ahora es un binding
      por clase, con las dos condiciones adentro. -->
 <aside
-  class="bg-gradient-to-b from-[#0f1e33] to-[#021930] text-white h-full transition-all duration-300 flex flex-col z-50 fixed lg:relative top-0 left-0 lg:flex shadow-2xl border-r border-white/5"
+  class="bg-gradient-to-b from-[#0f1e33]/85 to-[#021930]/90 backdrop-blur-2xl backdrop-saturate-150 text-white h-full transition-all duration-300 flex flex-col z-50 fixed lg:relative top-0 left-0 lg:flex shadow-glass-navy border-r border-white/10"
   [class.w-64]="isMobile || !isCollapsed"
   [class.w-16]="!isMobile && isCollapsed"
   [class.translate-x-0]="!isMobile || isSidebarOpen"
@@ -11,7 +11,7 @@
 >
 
   <!-- Logo / Toggle -->
-  <div class="h-20 shrink-0 flex items-center gap-3 px-4 border-b border-white/5">
+  <div class="h-20 shrink-0 flex items-center gap-3 px-4 border-b border-white/10">
     <a (click)="onToggle()" class="shrink-0 cursor-pointer hover:scale-105 transition-transform">
       <div class="bg-white rounded-xl p-1.5 shadow-md">
         <img src="assets/logo.png" alt="Logo" class="h-7 w-7 object-contain" />
@@ -42,9 +42,9 @@
         @if (!item.children && item.path === 'home') {
           <a
             [routerLink]="[item.path]"
-            routerLinkActive="bg-white/[0.07] text-amber-400 border-amber-400"
+            routerLinkActive="bg-white/10 text-amber-400 border-amber-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]"
             (click)="isMobile ? onToggle() : null"
-            class="flex items-center p-3 rounded-lg border-l-2 border-transparent hover:bg-white/5 hover:text-amber-300 transition-all duration-200 cursor-pointer group"
+            class="flex items-center p-3 rounded-lg border-l-2 border-transparent hover:bg-white/[0.08] hover:text-amber-300 hover:translate-x-0.5 transition-all duration-200 cursor-pointer group"
             [class.justify-center]="isCollapsed && !isMobile"
           >
             <span class="material-icons text-slate-400 group-hover:text-amber-300 transition-colors text-[20px] shrink-0">
@@ -70,9 +70,9 @@
           @for (child of item.children; track child.path) {
             <a
               [routerLink]="[child.path]"
-              routerLinkActive="bg-white/[0.07] text-amber-400 border-amber-400"
+              routerLinkActive="bg-white/10 text-amber-400 border-amber-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]"
               (click)="isMobile ? onToggle() : null"
-              class="flex items-center p-3 rounded-lg border-l-2 border-transparent hover:bg-white/5 hover:text-amber-300 transition-all duration-200 cursor-pointer group"
+              class="flex items-center p-3 rounded-lg border-l-2 border-transparent hover:bg-white/[0.08] hover:text-amber-300 hover:translate-x-0.5 transition-all duration-200 cursor-pointer group"
               [class.justify-center]="isCollapsed && !isMobile"
             >
               <span class="material-icons text-slate-400 group-hover:text-amber-300 text-[20px] shrink-0">
@@ -91,7 +91,7 @@
   </nav>
 
   <!-- Sección inferior: items simples restantes (Reportes, Configuración) + Salir -->
-  <div class="border-t border-white/5 px-3 py-4 space-y-1 shrink-0">
+  <div class="border-t border-white/10 px-3 py-4 space-y-1 shrink-0">
     @for (item of menuItems; track $index) {
       @if (!item.children && item.path !== 'home') {
         <a

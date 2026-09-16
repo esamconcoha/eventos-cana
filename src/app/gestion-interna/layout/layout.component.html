@@ -1,7 +1,7 @@
 <div class="flex h-screen overflow-hidden relative">
 
   @if (isSidebarOpen && isMobile) {
-    <div class="fixed inset-0 bg-[#021930]/60 backdrop-blur-sm z-40 lg:hidden"
+    <div class="fixed inset-0 bg-[#021930]/40 backdrop-blur-md z-40 lg:hidden animate-backdrop-in"
          (click)="closeSidebar()">
     </div>
   }
@@ -13,14 +13,14 @@
     (toggle)="toggleSidebar()">
   </app-sidemenu>
 
-  <div class="flex-1 flex flex-col overflow-hidden relative bg-[#eae3d5]">
+  <div class="flex-1 flex flex-col overflow-hidden relative">
 
     <!-- Barra superior solo para movil/tablet vertical. Sin ella el menu queda
          inalcanzable abajo de lg: el aside vive fuera de pantalla con
          -translate-x-full y no habia ningun control que disparara toggleSidebar().
          Es lg:hidden, asi que en escritorio no aparece ni ocupa alto. -->
     <header class="lg:hidden shrink-0 z-30 flex items-center gap-3 h-14 px-4
-                   bg-[#021930] text-white shadow-md">
+                   glass-navy border-b text-white">
       <button type="button" (click)="toggleSidebar()" aria-label="Abrir menú"
         class="-ml-1 p-2 rounded-lg hover:bg-white/10 active:bg-white/20 transition-colors">
         <span class="material-icons text-[22px]">menu</span>
@@ -32,7 +32,8 @@
     </header>
 
     <!-- Resplandor ambiental cálido -->
-    <div class="ambient-blob w-[28rem] h-[28rem] bg-amber-200/30 -top-40 -right-24"></div>
+    <div class="ambient-blob w-[28rem] h-[28rem] bg-amber-200/25 -top-40 -right-24 animate-blob-float"></div>
+    <div class="ambient-blob w-[22rem] h-[22rem] bg-brand-500/15 -bottom-32 -left-20 animate-blob-float-slow"></div>
 
     <main class="relative flex-1 overflow-x-hidden overflow-y-auto p-4 md:p-8">
       <div class="max-w-6xl mx-auto animate-fade-in">

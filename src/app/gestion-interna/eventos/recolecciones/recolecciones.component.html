@@ -52,7 +52,7 @@
           [class.bg-amber-50]="tabActiva === t.id"
           [class.text-amber-700]="tabActiva === t.id"
           [class.text-gray-500]="tabActiva !== t.id"
-          [class.hover:bg-gray-50]="tabActiva !== t.id">{{ t.label }}</button>
+          [class.hover:bg-white/60]="tabActiva !== t.id">{{ t.label }}</button>
       }
     </div>
 
@@ -110,14 +110,14 @@
                 </td>
                 <td class="px-4 py-3">
                   <div class="flex items-center gap-2">
-                    <div class="flex-1 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                    <div class="flex-1 h-2 rounded-full bg-brand-900/10 ring-1 ring-inset ring-brand-900/10 overflow-hidden">
                       <div class="h-full rounded-full transition-all" [ngClass]="avanceColorClass(r)" [style.width.%]="avancePct(r)"></div>
                     </div>
                     <span class="text-xs text-gray-500 w-9 text-right">{{ avancePct(r) | number:'1.0-0' }}%</span>
                   </div>
                 </td>
                 <td class="px-4 py-3">
-                  <span class="badge" [ngClass]="estadoPedidoDef(r)?.badgeClass ?? 'bg-slate-50 text-slate-500 ring-slate-200'">
+                  <span class="badge" [ngClass]="estadoPedidoDef(r)?.badgeClass ?? 'bg-white/40 text-slate-500 ring-white/70'">
                     <span class="w-1.5 h-1.5 rounded-full mr-1.5" [ngClass]="estadoPedidoDef(r)?.dot ?? 'bg-slate-300'"></span>
                     {{ estadoPedidoLabel(r) }}
                   </span>
@@ -129,7 +129,7 @@
                       <span class="material-icons text-[18px]">visibility</span>
                     </button>
                     <a [routerLink]="['/gestion-interna/eventos/entregas']" title="Ver entregas"
-                      class="p-2 rounded-xl hover:bg-amber-50 text-amber-500 transition-colors">
+                      class="p-2 rounded-xl hover:bg-amber-100/60 text-amber-500 transition-colors">
                       <span class="material-icons text-[18px]">local_shipping</span>
                     </a>
                   </div>

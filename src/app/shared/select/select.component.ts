@@ -150,11 +150,11 @@ export class SelectComponent implements ControlValueAccessor, OnDestroy {
   get claseBase(): string {
     switch (this.variante) {
       case 'drawer':
-        return 'w-full flex items-center justify-between gap-2 bg-white border-0 border-b pb-2 pt-3 sm:pt-0 text-[16px] sm:text-sm text-left transition-colors disabled:text-gray-400 disabled:cursor-not-allowed';
+        return 'w-full flex items-center justify-between gap-2 bg-transparent border-0 border-b pb-2 pt-3 sm:pt-0 text-[16px] sm:text-sm text-left transition-colors disabled:text-gray-400 disabled:cursor-not-allowed';
       case 'tabla':
-        return 'w-full flex items-center justify-between gap-2 border-2 rounded-lg px-2 py-1.5 text-[16px] sm:text-sm text-left bg-white transition-all duration-150 disabled:bg-slate-50 disabled:text-gray-400 disabled:cursor-not-allowed';
+        return 'w-full flex items-center justify-between gap-2 border-2 rounded-lg px-2 py-1.5 text-[16px] sm:text-sm text-left bg-white/45 shadow-inner-glass transition-all duration-200 disabled:bg-white/20 disabled:text-gray-400 disabled:cursor-not-allowed';
       default:
-        return 'w-full flex items-center justify-between gap-2 border-2 rounded-xl px-3 py-2.5 text-[16px] sm:text-sm text-left bg-white transition-all duration-150 disabled:bg-slate-50 disabled:text-gray-400 disabled:cursor-not-allowed';
+        return 'w-full flex items-center justify-between gap-2 border-2 rounded-xl px-3 py-2.5 text-[16px] sm:text-sm text-left bg-white/45 shadow-inner-glass transition-all duration-200 disabled:bg-white/20 disabled:text-gray-400 disabled:cursor-not-allowed';
     }
   }
 
@@ -163,6 +163,6 @@ export class SelectComponent implements ControlValueAccessor, OnDestroy {
       return this.variante === 'tabla' && this.acento === 'cyan' ? 'border-cyan-500' : 'border-amber-400';
     }
     if (this.invalido) { return 'border-red-300'; }
-    return this.variante === 'drawer' ? 'border-gray-200' : 'border-slate-200';
+    return this.variante === 'drawer' ? 'border-brand-900/15' : 'border-white/80';
   }
 }

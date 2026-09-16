@@ -51,7 +51,7 @@
 
       <!-- ─── Próximos eventos ───────────────────────────── -->
       <div class="surface-card overflow-hidden flex flex-col">
-        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-brand-900/[0.06]">
           <h2 class="font-serif italic text-xl text-gray-900">Próximos eventos</h2>
           @if (puede('/gestion-interna/eventos/calendario')) {
             <a routerLink="/gestion-interna/eventos/calendario"
@@ -65,9 +65,9 @@
             <p class="text-sm">No hay eventos programados</p>
           </div>
         } @else {
-          <div class="divide-y divide-slate-50 flex-1">
+          <div class="divide-y divide-brand-900/[0.05] flex-1">
             @for (e of resumen.proximosEventos; track e.correlativoPedido) {
-              <div class="flex items-center gap-4 px-6 py-4 hover:bg-amber-50/40 transition-colors">
+              <div class="flex items-center gap-4 px-6 py-4 hover:bg-amber-100/40 transition-colors">
                 <div class="w-14 shrink-0 rounded-xl bg-[#021930] text-white py-2 text-center">
                   <p class="font-montserrat font-bold text-lg leading-none">{{ diaDe(e.fechaEvento) }}</p>
                   <p class="text-[10px] font-semibold tracking-wide mt-0.5 opacity-80">{{ mesDe(e.fechaEvento) }}</p>
@@ -101,9 +101,9 @@
         <div class="mt-4 flex-1 flex flex-col gap-2">
           @for (a of accesosVisibles; track a.ruta) {
             <button (click)="ir(a.ruta)"
-              class="flex-1 flex items-center gap-3 rounded-xl ring-1 ring-slate-100 px-4 py-3 text-left
-                     hover:ring-amber-200 hover:bg-amber-50/40 transition-all">
-              <div class="w-9 h-9 rounded-lg bg-amber-50 text-amber-500 flex items-center justify-center shrink-0">
+              class="flex-1 flex items-center gap-3 rounded-xl ring-1 ring-white/60 px-4 py-3 text-left
+                     hover:ring-amber-300/70 hover:bg-amber-100/40 transition-all">
+              <div class="w-9 h-9 rounded-lg bg-amber-100/60 text-amber-500 flex items-center justify-center shrink-0">
                 <span class="material-icons text-[18px]">{{ a.icono }}</span>
               </div>
               <span class="text-sm font-medium text-gray-700 leading-tight">{{ a.label }}</span>
@@ -117,7 +117,7 @@
   <!-- ─── Misión y visión ────────────────────────────────── -->
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
     <div class="surface-card p-6 hover:shadow-glow-amber hover:-translate-y-1 transition-all duration-300">
-      <div class="flex items-center space-x-3 mb-4 pb-3 border-b border-slate-100">
+      <div class="flex items-center space-x-3 mb-4 pb-3 border-b border-brand-900/[0.06]">
         <div class="page-header-icon w-10 h-10 rounded-xl">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -132,7 +132,7 @@
     </div>
 
     <div class="surface-card p-6 hover:shadow-glow-amber hover:-translate-y-1 transition-all duration-300">
-      <div class="flex items-center space-x-3 mb-4 pb-3 border-b border-slate-100">
+      <div class="flex items-center space-x-3 mb-4 pb-3 border-b border-brand-900/[0.06]">
         <div class="page-header-icon w-10 h-10 rounded-xl">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />

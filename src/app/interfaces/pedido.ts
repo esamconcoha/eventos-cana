@@ -1,17 +1,21 @@
+import { DescuentoLineaRequest, DescuentoLineaResponse } from './descuento';
+
 export type EstadoPagoPedido = 'PENDIENTE' | 'ANTICIPO' | 'PARCIAL' | 'PAGADO' | 'DEVUELTO';
 
 // estados_pedido.id_estado es FK numérico a tipo_estado (tipo_estado = 'EVE').
 // No se usa un código de texto inventado: el id real del catálogo es la clave.
 export type OrigenPedido = 'COTIZACION' | 'DIRECTO';
 
-export interface DetallePedido {
+// El descuento viaja en la línea; si el pedido nació de una cotización, llega
+// copiado de ella. Ver interfaces/descuento.ts.
+export interface DetallePedido extends DescuentoLineaResponse {
   idItem: number;
   nombreItem?: string;      // solo para mostrar en UI
   costoItem?: number;       // solo para mostrar en UI
   cantidadItemPedido: number;
 }
 
-export interface DetalleServicioPedido {
+export interface DetalleServicioPedido extends DescuentoLineaResponse {
   idServicio: number;
   nombreServicio?: string;  // solo para mostrar en UI
   cantidad: number;
@@ -96,8 +100,9 @@ export interface CrearPedido {
   /** Opcional: se puede agendar acá o después desde Recolecciones. */
   fechaRecoleccion?: string;
   codTipoEvento: string;
-  detalles: { idItem: number; cantidadItemPedido: number }[];
-  detallesServicios: { idServicio: number; cantidad: number; precioAcordado: number; especificaciones?: string }[];
+  detalles: (DescuentoLineaRequest & { idItem: number; cantidadItemPedido: number })[];
+  detallesServicios: (DescuentoLineaRequest & {
+    idServicio: number; cantidad: number; precioAcordado: number; especificaciones?: string })[];
 }
 
 // Reemplaza por completo detalles/detallesServicios (delete + recreate en backend),
@@ -108,6 +113,7 @@ export interface ActualizarPedido {
   fechaEntrega?: string;
   fechaRecoleccion?: string;
   fechaEvento?: string;
-  detalles?: { idItem: number; cantidadItemPedido: number }[];
-  detallesServicios?: { idServicio: number; cantidad: number; precioAcordado: number; especificaciones?: string }[];
+  detalles?: (DescuentoLineaRequest & { idItem: number; cantidadItemPedido: number })[];
+  detallesServicios?: (DescuentoLineaRequest & {
+    idServicio: number; cantidad: number; precioAcordado: number; especificaciones?: string })[];
 }

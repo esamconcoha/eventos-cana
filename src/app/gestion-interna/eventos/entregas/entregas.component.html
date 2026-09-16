@@ -52,7 +52,7 @@
        TABS
   ══════════════════════════════════════════════════════ -->
   <div class="surface-card px-6 pt-4">
-    <div class="flex items-center gap-6 border-b border-slate-100 overflow-x-auto">
+    <div class="flex items-center gap-6 border-b border-brand-900/[0.06] overflow-x-auto">
       <button type="button" (click)="cambiarTab('todas')"
         class="pb-3 text-sm font-semibold whitespace-nowrap transition-colors border-b-2 -mb-px"
         [class.text-gray-900]="tabActiva === 'todas'"
@@ -167,14 +167,14 @@
                 </td>
                 <td class="px-4 py-3">
                   <div class="flex items-center gap-2">
-                    <div class="flex-1 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                    <div class="flex-1 h-2 rounded-full bg-brand-900/10 ring-1 ring-inset ring-brand-900/10 overflow-hidden">
                       <div class="h-full rounded-full transition-all" [ngClass]="avanceColorClass(e)" [style.width.%]="avancePct(e)"></div>
                     </div>
                     <span class="text-xs text-gray-500 w-9 text-right">{{ avancePct(e) | number:'1.0-0' }}%</span>
                   </div>
                 </td>
                 <td class="px-4 py-3">
-                  <span class="badge" [ngClass]="estadoPedidoDef(e)?.badgeClass ?? 'bg-slate-50 text-slate-500 ring-slate-200'">
+                  <span class="badge" [ngClass]="estadoPedidoDef(e)?.badgeClass ?? 'bg-white/40 text-slate-500 ring-white/70'">
                     <span class="w-1.5 h-1.5 rounded-full mr-1.5" [ngClass]="estadoPedidoDef(e)?.dot ?? 'bg-slate-300'"></span>
                     {{ estadoPedidoLabel(e) }}
                   </span>
@@ -182,7 +182,7 @@
                 <td class="px-4 py-3 text-center" (click)="$event.stopPropagation()">
                   <div class="flex justify-center gap-2">
                     <button (click)="verEntrega(e)" title="Ver detalle"
-                      class="p-2 rounded-xl hover:bg-amber-50 text-amber-500 transition-colors">
+                      class="p-2 rounded-xl hover:bg-amber-100/60 text-amber-500 transition-colors">
                       <span class="material-icons text-[18px]">visibility</span>
                     </button>
                     <a routerLink="/gestion-interna/eventos/pedidos" title="Ver pedido"

@@ -14,6 +14,9 @@ import { ServicioDecoracion } from '../../../interfaces/servicio';
 import { Catalogo } from '../../../interfaces/catalogo';
 import { TrazaEvento } from '../../../interfaces/trazabilidad';
 import { fechaHoraISOLocal } from '../../../shared/fecha.util';
+import { TIPOS_DESCUENTO, etiquetaDescuento, montoDescuento, netoLinea,
+         payloadDescuento, requiereValor, validadorDescuentoLinea } from '../../../shared/descuento.util';
+import { TipoDescuento } from '../../../interfaces/descuento';
 
 @Component({
   selector: 'app-cotizaciones',
@@ -80,6 +83,9 @@ export class CotizacionesComponent implements OnInit {
   minutosDisponibles = Array.from({ length: 12 }, (_, i) => i * 5);
 
   form: FormGroup;
+
+  /** Opciones del selector de descuento de cada línea. */
+  readonly tiposDescuento = TIPOS_DESCUENTO;
 
   // ─── Confirmar cotización (pide fecha de entrega + viajes aprox.) ──
   // El backend usa estos datos para crear de una vez el registro en
@@ -186,15 +192,31 @@ export class CotizacionesComponent implements OnInit {
   }
 
   // ─── Monto total de una cotización ya guardada ────────────
+  // Se prefiere subtotalNeto (lo calcula la BD con la misma función que usa el
+  // total del pedido); el cálculo local es el respaldo para respuestas viejas.
   montoTotal(cotizacion: Cotizacion): number {
     const totalItems = (cotizacion.detalles ?? []).reduce((acc, d) => {
+      if (d.subtotalNeto != null) { return acc + d.subtotalNeto; }
       const costo = d.costoItem ?? this.getItem(d.idItem)?.costoItem ?? 0;
-      return acc + costo * d.cantidadItemCotizacion;
+      return acc + netoLinea(costo * d.cantidadItemCotizacion, d.tipoDescuento, d.valorDescuento);
     }, 0);
-    const totalServicios = (cotizacion.detallesServicios ?? []).reduce(
-      (acc, d) => acc + d.precioCotizado * d.cantidad, 0
-    );
+    const totalServicios = (cotizacion.detallesServicios ?? []).reduce((acc, d) => {
+      if (d.subtotalNeto != null) { return acc + d.subtotalNeto; }
+      return acc + netoLinea(d.precioCotizado * d.cantidad, d.tipoDescuento, d.valorDescuento);
+    }, 0);
     return totalItems + totalServicios;
+  }
+
+  /** Lo descontado en una cotización ya guardada; 0 si no lleva descuentos. */
+  descuentoTotal(cotizacion: Cotizacion): number {
+    const items = (cotizacion.detalles ?? []).reduce((acc, d) => acc + (d.montoDescuento ?? 0), 0);
+    const servicios = (cotizacion.detallesServicios ?? []).reduce((acc, d) => acc + (d.montoDescuento ?? 0), 0);
+    return items + servicios;
+  }
+
+  /** Texto corto del descuento de una línea, para chips en el listado. */
+  textoDescuento(tipo: TipoDescuento | undefined, valor: number | undefined): string {
+    return etiquetaDescuento(tipo, valor);
   }
 
   // ─── Items ───────────────────────────────────────────────
@@ -240,11 +262,16 @@ export class CotizacionesComponent implements OnInit {
     return this.form.get('detalles') as FormArray;
   }
 
+  // El descuento se valida a nivel de fila y no de control: si el valor es
+  // obligatorio y cuál es su tope depende del tipo elegido en la misma fila.
   nuevoDetalle(): FormGroup {
     return this.fb.group({
       idItem:                 [null, Validators.required],
-      cantidadItemCotizacion: [1,   [Validators.required, Validators.min(1)]]
-    });
+      cantidadItemCotizacion: [1,   [Validators.required, Validators.min(1)]],
+      tipoDescuento:          ['NIN'],
+      valorDescuento:         [null],
+      motivoDescuento:        ['']
+    }, { validators: validadorDescuentoLinea });
   }
 
   agregarDetalle(): void {
@@ -264,11 +291,23 @@ export class CotizacionesComponent implements OnInit {
     return this.items.find(i => i.idItem === Number(idItem));
   }
 
-  // Calcula el subtotal de una fila de item
-  subtotalDetalle(index: number): number {
+  // Subtotal ANTES del descuento
+  subtotalBrutoDetalle(index: number): number {
     const row = this.detalles.at(index).value;
     const item = this.getItem(row.idItem);
     return item ? (item.costoItem * (row.cantidadItemCotizacion || 0)) : 0;
+  }
+
+  descuentoDetalle(index: number): number {
+    const row = this.detalles.at(index).value;
+    return montoDescuento(this.subtotalBrutoDetalle(index), row.tipoDescuento, row.valorDescuento);
+  }
+
+  // Lo que realmente cotiza la fila. El backend recalcula lo mismo al guardar;
+  // acá solo se previsualiza mientras se llena el formulario.
+  subtotalDetalle(index: number): number {
+    const row = this.detalles.at(index).value;
+    return netoLinea(this.subtotalBrutoDetalle(index), row.tipoDescuento, row.valorDescuento);
   }
 
   // ─── Detalles de servicios (FormArray) ────────────────────
@@ -281,8 +320,11 @@ export class CotizacionesComponent implements OnInit {
       idServicio:       [null, Validators.required],
       cantidad:         [1,   [Validators.required, Validators.min(1)]],
       precioCotizado:   [null, [Validators.required, Validators.min(0)]],
-      especificaciones: ['']
-    });
+      especificaciones: [''],
+      tipoDescuento:    ['NIN'],
+      valorDescuento:   [null],
+      motivoDescuento:  ['']
+    }, { validators: validadorDescuentoLinea });
   }
 
   agregarDetalleServicio(): void {
@@ -298,17 +340,51 @@ export class CotizacionesComponent implements OnInit {
     return this.servicios.find(s => s.idServicio === Number(idServicio));
   }
 
-  // Calcula el subtotal de una fila de servicio
-  subtotalDetalleServicio(index: number): number {
+  subtotalBrutoDetalleServicio(index: number): number {
     const row = this.detallesServicios.at(index).value;
     return (row.precioCotizado || 0) * (row.cantidad || 0);
   }
 
-  // Total general (items + servicios)
+  descuentoDetalleServicio(index: number): number {
+    const row = this.detallesServicios.at(index).value;
+    return montoDescuento(this.subtotalBrutoDetalleServicio(index), row.tipoDescuento, row.valorDescuento);
+  }
+
+  subtotalDetalleServicio(index: number): number {
+    const row = this.detallesServicios.at(index).value;
+    return netoLinea(this.subtotalBrutoDetalleServicio(index), row.tipoDescuento, row.valorDescuento);
+  }
+
+  // ─── Descuentos (helpers de plantilla) ───────────────────
+  /** true cuando el tipo elegido pide un número (POR o MON). */
+  descuentoPideValor(fa: FormArray, index: number): boolean {
+    return requiereValor(fa.at(index).get('tipoDescuento')?.value);
+  }
+
+  /** true cuando la fila tiene algún descuento: dispara el campo de motivo. */
+  descuentoActivo(fa: FormArray, index: number): boolean {
+    return (fa.at(index).get('tipoDescuento')?.value ?? 'NIN') !== 'NIN';
+  }
+
+  descuentoLineaInvalido(fa: FormArray, index: number): boolean {
+    const fila = fa.at(index);
+    return !!(fila.errors?.['descuentoSinValor'] || fila.errors?.['descuentoPorcentajeInvalido']) && fila.touched;
+  }
+
+  // ─── Totales del formulario ──────────────────────────────
+  get totalBrutoCotizacion(): number {
+    return this.detalles.controls.reduce((acc, _, i) => acc + this.subtotalBrutoDetalle(i), 0)
+      + this.detallesServicios.controls.reduce((acc, _, i) => acc + this.subtotalBrutoDetalleServicio(i), 0);
+  }
+
+  get totalDescuentosCotizacion(): number {
+    return this.detalles.controls.reduce((acc, _, i) => acc + this.descuentoDetalle(i), 0)
+      + this.detallesServicios.controls.reduce((acc, _, i) => acc + this.descuentoDetalleServicio(i), 0);
+  }
+
+  // Total general ya neto de descuentos (items + servicios)
   get totalCotizacion(): number {
-    const totalItems = this.detalles.controls.reduce((acc, _, i) => acc + this.subtotalDetalle(i), 0);
-    const totalServicios = this.detallesServicios.controls.reduce((acc, _, i) => acc + this.subtotalDetalleServicio(i), 0);
-    return totalItems + totalServicios;
+    return this.totalBrutoCotizacion - this.totalDescuentosCotizacion;
   }
 
   // ─── Selector de fecha/hora del evento ────────────────────
@@ -438,8 +514,11 @@ export class CotizacionesComponent implements OnInit {
     for (const d of cotizacion.detalles ?? []) {
       this.detalles.push(this.fb.group({
         idItem: [d.idItem, Validators.required],
-        cantidadItemCotizacion: [d.cantidadItemCotizacion, [Validators.required, Validators.min(1)]]
-      }));
+        cantidadItemCotizacion: [d.cantidadItemCotizacion, [Validators.required, Validators.min(1)]],
+        tipoDescuento: [d.tipoDescuento ?? 'NIN'],
+        valorDescuento: [d.valorDescuento || null],
+        motivoDescuento: [d.motivoDescuento ?? '']
+      }, { validators: validadorDescuentoLinea }));
     }
     if (this.detalles.length === 0) { this.detalles.push(this.nuevoDetalle()); }
 
@@ -449,8 +528,11 @@ export class CotizacionesComponent implements OnInit {
         idServicio: [s.idServicio, Validators.required],
         cantidad: [s.cantidad, [Validators.required, Validators.min(1)]],
         precioCotizado: [s.precioCotizado, [Validators.required, Validators.min(0)]],
-        especificaciones: [s.especificaciones ?? '']
-      }));
+        especificaciones: [s.especificaciones ?? ''],
+        tipoDescuento: [s.tipoDescuento ?? 'NIN'],
+        valorDescuento: [s.valorDescuento || null],
+        motivoDescuento: [s.motivoDescuento ?? '']
+      }, { validators: validadorDescuentoLinea }));
     }
   }
 
@@ -469,13 +551,15 @@ export class CotizacionesComponent implements OnInit {
       codTipoEvento: this.form.value.codTipoEvento,
       detalleCotizacion: this.detalles.value.map((d: any) => ({
         idItem: Number(d.idItem),
-        cantidadItemCotizacion: d.cantidadItemCotizacion
+        cantidadItemCotizacion: d.cantidadItemCotizacion,
+        ...payloadDescuento(d)
       })),
       detalleServicioCotizacion: this.detallesServicios.value.map((d: any) => ({
         idServicio: Number(d.idServicio),
         cantidad: d.cantidad,
         precioCotizado: d.precioCotizado,
-        especificaciones: d.especificaciones || undefined
+        especificaciones: d.especificaciones || undefined,
+        ...payloadDescuento(d)
       }))
     };
 
@@ -519,13 +603,15 @@ export class CotizacionesComponent implements OnInit {
       codTipoEvento: this.form.value.codTipoEvento,
       detalleCotizacion: this.detalles.value.map((d: any) => ({
         idItem: Number(d.idItem),
-        cantidadItemCotizacion: d.cantidadItemCotizacion
+        cantidadItemCotizacion: d.cantidadItemCotizacion,
+        ...payloadDescuento(d)
       })),
       detalleServicioCotizacion: this.detallesServicios.value.map((d: any) => ({
         idServicio: Number(d.idServicio),
         cantidad: d.cantidad,
         precioCotizado: d.precioCotizado,
-        especificaciones: d.especificaciones || undefined
+        especificaciones: d.especificaciones || undefined,
+        ...payloadDescuento(d)
       }))
     };
 

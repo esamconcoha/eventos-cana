@@ -15,15 +15,15 @@
     <div class="flex items-center gap-4">
       <div class="flex items-center gap-1 surface-card px-2 py-1.5">
         <button (click)="mesAnterior()" title="Mes anterior"
-          class="p-1.5 rounded-lg hover:bg-amber-50 text-gray-500 transition-colors">
+          class="p-1.5 rounded-lg hover:bg-amber-100/60 text-gray-500 transition-colors">
           <span class="material-icons text-[18px]">chevron_left</span>
         </button>
         <button (click)="irAHoy()"
-          class="px-3 py-1 text-sm font-medium text-gray-600 rounded-lg hover:bg-amber-50 transition-colors">
+          class="px-3 py-1 text-sm font-medium text-gray-600 rounded-lg hover:bg-amber-100/60 transition-colors">
           Hoy
         </button>
         <button (click)="mesSiguiente()" title="Mes siguiente"
-          class="p-1.5 rounded-lg hover:bg-amber-50 text-gray-500 transition-colors">
+          class="p-1.5 rounded-lg hover:bg-amber-100/60 text-gray-500 transition-colors">
           <span class="material-icons text-[18px]">chevron_right</span>
         </button>
       </div>
@@ -37,12 +37,12 @@
     <div class="surface-card overflow-hidden">
 
       <!-- Leyenda: además de explicar los colores, filtra la grilla -->
-      <div class="flex flex-wrap items-center gap-2 px-5 py-3 border-b border-gray-50">
+      <div class="flex flex-wrap items-center gap-2 px-5 py-3 border-b border-brand-900/10">
         @for (t of tipos; track t.tipo) {
           <button (click)="alternarTipo(t.tipo)"
             class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all"
             [class.ring-1]="tipoActivo(t.tipo)"
-            [ngClass]="tipoActivo(t.tipo) ? t.badge : 'bg-slate-50 text-slate-400 line-through'">
+            [ngClass]="tipoActivo(t.tipo) ? t.badge : 'bg-white/40 text-slate-400 line-through'">
             <span class="w-1.5 h-1.5 rounded-full" [ngClass]="tipoActivo(t.tipo) ? t.dot : 'bg-slate-300'"></span>
             {{ t.label }}
           </button>
@@ -63,7 +63,7 @@
              mas ancho que 560px, asi que no cambia nada. -->
         <div class="overflow-x-auto">
         <div class="min-w-[560px]">
-        <div class="grid grid-cols-7 border-b border-gray-50">
+        <div class="grid grid-cols-7 border-b border-brand-900/10">
           @for (d of nombresDias; track d) {
             <div class="px-2 py-2 text-center text-[11px] font-semibold tracking-wide text-gray-400">{{ d }}</div>
           }
@@ -72,9 +72,9 @@
         <div class="grid grid-cols-7">
           @for (dia of dias; track dia.fecha) {
             <div (click)="seleccionarDia(dia)"
-              class="min-h-[6.5rem] border-r border-b border-gray-50 p-1.5 cursor-pointer transition-colors align-top"
+              class="min-h-[6.5rem] border-r border-b border-brand-900/10 p-1.5 cursor-pointer transition-colors align-top"
               [class.bg-slate-50/60]="!dia.esDelMes"
-              [class.hover:bg-amber-50]="dia.esDelMes"
+              [class.hover:bg-amber-100/60]="dia.esDelMes"
               [class.ring-2]="diaSeleccionado?.fecha === dia.fecha"
               [class.ring-amber-300]="diaSeleccionado?.fecha === dia.fecha"
               [class.ring-inset]="diaSeleccionado?.fecha === dia.fecha">
@@ -132,7 +132,8 @@
             <div class="mt-4 space-y-3">
               @for (item of itemsVisibles(diaSeleccionado); track $index) {
                 <div (click)="abrirItem(item)"
-                  class="rounded-xl ring-1 ring-gray-100 p-3 cursor-pointer hover:ring-amber-200 hover:bg-amber-50/40 transition-all">
+                  class="rounded-xl border border-l-4 border-brand-900/10 bg-white/50 p-3 cursor-pointer shadow-glass hover:bg-white/70 hover:border-brand-900/20 hover:-translate-y-0.5 transition-all"
+                  [ngClass]="acentoTipo(item)">
 
                   <div class="flex items-start justify-between gap-2">
                     <span class="badge shrink-0" [ngClass]="defTipo(item).badge">
@@ -163,15 +164,24 @@
                   }
 
                   @if (item.tipo === 'ENTREGA') {
-                    <p class="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                      <span class="material-icons text-[13px] text-gray-400">local_shipping</span>
-                      <span class="font-montserrat">
-                        {{ item.cantidadViajesReales }} / {{ item.cantidadViajesAproximados }} viajes
-                      </span>
-                      @if (item.entregaFinalizada) {
-                        <span class="text-emerald-600 font-medium">· cerrada</span>
-                      }
-                    </p>
+                    <div class="mt-2">
+                      <div class="text-xs text-gray-500 flex items-center gap-1">
+                        <span class="material-icons text-[13px] text-gray-400">local_shipping</span>
+                        <span class="font-montserrat">
+                          {{ item.cantidadViajesReales }} / {{ item.cantidadViajesAproximados }} viajes
+                        </span>
+                        @if (item.entregaFinalizada) {
+                          <span class="text-emerald-600 font-medium">· cerrada</span>
+                        }
+                        <span class="ml-auto font-montserrat font-semibold text-gray-500">{{ avancePct(item) }}%</span>
+                      </div>
+                      <!-- Track con tinte navy + anillo: sobre el vidrio un
+                           track blanco no se distingue, y una entrega al 0% se
+                           veria como una barra vacia inexistente. -->
+                      <div class="mt-1 h-2 rounded-full bg-brand-900/10 ring-1 ring-inset ring-brand-900/10 overflow-hidden">
+                        <div class="h-full rounded-full transition-all" [ngClass]="avanceColor(item)" [style.width.%]="avancePct(item)"></div>
+                      </div>
+                    </div>
                   }
 
                   @if (item.nombreEstadoPedido) {

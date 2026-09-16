@@ -23,11 +23,17 @@ export interface RegistrarPago {
   usuarioRegistro: string;
 }
 
+// Refleja EstadoCuentaPedidoDto tal cual: los nombres tienen que calzar con el
+// JSON del backend o los montos llegan como undefined y la tarjeta sale vacia.
 export interface EstadoCuenta {
   correlativoPedido: string;
-  montoTotalPedido: number;
+  /** Suma de las lineas ANTES de descuentos. */
+  totalBruto: number;
+  /** Lo descontado entre articulos y servicios. */
+  totalDescuentos: number;
+  /** totalBruto - totalDescuentos: lo que realmente se cobra. */
+  totalPedido: number;
   totalPagado: number;
   saldoPendiente: number;
   estadoPago: EstadoCuentaPedido;
-  pagado: boolean;
 }
