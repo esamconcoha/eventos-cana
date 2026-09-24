@@ -521,15 +521,13 @@
         <div class="space-y-2">
           <div class="flex flex-col gap-1">
             <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Desde</label>
-            <app-date-picker [(ngModel)]="fechaDesde" (ngModelChange)="onRangoManualChange()"
-              modo="fecha" placeholder="Fecha inicial"
-              [fechaMaxima]="fechaHasta || null"></app-date-picker>
+            <app-date-picker [(ngModel)]="fechaDesde" (ngModelChange)="onRangoManualChange('desde')"
+              modo="fecha" placeholder="Fecha inicial"></app-date-picker>
           </div>
           <div class="flex flex-col gap-1">
             <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Hasta</label>
-            <app-date-picker [(ngModel)]="fechaHasta" (ngModelChange)="onRangoManualChange()"
-              modo="fecha" placeholder="Fecha final"
-              [fechaMinima]="fechaDesde || null"></app-date-picker>
+            <app-date-picker [(ngModel)]="fechaHasta" (ngModelChange)="onRangoManualChange('hasta')"
+              modo="fecha" placeholder="Fecha final"></app-date-picker>
           </div>
         </div>
       </div>

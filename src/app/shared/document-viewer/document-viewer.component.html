@@ -3,12 +3,20 @@
     (click)="cerrar()">
   </div>
 
-  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
-    <div class="pointer-events-auto w-full max-w-3xl h-[85vh] glass-strong rounded-[2rem] overflow-hidden animate-modal-in flex flex-col"
+  <!-- En movil el visor ocupa la pantalla completa: con el p-4 + h-[85vh] del
+       diseno anterior la hoja quedaba recortada y sin margen para leerla.
+       dvh y no vh: en iOS/Android la barra de direcciones se cuenta dentro de
+       vh, asi que el encabezado y la barra de zoom se salian de la pantalla.
+       El safe-area es para el notch cuando se instala como PWA. -->
+  <div class="fixed inset-0 z-50 flex items-stretch sm:items-center justify-center sm:p-4 pointer-events-none">
+    <div class="pointer-events-auto flex flex-col w-full h-[100dvh] sm:h-[85dvh] sm:max-w-3xl
+                glass-strong rounded-none sm:rounded-[2rem] overflow-hidden animate-modal-in"
       (click)="$event.stopPropagation()">
 
       <!-- Encabezado -->
-      <div class="flex items-center justify-between gap-2 px-4 sm:px-6 py-4 border-b border-brand-900/[0.06] bg-gradient-to-r from-amber-100/50 to-white/20 shrink-0">
+      <div class="flex items-center justify-between gap-2 px-4 sm:px-6 py-4 shrink-0
+                  pt-[max(1rem,env(safe-area-inset-top))] sm:pt-4
+                  border-b border-brand-900/[0.06] bg-gradient-to-r from-amber-100/50 to-white/20">
         <div class="flex items-center gap-3 min-w-0">
           <div class="w-10 h-10 rounded-full bg-amber-400 flex items-center justify-center shadow-glow-amber shrink-0">
             <span class="material-icons text-gray-900 text-[20px]">description</span>
@@ -32,18 +40,75 @@
         </div>
       </div>
 
+      <!-- Barra de zoom -->
+      @if (puedeZoom) {
+        <div class="flex items-center justify-center gap-1 px-3 py-2 shrink-0
+                    border-b border-brand-900/[0.06] bg-white/30">
+          <button type="button" (click)="alejar()" [disabled]="zoomPorcentaje <= 50"
+            class="w-9 h-9 rounded-full hover:bg-white/70 flex items-center justify-center text-gray-600
+                   disabled:text-gray-300 disabled:hover:bg-transparent transition-colors"
+            title="Alejar">
+            <span class="material-icons text-[20px]">zoom_out</span>
+          </button>
+          <button type="button" (click)="ajustar()"
+            class="min-w-[4.5rem] px-2 py-1 rounded-full text-xs font-semibold text-gray-600
+                   hover:bg-white/70 transition-colors"
+            title="Ajustar al ancho">
+            {{ zoomPorcentaje }}%
+          </button>
+          <button type="button" (click)="acercar()" [disabled]="zoomPorcentaje >= 500"
+            class="w-9 h-9 rounded-full hover:bg-white/70 flex items-center justify-center text-gray-600
+                   disabled:text-gray-300 disabled:hover:bg-transparent transition-colors"
+            title="Acercar">
+            <span class="material-icons text-[20px]">zoom_in</span>
+          </button>
+          @if (esPdf && paginas > 1) {
+            <span class="ml-3 text-xs text-slate-400">{{ paginas }} páginas</span>
+          }
+        </div>
+      }
+
       <!-- Vista previa -->
-      <div class="flex-1 bg-brand-900/5 min-h-0">
-        @if (esPdf && urlSegura) {
-          <iframe [src]="urlSegura" class="w-full h-full border-0"></iframe>
+      <!-- touch-pan-x/y: deja el scroll al navegador pero le quita el
+           pinch-zoom, que ampliaba la pagina entera y sacaba el modal (fixed)
+           de la pantalla. El pinch lo maneja el componente. -->
+      <div class="relative flex-1 min-h-0 overflow-auto overscroll-contain touch-pan-x touch-pan-y
+                  bg-brand-900/5 pb-[env(safe-area-inset-bottom)]"
+        (touchstart)="alIniciarToque($event)"
+        (touchmove)="alMoverToque($event)"
+        (touchend)="alTerminarToque()"
+        (touchcancel)="alTerminarToque()"
+        (wheel)="alRodar($event)">
+
+        @if (esPdf && !errorPdf) {
+          <div #hojas class="flex flex-col items-center gap-4 p-3 min-h-full"></div>
+
+          @if (cargando) {
+            <div class="absolute inset-0 flex flex-col items-center justify-center gap-3 text-grayMedium">
+              <span class="material-icons text-[40px] text-amber-400 animate-spin">progress_activity</span>
+              <p class="text-sm">Preparando el documento…</p>
+            </div>
+          }
         } @else if (esImagen && urlSegura) {
-          <div class="w-full h-full overflow-auto flex items-center justify-center p-4">
-            <img [src]="urlSegura" [alt]="nombreArchivo" class="max-w-full h-auto rounded-lg shadow-lg">
+          <div class="min-w-full min-h-full flex items-center justify-center p-3">
+            <!-- max-w-none al ampliar: el reset de Tailwind le pone a todo <img>
+                 un max-width:100% que anulaba el ancho del zoom. -->
+            <img [src]="urlSegura" [alt]="nombreArchivo" draggable="false"
+              class="rounded-lg shadow-lg select-none"
+              [class.max-w-full]="escala === 1"
+              [class.max-h-full]="escala === 1"
+              [class.object-contain]="escala === 1"
+              [class.max-w-none]="escala !== 1"
+              [style.width]="escala === 1 ? null : (escala * 100) + '%'">
           </div>
         } @else {
-          <div class="w-full h-full flex flex-col items-center justify-center gap-3 text-grayMedium">
+          <div class="w-full h-full flex flex-col items-center justify-center gap-3 p-6 text-center text-grayMedium">
             <span class="material-icons text-[48px] text-slate-300">insert_drive_file</span>
-            <p class="text-sm">Vista previa no disponible para este tipo de archivo.</p>
+            <p class="text-sm">
+              {{ errorPdf
+                ? 'No se pudo mostrar la vista previa del PDF. Descárgalo para abrirlo.'
+                : 'Vista previa no disponible para este tipo de archivo.' }}
+            </p>
             <button (click)="descargar()" class="btn-primary">
               <span class="material-icons text-[18px]">download</span>
               Descargar documento

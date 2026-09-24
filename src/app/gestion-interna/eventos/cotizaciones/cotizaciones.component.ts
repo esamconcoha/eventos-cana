@@ -185,8 +185,22 @@ export class CotizacionesComponent implements OnInit {
     this.aplicarFiltros();
   }
 
-  /** Al editar las fechas a mano, el preset pasa a "rango" personalizado. */
-  onRangoManualChange(): void {
+  /**
+   * Al editar las fechas a mano, el preset pasa a "rango" personalizado.
+   *
+   * Si el rango queda invertido se corre el otro extremo en lugar de impedir la
+   * selección: los date-pickers ya no se limitan entre sí porque, con "Esta
+   * semana" o "Este mes" puestos, el tope de "Hasta" bloqueaba cualquier
+   * "Desde" futuro y no se podía consultar a futuro sin pasar por "Todos".
+   */
+  onRangoManualChange(campo: 'desde' | 'hasta'): void {
+    if (this.fechaDesde && this.fechaHasta && this.fechaDesde > this.fechaHasta) {
+      if (campo === 'desde') {
+        this.fechaHasta = this.fechaDesde;
+      } else {
+        this.fechaDesde = this.fechaHasta;
+      }
+    }
     this.rangoPreset = 'rango';
     this.aplicarFiltros();
   }
