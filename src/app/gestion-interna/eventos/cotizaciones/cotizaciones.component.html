@@ -294,12 +294,10 @@
                       }
                     </td>
                     <td class="px-4 py-2 text-center">
-                      @if (detalles.length > 1) {
-                        <button type="button" (click)="eliminarDetalle(i)"
-                          class="p-1 rounded hover:bg-red-100/50 text-red-400 transition-colors">
-                          <span class="material-icons text-[18px]">delete_outline</span>
-                        </button>
-                      }
+                      <button type="button" (click)="eliminarDetalle(i)"
+                        class="p-1 rounded hover:bg-red-100/50 text-red-400 transition-colors">
+                        <span class="material-icons text-[18px]">delete_outline</span>
+                      </button>
                     </td>
                   </tr>
                 }
@@ -686,6 +684,12 @@
 
         <form [formGroup]="formConfirmar" (ngSubmit)="guardarConfirmacion()" class="px-6 pb-6 pt-4 space-y-4">
 
+          @if (!confirmarLlevaItems) {
+            <p class="text-sm text-gray-500">
+              Esta cotización solo tiene servicios, así que el pedido no genera entrega ni recolección.
+              Su estado se avanza desde Pedidos.
+            </p>
+          } @else {
           <div class="flex flex-col gap-1">
             <label class="field-label">Fecha de entrega estimada <span class="text-red-500">*</span></label>
             <app-date-picker formControlName="fechaEntregaEstimada" modo="fecha" [minimoHoy]="true"
@@ -705,6 +709,7 @@
             }
             <span class="text-xs text-gray-400">Estimado inicial de viajes para la logística de entrega.</span>
           </div>
+          }
 
           <div class="flex gap-3 pt-2">
             <button type="button" (click)="cerrarConfirmar()" class="btn-cancel flex-1">Cancelar</button>

@@ -207,6 +207,8 @@
                 placeholder="Sin salón asignado" etiquetaVacio="Sin salón asignado"></app-select>
             </div>
 
+            <!-- Solo con items: un pedido de solo servicios no genera entrega ni recolección. -->
+            @if (detalles.length > 0) {
             <div class="flex flex-col gap-1">
               <label class="field-label">Fecha de entrega estimada <span class="text-red-500">*</span></label>
               <!-- Tope = día del evento: no se entrega después de que ocurra. -->
@@ -235,6 +237,7 @@
                 <span class="text-xs text-red-500">Campo requerido</span>
               }
             </div>
+            }
 
           </div>
         </div>
@@ -319,12 +322,10 @@
                       }
                     </td>
                     <td class="px-4 py-2 text-center">
-                      @if (detalles.length > 1) {
-                        <button type="button" (click)="eliminarDetalle(i)"
-                          class="p-1 rounded hover:bg-red-100/50 text-red-400 transition-colors">
-                          <span class="material-icons text-[18px]">delete_outline</span>
-                        </button>
-                      }
+                      <button type="button" (click)="eliminarDetalle(i)"
+                        class="p-1 rounded hover:bg-red-100/50 text-red-400 transition-colors">
+                        <span class="material-icons text-[18px]">delete_outline</span>
+                      </button>
                     </td>
                   </tr>
                 }
@@ -1222,12 +1223,10 @@
                         }
                       </td>
                       <td class="px-4 py-2 text-center">
-                        @if (detallesEditar.length > 1) {
-                          <button type="button" (click)="eliminarDetalleEditar(i)"
-                            class="p-1 rounded hover:bg-red-100/50 text-red-400 transition-colors">
-                            <span class="material-icons text-[18px]">delete_outline</span>
-                          </button>
-                        }
+                        <button type="button" (click)="eliminarDetalleEditar(i)"
+                          class="p-1 rounded hover:bg-red-100/50 text-red-400 transition-colors">
+                          <span class="material-icons text-[18px]">delete_outline</span>
+                        </button>
                       </td>
                     </tr>
                   }

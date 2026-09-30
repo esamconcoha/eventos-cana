@@ -84,9 +84,9 @@ export interface Pedido {
 // Pedido "Directo": el cliente se captura como texto libre (igual que en
 // cotizaciones), no se selecciona de usuarios existentes. usuarioInternoPedido
 // sí es el staff logueado (se toma del token, no se pide en el formulario).
-// fechaEntrega y cantidadViajesAproximados son obligatorios: el backend los
-// usa para crear de una vez el registro en entregas_pedido (ya no existe un
-// paso manual de "Nueva entrega").
+// fechaEntrega y cantidadViajesAproximados son obligatorios si el pedido lleva
+// items: el backend los usa para crear de una vez el registro en
+// entregas_pedido. Un pedido de solo servicios no genera entrega y los manda null.
 export interface CrearPedido {
   nombreClientePedido: string;
   telefonoClientePedido: number;
@@ -95,8 +95,8 @@ export interface CrearPedido {
   direccionPedido: string;
   fechaEvento: string;
   salonEntrega?: number;   // FK a mantenimiento_salones.id_salon
-  fechaEntrega: string;
-  cantidadViajesAproximados: number;
+  fechaEntrega: string | null;
+  cantidadViajesAproximados: number | null;
   /** Opcional: se puede agendar acá o después desde Recolecciones. */
   fechaRecoleccion?: string;
   codTipoEvento: string;

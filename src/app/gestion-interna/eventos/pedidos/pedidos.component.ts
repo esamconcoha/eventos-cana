@@ -144,9 +144,10 @@ export class PedidosComponent implements OnInit {
       cantidadViajesAproximados: [2, [Validators.required, Validators.min(1)]],
       fechaRecoleccion: [''],
       codTipoEvento:    [null, Validators.required],
-      detalles: this.fb.array([this.nuevoDetalle()]),
+      detalles: this.fb.array([]),
       detallesServicios: this.fb.array([])
     });
+    this.sincronizarCamposEntrega();
 
     this.formPago = this.fb.group({
       montoPago:        [null, [Validators.required, Validators.min(0.01)]],
@@ -448,13 +449,28 @@ export class PedidosComponent implements OnInit {
 
   agregarDetalle(): void {
     this.detalles.push(this.nuevoDetalle());
+    this.sincronizarCamposEntrega();
   }
 
   eliminarDetalle(i: number): void {
-    if (this.detalles.length > 1) {
-      this.detalles.removeAt(i);
-    } else {
-      this.toast.info('Aviso', 'Debe haber al menos un item en el pedido');
+    this.detalles.removeAt(i);
+    this.sincronizarCamposEntrega();
+  }
+
+  /**
+   * Un pedido de solo servicios no genera entrega, así que fecha de entrega y
+   * viajes solo se piden si hay items. Deshabilitados quedan fuera de la
+   * validación del form y del form.value.
+   */
+  private sincronizarCamposEntrega(): void {
+    const campos = ['fechaEntrega', 'cantidadViajesAproximados'];
+    for (const campo of campos) {
+      const control = this.form.get(campo);
+      if (this.detalles.length > 0) {
+        control?.enable({ emitEvent: false });
+      } else {
+        control?.disable({ emitEvent: false });
+      }
     }
   }
 
@@ -591,11 +607,7 @@ export class PedidosComponent implements OnInit {
   }
 
   eliminarDetalleEditar(i: number): void {
-    if (this.detallesEditar.length > 1) {
-      this.detallesEditar.removeAt(i);
-    } else {
-      this.toast.info('Aviso', 'Debe haber al menos un item en el pedido');
-    }
+    this.detallesEditar.removeAt(i);
   }
 
   subtotalBrutoDetalleEditar(index: number): number {
@@ -866,6 +878,11 @@ export class PedidosComponent implements OnInit {
   // ─── Guardar nuevo pedido (directo) ───────────────────────
   guardar(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+    if (this.detalles.length === 0 && this.detallesServicios.length === 0) {
+      this.toast.info('Aviso', 'Agrega al menos un item o un servicio al pedido');
+      return;
+    }
+    const llevaItems = this.detalles.length > 0;
 
     const payload = {
       nombreClientePedido: this.form.value.nombreClientePedido,
@@ -875,8 +892,8 @@ export class PedidosComponent implements OnInit {
       direccionPedido: this.form.value.direccionPedido,
       fechaEvento: this.form.value.fechaEventoHora,
       salonEntrega: this.form.value.salonEntrega ? Number(this.form.value.salonEntrega) : undefined,
-      fechaEntrega: this.form.value.fechaEntrega,
-      cantidadViajesAproximados: Number(this.form.value.cantidadViajesAproximados),
+      fechaEntrega: llevaItems ? this.form.value.fechaEntrega : null,
+      cantidadViajesAproximados: llevaItems ? Number(this.form.value.cantidadViajesAproximados) : null,
       fechaRecoleccion: this.form.value.fechaRecoleccion || undefined,
       codTipoEvento: this.form.value.codTipoEvento,
       detalles: this.detalles.value.map((d: any) => ({
@@ -904,10 +921,10 @@ export class PedidosComponent implements OnInit {
   }
 
   cancelar(): void {
-    this.form.reset();
+    this.form.reset({ cantidadViajesAproximados: 2 });
     this.detalles.clear();
-    this.detalles.push(this.nuevoDetalle());
     this.detallesServicios.clear();
+    this.sincronizarCamposEntrega();
     this.resetCalendario();
     this.mostrarForm = false;
   }
@@ -1215,13 +1232,8 @@ export class PedidosComponent implements OnInit {
           fechaEventoHora: fechaHoraISOLocal(fe)
         });
 
-        const detalles = data.detalles ?? [];
-        if (detalles.length > 0) {
-          detalles.forEach(d => this.detallesEditar.push(
-            this.nuevoDetalleEditar(d.idItem, d.cantidadItemPedido, d)));
-        } else {
-          this.detallesEditar.push(this.nuevoDetalleEditar());
-        }
+        (data.detalles ?? []).forEach(d => this.detallesEditar.push(
+          this.nuevoDetalleEditar(d.idItem, d.cantidadItemPedido, d)));
 
         (data.detallesServicios ?? []).forEach(d =>
           this.detallesServiciosEditar.push(
@@ -1255,6 +1267,10 @@ export class PedidosComponent implements OnInit {
 
   guardarEdicion(): void {
     if (this.formEditar.invalid || !this.pedidoEditando) { this.formEditar.markAllAsTouched(); return; }
+    if (this.detallesEditar.length === 0 && this.detallesServiciosEditar.length === 0) {
+      this.toast.info('Aviso', 'El pedido debe tener al menos un item o un servicio');
+      return;
+    }
 
     const payload = {
       direccionPedido: this.formEditar.value.direccionPedido,

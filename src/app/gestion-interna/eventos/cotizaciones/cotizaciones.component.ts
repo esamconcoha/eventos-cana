@@ -111,7 +111,7 @@ export class CotizacionesComponent implements OnInit {
       telefonoClienteCotizacion:  ['', [Validators.required, Validators.pattern('^[0-9]{8}$')]],
       fechaHoraEvento:            ['', Validators.required],
       codTipoEvento:              [null, Validators.required],
-      detalles: this.fb.array([this.nuevoDetalle()]),
+      detalles: this.fb.array([]),
       detallesServicios: this.fb.array([])
     });
 
@@ -293,11 +293,7 @@ export class CotizacionesComponent implements OnInit {
   }
 
   eliminarDetalle(i: number): void {
-    if (this.detalles.length > 1) {
-      this.detalles.removeAt(i);
-    } else {
-      this.toast.info('Aviso', 'Debe haber al menos un item en la cotización');
-    }
+    this.detalles.removeAt(i);
   }
 
   // Obtiene el item seleccionado para mostrar nombre y costo
@@ -534,7 +530,6 @@ export class CotizacionesComponent implements OnInit {
         motivoDescuento: [d.motivoDescuento ?? '']
       }, { validators: validadorDescuentoLinea }));
     }
-    if (this.detalles.length === 0) { this.detalles.push(this.nuevoDetalle()); }
 
     this.detallesServicios.clear();
     for (const s of cotizacion.detallesServicios ?? []) {
@@ -553,6 +548,10 @@ export class CotizacionesComponent implements OnInit {
   // ─── Guardar ─────────────────────────────────────────────
   guardar(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+    if (this.detalles.length === 0 && this.detallesServicios.length === 0) {
+      this.toast.info('Aviso', 'Agrega al menos un item o un servicio a la cotización');
+      return;
+    }
     if (this.cotizacionEditando) { this.guardarEdicion(); return; }
 
     const payload: CrearCotizacion = {
@@ -751,7 +750,6 @@ export class CotizacionesComponent implements OnInit {
   cancelar(): void {
     this.form.reset();
     this.detalles.clear();
-    this.detalles.push(this.nuevoDetalle());
     this.detallesServicios.clear();
     this.resetCalendario();
     this.mostrarForm = false;
@@ -762,7 +760,18 @@ export class CotizacionesComponent implements OnInit {
   abrirConfirmar(cotizacion: Cotizacion): void {
     this.cotizacionAConfirmar = cotizacion;
     this.formConfirmar.reset({ cantidadViajesAproximados: 2 });
+    // Una cotización de solo servicios no genera entrega: fecha de entrega y
+    // viajes no aplican. Deshabilitados quedan fuera de la validación del form.
+    if (this.confirmarLlevaItems) {
+      this.formConfirmar.enable();
+    } else {
+      this.formConfirmar.disable();
+    }
     this.mostrarConfirmar = true;
+  }
+
+  get confirmarLlevaItems(): boolean {
+    return (this.cotizacionAConfirmar?.detalles ?? []).length > 0;
   }
 
   cerrarConfirmar(): void {
@@ -778,10 +787,12 @@ export class CotizacionesComponent implements OnInit {
   guardarConfirmacion(): void {
     if (this.formConfirmar.invalid || !this.cotizacionAConfirmar) { this.formConfirmar.markAllAsTouched(); return; }
 
-    const payload: ConfirmarCotizacion = {
-      fechaEntregaEstimada: this.formConfirmar.value.fechaEntregaEstimada,
-      cantidadViajesAproximados: Number(this.formConfirmar.value.cantidadViajesAproximados)
-    };
+    const payload: ConfirmarCotizacion = this.confirmarLlevaItems
+      ? {
+          fechaEntregaEstimada: this.formConfirmar.value.fechaEntregaEstimada,
+          cantidadViajesAproximados: Number(this.formConfirmar.value.cantidadViajesAproximados)
+        }
+      : { fechaEntregaEstimada: null, cantidadViajesAproximados: null };
 
     this.cotizacionService.confirmarCotizacion(this.cotizacionAConfirmar.idCotizacion, payload).subscribe({
       next: () => {

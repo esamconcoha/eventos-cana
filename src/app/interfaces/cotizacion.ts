@@ -53,9 +53,10 @@ export interface ActualizarCotizacion {
   detalleServicioCotizacion: DetalleServicioCotizacion[];
 }
 
+// Ambos van null cuando la cotización es de solo servicios (no genera entrega).
 export interface ConfirmarCotizacion {
-  fechaEntregaEstimada: string;
-  cantidadViajesAproximados: number;
+  fechaEntregaEstimada: string | null;
+  cantidadViajesAproximados: number | null;
 }
 
 export interface Cotizacion {
