@@ -16,6 +16,8 @@ public interface DetallePedidoRepository extends JpaRepository<DetallePedido, Lo
 
     void deleteByCorrelativoPedido(String correlativoPedido);
 
+    boolean existsByCorrelativoPedido(String correlativoPedido);
+
     /** Misma formula de descuento que el total del pedido; ver DetalleCotizacionRepository. */
     @Query(value =
             "select dp.id_item as idItem, ic.descripcion_item as nombreItem, " +

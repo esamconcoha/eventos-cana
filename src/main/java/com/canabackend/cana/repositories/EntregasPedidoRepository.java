@@ -110,7 +110,8 @@ public interface EntregasPedidoRepository extends JpaRepository<EntregasPedido,L
      * Pedidos a los que todavia se les puede abrir una entrega.
      *
      * Criterio: pedido activo, estado actual del ciclo de vida anterior a la
-     * entrega, y sin fila en entregas_pedido. NO se filtra por fecha_entrega:
+     * entrega, sin fila en entregas_pedido y con al menos un item (un pedido
+     * de solo servicios no tiene nada que llevar). NO se filtra por fecha_entrega:
      * esa es la fecha pactada con el cliente que se captura al crear el pedido,
      * y viene null solo en los pedidos nacidos de una cotizacion.
      *
@@ -137,6 +138,8 @@ public interface EntregasPedidoRepository extends JpaRepository<EntregasPedido,L
             "  and not exists (select 1 from cana.entregas_pedido en " +
             "                   where en.correlativo_pedido = p.correlativo_pedido " +
             "                     and en.tipo_movimiento = :tipoMovimiento) " +
+            "  and exists (select 1 from cana.detalle_pedido dpi " +
+            "               where dpi.correlativo_pedido = p.correlativo_pedido) " +
             "order by p.fecha_evento nulls last, p.correlativo_pedido", nativeQuery = true)
     List<PedidoDisponibleProjection> findPedidosDisponibles(@Param("codigosEstado") List<String> codigosEstado,
                                                             @Param("tipoMovimiento") String tipoMovimiento);

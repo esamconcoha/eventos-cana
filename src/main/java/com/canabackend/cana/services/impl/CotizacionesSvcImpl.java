@@ -257,8 +257,12 @@ public class CotizacionesSvcImpl implements CotizacionesSvc {
         boolean yaConfirmada = CotizacionConstants.ESTADO_CONFIRMADA.equals(cotizacion.getEstadoCotizacion());
 
         // Los datos de entrega solo se validan si esta confirmacion va a crear
-        // el pedido; re-confirmar una cotizacion ya confirmada no crea nada.
-        if (!yaConfirmada) {
+        // el pedido (re-confirmar una cotizacion ya confirmada no crea nada) y
+        // si hay items que llevar: una cotizacion de solo servicios no genera
+        // entrega, asi que no se le piden fecha de entrega ni viajes.
+        boolean llevaItems = !CollectionUtils.isEmpty(
+                this.detalleCotizacionRepository.findByIdCotizacion(idCotizacion));
+        if (!yaConfirmada && llevaItems) {
             if (confirmacion == null || confirmacion.getFechaEntrega() == null) {
                 throw new MSCanaException(ErrorEnum.FECHA_ENTREGA_REQUERIDA);
             }
@@ -277,7 +281,8 @@ public class CotizacionesSvcImpl implements CotizacionesSvc {
 
         if (!yaConfirmada) {
             this.pedidosCanaSvc.crearPedidoDesdeCotizacion(idCotizacion,
-                    confirmacion.getFechaEntrega(), confirmacion.getCantidadViajesAproximados());
+                    confirmacion != null ? confirmacion.getFechaEntrega() : null,
+                    confirmacion != null ? confirmacion.getCantidadViajesAproximados() : null);
         }
     }
 

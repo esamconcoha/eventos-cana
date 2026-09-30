@@ -14,4 +14,6 @@ public interface DocumentosEntregaRepository extends JpaRepository<DocumentosEnt
 
     /** Para el flag "tiene constancia firmada" del detalle, sin traer el contenido. */
     boolean existsByIdEntregaAndEstadoRegistroTrue(Long idEntrega);
+
+    boolean existsByIdEntrega(Long idEntrega);
 }

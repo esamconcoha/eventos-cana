@@ -26,6 +26,7 @@ import com.canabackend.cana.projections.EstadisticasProjection;
 import com.canabackend.cana.projections.ItemEntregaProjection;
 import com.canabackend.cana.projections.PedidoDisponibleProjection;
 import com.canabackend.cana.projections.ViajeItemProjection;
+import com.canabackend.cana.repositories.DetallePedidoRepository;
 import com.canabackend.cana.repositories.DetalleServicioPedidoRepository;
 import com.canabackend.cana.repositories.DetalleViajeItemsRepository;
 import com.canabackend.cana.repositories.DetalleViajeRepository;
@@ -79,6 +80,8 @@ public class EntregasPedidoSvcImpl implements EntregasPedidoSvc {
     private ItemsCanaRepository itemsCanaRepository;
     @Autowired
     private DetalleServicioPedidoRepository detalleServicioPedidoRepository;
+    @Autowired
+    private DetallePedidoRepository detallePedidoRepository;
     @Autowired
     private DocumentosEntregaRepository documentosEntregaRepository;
     @Autowired
@@ -182,6 +185,9 @@ public class EntregasPedidoSvcImpl implements EntregasPedidoSvc {
         if (this.entregasPedidoRepository.existsByCorrelativoPedidoAndTipoMovimiento(
                 pedido.getCorrelativoPedido(), MovimientoConstants.TIPO_ENTREGA)) {
             throw new MSCanaException(ErrorEnum.ENTREGA_YA_EXISTE);
+        }
+        if (!this.detallePedidoRepository.existsByCorrelativoPedido(pedido.getCorrelativoPedido())) {
+            throw new MSCanaException(ErrorEnum.PEDIDO_SIN_ITEMS);
         }
 
         EntregasPedido entrega = new EntregasPedido();

@@ -51,6 +51,10 @@ public class PedidosCanaSvcImpl implements PedidosCanaSvc {
     private ServiciosDecoracionRepository serviciosDecoracionRepository;
     @Autowired
     private EntregasPedidoRepository entregasPedidoRepository;
+    @Autowired
+    private DetalleViajeRepository detalleViajeRepository;
+    @Autowired
+    private DocumentosEntregaRepository documentosEntregaRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -73,7 +77,10 @@ public class PedidosCanaSvcImpl implements PedidosCanaSvc {
     @Override
     @Transactional(rollbackFor = MSCanaException.class)
     public PedidoDto guardarPedido(GuardarPedidoDto dto) {
-        validarDatosEntrega(dto.getFechaEntrega(), dto.getCantidadViajesAproximados());
+        boolean llevaItems = !CollectionUtils.isEmpty(dto.getDetalles());
+        if (llevaItems) {
+            validarDatosEntrega(dto.getFechaEntrega(), dto.getCantidadViajesAproximados());
+        }
         // Solo al crear: un pedido nuevo no se agenda para ayer. Al editar no
         // se valida, porque hay que poder corregir pedidos historicos.
         validarNoEsPasado(dto.getFechaEntrega());
@@ -102,7 +109,9 @@ public class PedidosCanaSvcImpl implements PedidosCanaSvc {
 
         validarDetalles(dto.getDetalles(), dto.getDetallesServicios());
         guardarDetalles(pedido.getCorrelativoPedido(), dto.getDetalles(), dto.getDetallesServicios());
-        crearEntregaInicial(pedido.getCorrelativoPedido(), dto.getCantidadViajesAproximados());
+        if (llevaItems) {
+            crearEntregaInicial(pedido.getCorrelativoPedido(), dto.getCantidadViajesAproximados());
+        }
 
         return mapToPedidoDto(pedido);
     }
@@ -140,6 +149,9 @@ public class PedidosCanaSvcImpl implements PedidosCanaSvc {
                 this.detalleServicioPedidoRepository.deleteByCorrelativoPedido(correlativoPedido);
             }
             guardarDetalles(correlativoPedido, dto.getDetalles(), dto.getDetallesServicios());
+            if (dto.getDetalles() != null && dto.getDetalles().isEmpty()) {
+                descartarEntregaSinMovimiento(correlativoPedido);
+            }
             // Los items/servicios cambian montoTotalPedido; se recalcula estado_pago/pagado
             // contra los pagos activos ya registrados, sin tocarlos (sube o baja el estado segun corresponda).
             this.pagosPedidoSvc.recalcularEstadoPago(correlativoPedido);
@@ -212,7 +224,11 @@ public class PedidosCanaSvcImpl implements PedidosCanaSvc {
         if (this.pedidosCanaRepository.existsByIdCotizacion(idCotizacion.intValue())) {
             return;
         }
-        validarDatosEntrega(fechaEntrega, cantidadViajesAproximados);
+        List<DetalleCotizacion> detallesCotizacion = this.detalleCotizacionRepository.findByIdCotizacion(idCotizacion);
+        boolean llevaItems = !CollectionUtils.isEmpty(detallesCotizacion);
+        if (llevaItems) {
+            validarDatosEntrega(fechaEntrega, cantidadViajesAproximados);
+        }
 
         Cotizaciones cotizacion = this.cotizacionesRepository.findById(idCotizacion)
                 .orElseThrow(() -> new MSCanaException(ErrorEnum.COTIZACION_NOT_FOUND));
@@ -234,8 +250,7 @@ public class PedidosCanaSvcImpl implements PedidosCanaSvc {
         pedido.setEstadoPago(PagoConstants.ESTADO_PAGO_PENDIENTE);
         this.pedidosCanaRepository.save(pedido);
 
-        List<DetalleCotizacion> detallesCotizacion = this.detalleCotizacionRepository.findByIdCotizacion(idCotizacion);
-        if (!CollectionUtils.isEmpty(detallesCotizacion)) {
+        if (llevaItems) {
             List<DetallePedido> detalles = new ArrayList<>();
             for (DetalleCotizacion d : detallesCotizacion) {
                 DetallePedido detalle = new DetallePedido();
@@ -272,7 +287,9 @@ public class PedidosCanaSvcImpl implements PedidosCanaSvc {
         }
 
         // El primer tramo de estados_pedido lo abre el trigger sql/008 al INSERT.
-        crearEntregaInicial(pedido.getCorrelativoPedido(), cantidadViajesAproximados);
+        if (llevaItems) {
+            crearEntregaInicial(pedido.getCorrelativoPedido(), cantidadViajesAproximados);
+        }
     }
 
     /** Rechaza fechas anteriores a hoy. Ignora null: la obligatoriedad se valida aparte. */
@@ -292,8 +309,24 @@ public class PedidosCanaSvcImpl implements PedidosCanaSvc {
     }
 
     /**
-     * Todo pedido nace con su entrega abierta, asi que la logistica no depende
-     * de que alguien se acuerde de crearla despues.
+     * Si al editar el pedido se quedo sin items, la entrega que tenia abierta
+     * ya no tiene nada que llevar. Solo se borra si nunca se movio (sin viajes,
+     * sin constancia y sin finalizar); si ya hubo movimiento, es historia y se deja.
+     */
+    private void descartarEntregaSinMovimiento(String correlativoPedido) {
+        this.entregasPedidoRepository
+                .findByCorrelativoPedidoAndTipoMovimiento(correlativoPedido, MovimientoConstants.TIPO_ENTREGA)
+                .filter(e -> !Boolean.TRUE.equals(e.getPedidoFinalizado())
+                        && this.detalleViajeRepository.countByIdEntrega(e.getIdEntrega()) == 0
+                        && !this.documentosEntregaRepository.existsByIdEntrega(e.getIdEntrega()))
+                .ifPresent(this.entregasPedidoRepository::delete);
+    }
+
+    /**
+     * Todo pedido con items nace con su entrega abierta, asi que la logistica
+     * no depende de que alguien se acuerde de crearla despues. Un pedido de
+     * solo servicios no tiene nada que llevar ni recoger: no lleva entrega y su
+     * ciclo de vida se avanza a mano desde Pedidos.
      *
      * Se usa el repositorio y no EntregasPedidoSvc a proposito: ese servicio ya
      * depende de PedidosCanaSvc para mover estados, y inyectarlo aca cerraria
