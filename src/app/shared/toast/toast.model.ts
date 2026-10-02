@@ -1,3 +1,5 @@
+import { EscenaIlustracion } from '../ilustracion/ilustracion.component';
+
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
 export interface Toast {
@@ -11,5 +13,7 @@ export interface Toast {
   onCancel?: () => void;
   confirmText?: string;
   cancelText?: string;
-  removing?: boolean;      // flag para animación de salida
+  /** Ilustración animada: en confirmaciones siempre hay una (por defecto
+   *  'documento'); en éxitos solo si se pide, y reemplaza al ícono. */
+  escena?: EscenaIlustracion;
 }

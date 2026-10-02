@@ -16,23 +16,23 @@
     <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
       <div class="surface-card p-4">
         <p class="text-xs text-grayMedium">Sin agendar</p>
-        <p class="font-montserrat font-bold text-2xl text-slate-600 mt-1">{{ estadisticas.sinFecha }}</p>
+        <p class="font-montserrat font-bold text-2xl text-slate-600 mt-1" [appContador]="estadisticas.sinFecha"></p>
       </div>
       <div class="surface-card p-4">
         <p class="text-xs text-grayMedium">Atrasadas</p>
-        <p class="font-montserrat font-bold text-2xl text-red-600 mt-1">{{ estadisticas.atrasadas }}</p>
+        <p class="font-montserrat font-bold text-2xl text-red-600 mt-1" [appContador]="estadisticas.atrasadas"></p>
       </div>
       <div class="surface-card p-4">
         <p class="text-xs text-grayMedium">Hoy</p>
-        <p class="font-montserrat font-bold text-2xl text-amber-600 mt-1">{{ estadisticas.enCurso }}</p>
+        <p class="font-montserrat font-bold text-2xl text-amber-600 mt-1" [appContador]="estadisticas.enCurso"></p>
       </div>
       <div class="surface-card p-4">
         <p class="text-xs text-grayMedium">Programadas</p>
-        <p class="font-montserrat font-bold text-2xl text-sky-600 mt-1">{{ estadisticas.programadas }}</p>
+        <p class="font-montserrat font-bold text-2xl text-sky-600 mt-1" [appContador]="estadisticas.programadas"></p>
       </div>
       <div class="surface-card p-4">
         <p class="text-xs text-grayMedium">Finalizadas</p>
-        <p class="font-montserrat font-bold text-2xl text-emerald-600 mt-1">{{ estadisticas.finalizadas }}</p>
+        <p class="font-montserrat font-bold text-2xl text-emerald-600 mt-1" [appContador]="estadisticas.finalizadas"></p>
       </div>
     </div>
   }
@@ -111,7 +111,8 @@
                 <td class="px-4 py-3">
                   <div class="flex items-center gap-2">
                     <div class="flex-1 h-2 rounded-full bg-brand-900/10 ring-1 ring-inset ring-brand-900/10 overflow-hidden">
-                      <div class="h-full rounded-full transition-all" [ngClass]="avanceColorClass(r)" [style.width.%]="avancePct(r)"></div>
+                      <div class="barra-relleno h-full rounded-full" [ngClass]="avanceColorClass(r)" [style.width.%]="avancePct(r)"
+                        [class.barra-activa]="avancePct(r) > 0 && avancePct(r) < 100"></div>
                     </div>
                     <span class="text-xs text-gray-500 w-9 text-right">{{ avancePct(r) | number:'1.0-0' }}%</span>
                   </div>

@@ -191,7 +191,7 @@ export class EntregaDetalleComponent implements OnInit {
     this.entregaService.registrarViaje(payload).subscribe({
       next: (actualizada) => {
         this.entrega = actualizada;
-        this.toast.success('Viaje registrado');
+        this.toast.success('Viaje registrado', undefined, 'estado');
         this.cerrarRegistrarViaje();
       },
       error: (err) => this.toast.error('Error', mensajeErrorEntrega(err, 'No se pudo registrar el viaje'))
@@ -207,6 +207,7 @@ export class EntregaDetalleComponent implements OnInit {
     const nombre = servicio.nombreServicio || `Servicio #${servicio.idServicio}`;
 
     this.toast.confirm({
+      escena: 'estado',
       title: realizado ? '¿Confirmar que ya se realizó?' : '¿Marcar como pendiente?',
       message: realizado
         ? `Se registrará "${nombre}" como realizado con la fecha y hora de ahora.`
@@ -218,7 +219,7 @@ export class EntregaDetalleComponent implements OnInit {
           // La respuesta es el pedido, no la entrega: se recarga el detalle.
           next: () => {
             this.cargarEntrega();
-            this.toast.success(realizado ? 'Servicio confirmado' : 'Servicio marcado pendiente');
+            this.toast.success(realizado ? 'Servicio confirmado' : 'Servicio marcado pendiente', undefined, 'estado');
           },
           error: () => this.toast.error('Error', 'No se pudo actualizar el servicio')
         });
@@ -265,7 +266,7 @@ export class EntregaDetalleComponent implements OnInit {
     this.entregaService.marcarFinalizada(this.entrega!.idEntrega).subscribe({
       next: (actualizada) => {
         this.entrega = actualizada;
-        this.toast.success('Entrega finalizada');
+        this.toast.success('Entrega finalizada', undefined, 'documento');
       },
       error: (err) => this.toast.error('Error', mensajeErrorEntrega(err, 'No se pudo finalizar la entrega'))
     });

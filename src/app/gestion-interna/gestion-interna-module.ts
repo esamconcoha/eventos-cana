@@ -28,6 +28,9 @@ import { ReportesComponent } from './reportes/reportes.component';
 import { GraficoBarrasComponent } from '../shared/graficos/grafico-barras.component';
 import { GraficoDonaComponent } from '../shared/graficos/grafico-dona.component';
 import { GraficoRankingComponent } from '../shared/graficos/grafico-ranking.component';
+import { ContadorDirective } from '../shared/animaciones/contador.directive';
+import { InclinacionDirective } from '../shared/animaciones/inclinacion.directive';
+import { IlustracionComponent } from '../shared/ilustracion/ilustracion.component';
 
 @NgModule({
   declarations: [
@@ -60,7 +63,10 @@ import { GraficoRankingComponent } from '../shared/graficos/grafico-ranking.comp
     TrazabilidadModalComponent,
     GraficoBarrasComponent,
     GraficoDonaComponent,
-    GraficoRankingComponent
+    GraficoRankingComponent,
+    ContadorDirective,
+    InclinacionDirective,
+    IlustracionComponent
   ]
 })
 export class GestionInternaModule {}

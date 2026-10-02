@@ -182,114 +182,153 @@ export class ReportesComponent implements OnInit {
   }
 
   // ─── Datos derivados para la vista ───────────────────────
+  // Se memorizan por reporte: los getters se evalúan en cada ciclo de
+  // detección de cambios, y si devolvieran un arreglo nuevo cada vez, las
+  // gráficas recibirían un input "distinto" en cada ciclo y se redibujarían
+  // (las donas se volvían a trazar a cada rato). Mientras this.reporte sea el
+  // mismo objeto se devuelve el mismo arreglo; al cargar otro se recalcula.
+  private reporteMemorizado: unknown = null;
+  private readonly memoria = new Map<string, unknown>();
+
+  private memo<T>(clave: string, calcular: () => T): T {
+    if (this.reporteMemorizado !== this.reporte) {
+      this.memoria.clear();
+      this.reporteMemorizado = this.reporte;
+    }
+    if (!this.memoria.has(clave)) {
+      this.memoria.set(clave, calcular());
+    }
+    return this.memoria.get(clave) as T;
+  }
+
   get indicadores(): TarjetaIndicador[] {
-    if (!this.reporte) { return []; }
-    const r = this.reporte.resumen;
-    return [
-      {
-        label: 'Eventos del periodo', valor: this.entero(r.eventos),
-        nota: `${r.eventosFinalizados} finalizados · ${r.eventosCancelados} cancelados`,
-        icono: 'celebration', chip: 'bg-purple-100 text-purple-700'
-      },
-      {
-        label: 'Facturado', valor: this.moneda(r.facturado),
-        nota: 'Artículos y servicios de los pedidos',
-        icono: 'payments', chip: 'bg-slate-100 text-slate-600'
-      },
-      {
-        label: 'Cobrado', valor: this.moneda(r.cobrado),
-        nota: `${this.porcentaje(r.porcentajeCobrado)} de lo facturado`,
-        icono: 'account_balance_wallet', chip: 'bg-emerald-100 text-emerald-700'
-      },
-      {
-        label: 'Saldo por cobrar', valor: this.moneda(r.saldoPorCobrar),
-        nota: `${r.pedidosConSaldo} pedidos con saldo`,
-        icono: 'request_quote', chip: 'bg-amber-100 text-amber-700',
-        destacar: r.saldoPorCobrar > 0
-      },
-      {
-        label: 'Ticket promedio', valor: this.moneda(r.ticketPromedio),
-        nota: 'Por evento no cancelado',
-        icono: 'trending_up', chip: 'bg-sky-100 text-sky-700'
-      },
-      {
-        label: 'Conversión de cotizaciones', valor: this.porcentaje(r.tasaConversion),
-        nota: `${r.cotizacionesConfirmadas} de ${r.cotizaciones} cotizaciones`,
-        icono: 'swap_horiz', chip: 'bg-slate-100 text-slate-600'
-      },
-      {
-        label: 'Tasa de cancelación', valor: this.porcentaje(r.tasaCancelacion),
-        nota: `${r.eventosCancelados} eventos cancelados`,
-        icono: 'event_busy', chip: 'bg-red-100 text-red-600',
-        destacar: r.tasaCancelacion > 0
-      },
-      {
-        label: 'Faltantes en bodega', valor: this.entero(r.unidadesFaltantes),
-        nota: `${r.articulosConFaltantes} artículos afectados`,
-        icono: 'report_problem', chip: 'bg-red-100 text-red-600',
-        destacar: r.unidadesFaltantes > 0
-      }
-    ];
+    return this.memo('indicadores', (): TarjetaIndicador[] => {
+      if (!this.reporte) { return []; }
+      const r = this.reporte.resumen;
+      return [
+        {
+          label: 'Eventos del periodo', valor: this.entero(r.eventos),
+          nota: `${r.eventosFinalizados} finalizados · ${r.eventosCancelados} cancelados`,
+          icono: 'celebration', chip: 'bg-purple-100 text-purple-700'
+        },
+        {
+          label: 'Facturado', valor: this.moneda(r.facturado),
+          nota: 'Artículos y servicios de los pedidos',
+          icono: 'payments', chip: 'bg-slate-100 text-slate-600'
+        },
+        {
+          label: 'Cobrado', valor: this.moneda(r.cobrado),
+          nota: `${this.porcentaje(r.porcentajeCobrado)} de lo facturado`,
+          icono: 'account_balance_wallet', chip: 'bg-emerald-100 text-emerald-700'
+        },
+        {
+          label: 'Saldo por cobrar', valor: this.moneda(r.saldoPorCobrar),
+          nota: `${r.pedidosConSaldo} pedidos con saldo`,
+          icono: 'request_quote', chip: 'bg-amber-100 text-amber-700',
+          destacar: r.saldoPorCobrar > 0
+        },
+        {
+          label: 'Ticket promedio', valor: this.moneda(r.ticketPromedio),
+          nota: 'Por evento no cancelado',
+          icono: 'trending_up', chip: 'bg-sky-100 text-sky-700'
+        },
+        {
+          label: 'Conversión de cotizaciones', valor: this.porcentaje(r.tasaConversion),
+          nota: `${r.cotizacionesConfirmadas} de ${r.cotizaciones} cotizaciones`,
+          icono: 'swap_horiz', chip: 'bg-slate-100 text-slate-600'
+        },
+        {
+          label: 'Tasa de cancelación', valor: this.porcentaje(r.tasaCancelacion),
+          nota: `${r.eventosCancelados} eventos cancelados`,
+          icono: 'event_busy', chip: 'bg-red-100 text-red-600',
+          destacar: r.tasaCancelacion > 0
+        },
+        {
+          label: 'Faltantes en bodega', valor: this.entero(r.unidadesFaltantes),
+          nota: `${r.articulosConFaltantes} artículos afectados`,
+          icono: 'report_problem', chip: 'bg-red-100 text-red-600',
+          destacar: r.unidadesFaltantes > 0
+        }
+      ];
+    });
   }
 
   get etiquetasMeses(): string[] {
-    return this.reporte?.serieMensual.map(m => m.etiqueta) ?? [];
+    return this.memo('etiquetasMeses', (): string[] => {
+      return this.reporte?.serieMensual.map(m => m.etiqueta) ?? [];
+    });
   }
 
   get serieFacturado(): number[] {
-    return this.reporte?.serieMensual.map(m => m.facturado) ?? [];
+    return this.memo('serieFacturado', (): number[] => {
+      return this.reporte?.serieMensual.map(m => m.facturado) ?? [];
+    });
   }
 
   get serieCobrado(): number[] {
-    return this.reporte?.serieMensual.map(m => m.cobrado) ?? [];
+    return this.memo('serieCobrado', (): number[] => {
+      return this.reporte?.serieMensual.map(m => m.cobrado) ?? [];
+    });
   }
 
   get serieEventos(): number[] {
-    return this.reporte?.serieMensual.map(m => m.eventos) ?? [];
+    return this.memo('serieEventos', (): number[] => {
+      return this.reporte?.serieMensual.map(m => m.eventos) ?? [];
+    });
   }
 
   get donaTipos(): PorcionDona[] {
-    return (this.reporte?.eventosPorTipo ?? []).map(d => ({
-      etiqueta: d.etiqueta,
-      valor: d.cantidad,
-      detalle: `${d.cantidad} eventos · ${this.moneda(d.monto)}`
-    }));
+    return this.memo('donaTipos', (): PorcionDona[] => {
+      return (this.reporte?.eventosPorTipo ?? []).map(d => ({
+        etiqueta: d.etiqueta,
+        valor: d.cantidad,
+        detalle: `${d.cantidad} eventos · ${this.moneda(d.monto)}`
+      }));
+    });
   }
 
   /** Reparte dinero, no cantidad: la pregunta es cuánto se debe, no cuántos deben. */
   get donaCartera(): PorcionDona[] {
-    return (this.reporte?.carteraPorEstadoPago ?? []).map(d => ({
-      etiqueta: d.etiqueta,
-      valor: d.monto,
-      detalle: `${d.cantidad} pedidos · ${this.moneda(d.monto)}`
-    }));
+    return this.memo('donaCartera', (): PorcionDona[] => {
+      return (this.reporte?.carteraPorEstadoPago ?? []).map(d => ({
+        etiqueta: d.etiqueta,
+        valor: d.monto,
+        detalle: `${d.cantidad} pedidos · ${this.moneda(d.monto)}`
+      }));
+    });
   }
 
   get rankingArticulos(): FilaRanking[] {
-    return (this.reporte?.topArticulos ?? []).map(a => ({
-      etiqueta: a.etiqueta,
-      detalle: a.categoria,
-      valor: a.cantidad,
-      valorTexto: `${this.numero(a.cantidad)} u`
-    }));
+    return this.memo('rankingArticulos', (): FilaRanking[] => {
+      return (this.reporte?.topArticulos ?? []).map(a => ({
+        etiqueta: a.etiqueta,
+        detalle: a.categoria,
+        valor: a.cantidad,
+        valorTexto: `${this.numero(a.cantidad)} u`
+      }));
+    });
   }
 
   get rankingServicios(): FilaRanking[] {
-    return (this.reporte?.topServicios ?? []).map(s => ({
-      etiqueta: s.etiqueta,
-      detalle: s.categoria,
-      valor: s.monto,
-      valorTexto: this.moneda(s.monto)
-    }));
+    return this.memo('rankingServicios', (): FilaRanking[] => {
+      return (this.reporte?.topServicios ?? []).map(s => ({
+        etiqueta: s.etiqueta,
+        detalle: s.categoria,
+        valor: s.monto,
+        valorTexto: this.moneda(s.monto)
+      }));
+    });
   }
 
   get rankingEstados(): FilaRanking[] {
-    return (this.reporte?.eventosPorEstado ?? []).map(e => ({
-      etiqueta: e.etiqueta,
-      detalle: `${this.porcentaje(e.porcentaje)} de los eventos`,
-      valor: e.cantidad,
-      valorTexto: String(e.cantidad)
-    }));
+    return this.memo('rankingEstados', (): FilaRanking[] => {
+      return (this.reporte?.eventosPorEstado ?? []).map(e => ({
+        etiqueta: e.etiqueta,
+        detalle: `${this.porcentaje(e.porcentaje)} de los eventos`,
+        valor: e.cantidad,
+        valorTexto: String(e.cantidad)
+      }));
+    });
   }
 
   // ─── Formato ─────────────────────────────────────────────

@@ -108,7 +108,7 @@ export class RecoleccionDetalleComponent implements OnInit {
     }).subscribe({
       next: (actualizada) => {
         this.recoleccion = actualizada;
-        this.toast.success('Recolección agendada');
+        this.toast.success('Recolección agendada', undefined, 'documento');
         this.cerrarProgramar();
       },
       error: (err) => this.toast.error('Error', mensajeErrorRecoleccion(err, 'No se pudo agendar'))
@@ -164,7 +164,7 @@ export class RecoleccionDetalleComponent implements OnInit {
     this.recoleccionService.registrarViaje(payload).subscribe({
       next: (actualizada) => {
         this.recoleccion = actualizada;
-        this.toast.success('Viaje de vuelta registrado');
+        this.toast.success('Viaje de vuelta registrado', undefined, 'estado');
         this.cerrarRegistrarViaje();
       },
       error: (err) => this.toast.error('Error', mensajeErrorRecoleccion(err, 'No se pudo registrar el viaje'))
@@ -209,7 +209,7 @@ export class RecoleccionDetalleComponent implements OnInit {
     this.recoleccionService.marcarFinalizada(this.idRecoleccion).subscribe({
       next: (actualizada) => {
         this.recoleccion = actualizada;
-        this.toast.success('Recolección finalizada');
+        this.toast.success('Recolección finalizada', undefined, 'documento');
       },
       error: (err) => this.toast.error('Error', mensajeErrorRecoleccion(err, 'No se pudo finalizar'))
     });

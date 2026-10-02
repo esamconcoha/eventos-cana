@@ -20,31 +20,31 @@
   <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3">
     <div class="surface-card p-4">
       <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-1">Atrasadas</p>
-      <p class="font-montserrat font-bold text-2xl text-red-600">{{ estadisticas?.atrasadas ?? '—' }}</p>
+      <p class="font-montserrat font-bold text-2xl text-red-600" [appContador]="estadisticas?.atrasadas"></p>
     </div>
     <div class="surface-card p-4">
       <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-1">Entregas de hoy</p>
-      <p class="font-montserrat font-bold text-2xl text-amber-500">{{ estadisticas?.enCurso ?? '—' }}</p>
+      <p class="font-montserrat font-bold text-2xl text-amber-500" [appContador]="estadisticas?.enCurso"></p>
     </div>
     <div class="surface-card p-4">
       <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-1">Programadas</p>
-      <p class="font-montserrat font-bold text-2xl text-sky-600">{{ estadisticas?.programadas ?? '—' }}</p>
+      <p class="font-montserrat font-bold text-2xl text-sky-600" [appContador]="estadisticas?.programadas"></p>
     </div>
     <div class="surface-card p-4">
       <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-1">Sin fecha</p>
-      <p class="font-montserrat font-bold text-2xl text-slate-500">{{ estadisticas?.sinFecha ?? '—' }}</p>
+      <p class="font-montserrat font-bold text-2xl text-slate-500" [appContador]="estadisticas?.sinFecha"></p>
     </div>
     <div class="surface-card p-4">
       <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-1">Finalizadas</p>
-      <p class="font-montserrat font-bold text-2xl text-emerald-600">{{ estadisticas?.finalizadas ?? '—' }}</p>
+      <p class="font-montserrat font-bold text-2xl text-emerald-600" [appContador]="estadisticas?.finalizadas"></p>
     </div>
     <div class="surface-card p-4">
       <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-1">Viajes hoy</p>
-      <p class="font-montserrat font-bold text-2xl text-gray-900">{{ estadisticas?.viajesHoy ?? '—' }}</p>
+      <p class="font-montserrat font-bold text-2xl text-gray-900" [appContador]="estadisticas?.viajesHoy"></p>
     </div>
     <div class="surface-card p-4">
       <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-1">Desvío de viajes</p>
-      <p class="font-montserrat font-bold text-2xl text-red-600">{{ estadisticas?.desvioViajes ?? '—' }}</p>
+      <p class="font-montserrat font-bold text-2xl text-red-600" [appContador]="estadisticas?.desvioViajes"></p>
     </div>
   </div>
 
@@ -168,7 +168,8 @@
                 <td class="px-4 py-3">
                   <div class="flex items-center gap-2">
                     <div class="flex-1 h-2 rounded-full bg-brand-900/10 ring-1 ring-inset ring-brand-900/10 overflow-hidden">
-                      <div class="h-full rounded-full transition-all" [ngClass]="avanceColorClass(e)" [style.width.%]="avancePct(e)"></div>
+                      <div class="barra-relleno h-full rounded-full" [ngClass]="avanceColorClass(e)" [style.width.%]="avancePct(e)"
+                        [class.barra-activa]="avancePct(e) > 0 && avancePct(e) < 100"></div>
                     </div>
                     <span class="text-xs text-gray-500 w-9 text-right">{{ avancePct(e) | number:'1.0-0' }}%</span>
                   </div>

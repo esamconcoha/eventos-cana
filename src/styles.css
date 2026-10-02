@@ -435,3 +435,101 @@
     @apply border-red-300;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   ANIMACIONES DE DATOS
+   Barras, gráficas y listas entran creciendo en vez de aparecer de golpe.
+   Todo se desactiva solo con prefers-reduced-motion (regla de @layer base).
+
+   El escalonado se hace poniendo animation-delay por elemento desde el
+   template ([style.animation-delay.ms]="$index * 60"), y todas usan
+   fill-mode "both" para que el elemento espere oculto su turno.
+   ───────────────────────────────────────────────────────────────────────── */
+
+@keyframes crece-x {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+@keyframes crece-y {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+@keyframes entra-arriba {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes aparece {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+/* Destello que recorre una barra en curso: dice "esto sigue avanzando". */
+@keyframes destello {
+  0%   { transform: translateX(-100%); }
+  60%, 100% { transform: translateX(250%); }
+}
+/* La dona se "dibuja" en sentido horario destapando una máscara. 409 es la
+   circunferencia del anillo de la máscara (ver GraficoDonaComponent.LARGO_TRAZO). */
+@keyframes dibuja-trazo {
+  from { stroke-dashoffset: 409; }
+  to   { stroke-dashoffset: 0; }
+}
+
+/* Curva común: sale rápido y se asienta suave (easeOutExpo aproximado). */
+:root {
+  --curva-datos: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.anim-entra {
+  animation: entra-arriba 0.5s var(--curva-datos) both;
+}
+.anim-aparece {
+  animation: aparece 0.6s ease-out both;
+}
+
+/* ── Barras de progreso (entregas, recolecciones, calendario) ──
+   El relleno entra creciendo desde la izquierda y, si el dato cambia después,
+   el ancho se desliza en vez de saltar. Con .barra-activa (en curso, ni 0 ni
+   100%) lleva además un destello que la recorre cada pocos segundos. */
+.barra-relleno {
+  position: relative;
+  overflow: hidden;
+  transform-origin: left center;
+  animation: crece-x 0.9s var(--curva-datos) both;
+  transition: width 0.7s var(--curva-datos), background-color 0.4s ease;
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0) 60%);
+}
+.barra-relleno.barra-activa::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+  animation: destello 2.6s ease-in-out 1s infinite;
+}
+
+/* ── Gráfica de barras (SVG) ──
+   fill-box hace que el origen sea la base de CADA barra y no del SVG entero. */
+.grafico-barra {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  animation: crece-y 0.8s var(--curva-datos) both;
+  transition: opacity 0.2s ease, filter 0.2s ease;
+}
+.grafico-barra:hover {
+  filter: brightness(1.15) drop-shadow(0 4px 6px rgba(2, 25, 48, 0.25));
+}
+
+/* ── Dona (SVG) ──
+   Cada porción se agranda un poco al pasar el mouse, desde el centro. */
+.grafico-porcion {
+  transform-box: view-box;
+  transform-origin: 100px 100px;
+  transition: transform 0.25s var(--curva-datos), filter 0.25s ease;
+}
+.grafico-porcion:hover {
+  transform: scale(1.05);
+  filter: drop-shadow(0 3px 6px rgba(2, 25, 48, 0.25));
+}
+.grafico-mascara-trazo {
+  animation: dibuja-trazo 1.1s var(--curva-datos) both;
+}

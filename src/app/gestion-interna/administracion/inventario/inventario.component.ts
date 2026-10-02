@@ -131,7 +131,7 @@ export class InventarioComponent implements OnInit {
 
     request$.subscribe({
       next: () => {
-        this.toast.success(this.modoEdicion ? 'Item actualizado' : 'Item creado');
+        this.toast.success(this.modoEdicion ? 'Item actualizado' : 'Item creado', undefined, 'documento');
         this.cancelar();
         this.cargarItems();
       },
@@ -148,6 +148,7 @@ export class InventarioComponent implements OnInit {
 
   confirmarEliminar(item: ItemCana): void {
     this.toast.confirm({
+      escena: 'basurero',
       title: '¿Eliminar item?',
       message: `¿Estás seguro de eliminar "${item.descripcionItem}"?`,
       confirmText: 'Sí, eliminar',
@@ -155,7 +156,7 @@ export class InventarioComponent implements OnInit {
       onConfirm: () => {
         this.itemService.eliminarItem(item.idItem).subscribe({
           next: () => {
-            this.toast.success('Item eliminado');
+            this.toast.success('Item eliminado', undefined, 'basurero');
             this.cargarItems();
           },
           error: (err) => this.toast.error('Error', err?.error?.message ?? 'No se pudo eliminar')

@@ -111,7 +111,7 @@ export class UsuariosComponent implements OnInit {
     };
     this.usuarioService.guardarUsuario(payload).subscribe({
       next: () => {
-        this.toast.success('Usuario creado');
+        this.toast.success('Usuario creado', undefined, 'documento');
         this.cancelarCrear();
         this.cargarUsuarios();
       },
@@ -183,7 +183,7 @@ export class UsuariosComponent implements OnInit {
     console.log(payload);
     this.usuarioService.editarUsuario(payload).subscribe({
       next: () => {
-        this.toast.success('Usuario actualizado');
+        this.toast.success('Usuario actualizado', undefined, 'documento');
         this.cancelarEditar();
         this.cargarUsuarios();
       },
@@ -200,6 +200,7 @@ export class UsuariosComponent implements OnInit {
 
   confirmarInactivar(usuario: UsuarioInterno): void {
     this.toast.confirm({
+      escena: 'basurero',
       title: '¿Inactivar usuario?',
       message: `¿Estás seguro de inactivar a ${usuario.nombresUsuario} ${usuario.apellidosUsuario}?`,
       confirmText: 'Sí, inactivar',
@@ -207,7 +208,7 @@ export class UsuariosComponent implements OnInit {
       onConfirm: () => {
         this.usuarioService.inactivarUsuario(usuario.dpiNitUsuario).subscribe({
           next: () => {
-            this.toast.success('Usuario inactivado');
+            this.toast.success('Usuario inactivado', undefined, 'basurero');
             this.cargarUsuarios();
           },
           error: (err) => this.toast.error('Error', err?.error?.message ?? 'No se pudo inactivar el usuario')

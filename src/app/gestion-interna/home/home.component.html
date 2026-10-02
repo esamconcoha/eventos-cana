@@ -29,9 +29,12 @@
     <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
       @for (t of tarjetas; track t.label) {
         <button (click)="ir(t.ruta)"
-          class="surface-card p-4 text-left hover:shadow-glow-amber hover:-translate-y-1 transition-all duration-300"
-          [class.opacity-80]="t.secundaria">
-          <div class="w-9 h-9 rounded-xl flex items-center justify-center mb-3" [ngClass]="t.chip">
+          class="group surface-card p-4 text-left hover:shadow-glow-amber hover:-translate-y-1 transition-all duration-300"
+          [class.opacity-80]="t.secundaria"
+          [style.animation-delay.ms]="$index * 60" appInclinacion>
+          <div class="w-9 h-9 rounded-xl flex items-center justify-center mb-3
+                      transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6"
+               [ngClass]="t.chip">
             <span class="material-icons text-[18px]">{{ t.icono }}</span>
           </div>
           <p class="font-montserrat font-bold leading-none"
@@ -39,7 +42,7 @@
              [class.text-3xl]="t.secundaria"
              [class.text-gray-900]="!t.destacar && !t.secundaria"
              [class.text-gray-500]="t.secundaria"
-             [class.text-amber-600]="t.destacar">{{ t.valor }}</p>
+             [class.text-amber-600]="t.destacar" [appContador]="t.valor"></p>
           <p class="text-xs text-grayMedium mt-2 leading-tight">{{ t.label }}</p>
         </button>
       }
@@ -67,7 +70,8 @@
         } @else {
           <div class="divide-y divide-brand-900/[0.05] flex-1">
             @for (e of resumen.proximosEventos; track e.correlativoPedido) {
-              <div class="flex items-center gap-4 px-6 py-4 hover:bg-amber-100/40 transition-colors">
+              <div class="flex items-center gap-4 px-6 py-4 hover:bg-amber-100/40 transition-colors anim-entra"
+                   [style.animation-delay.ms]="250 + $index * 60">
                 <div class="w-14 shrink-0 rounded-xl bg-[#021930] text-white py-2 text-center">
                   <p class="font-montserrat font-bold text-lg leading-none">{{ diaDe(e.fechaEvento) }}</p>
                   <p class="text-[10px] font-semibold tracking-wide mt-0.5 opacity-80">{{ mesDe(e.fechaEvento) }}</p>

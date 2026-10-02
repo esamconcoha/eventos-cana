@@ -111,7 +111,7 @@ export class SalonesComponent implements OnInit {
 
     req$.subscribe({
       next: () => {
-        this.toast.success(this.modoEdicion ? 'Salón actualizado' : 'Salón creado');
+        this.toast.success(this.modoEdicion ? 'Salón actualizado' : 'Salón creado', undefined, 'documento');
         this.cancelar();
         this.cargarSalones();
       },
@@ -129,13 +129,14 @@ export class SalonesComponent implements OnInit {
   // ─── Eliminar (lógico) ────────────────────────────────────
   confirmarEliminar(s: Salon): void {
     this.toast.confirm({
+      escena: 'basurero',
       title: '¿Eliminar salón?',
       message: `¿Estás seguro de eliminar "${s.nombreSalon}"?`,
       confirmText: 'Sí, eliminar',
       cancelText: 'Cancelar',
       onConfirm: () => {
         this.salonService.eliminarSalon(s.idSalon).subscribe({
-          next: () => { this.toast.success('Salón eliminado'); this.cargarSalones(); },
+          next: () => { this.toast.success('Salón eliminado', undefined, 'basurero'); this.cargarSalones(); },
           error: (err) => this.toast.error('Error', err?.error?.message ?? 'No se pudo eliminar')
         });
       }

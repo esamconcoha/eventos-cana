@@ -238,6 +238,7 @@ export class PedidosComponent implements OnInit {
     // Se pregunta en ambos sentidos: confirmar deja constancia con fecha, y
     // deshacer la borra. Ninguna de las dos deberia pasar por un clic al pasar.
     this.toast.confirm({
+      escena: 'estado',
       title: realizado ? '¿Confirmar que ya se realizó?' : '¿Marcar como pendiente?',
       message: realizado
         ? `Se registrará "${nombre}" como realizado con la fecha y hora de ahora.`
@@ -254,7 +255,7 @@ export class PedidosComponent implements OnInit {
         this.pedidoSeleccionado = actualizado;
         const i = this.pedidos.findIndex(p => p.correlativoPedido === actualizado.correlativoPedido);
         if (i !== -1) { this.pedidos[i] = actualizado; this.aplicarFiltros(); }
-        this.toast.success(realizado ? 'Servicio confirmado' : 'Servicio marcado pendiente');
+        this.toast.success(realizado ? 'Servicio confirmado' : 'Servicio marcado pendiente', undefined, 'estado');
         this.cdr.detectChanges();
       },
       error: () => this.toast.error('Error', 'No se pudo actualizar el servicio')
@@ -912,7 +913,7 @@ export class PedidosComponent implements OnInit {
 
     this.pedidoService.guardarPedido(payload).subscribe({
       next: () => {
-        this.toast.success('Pedido creado');
+        this.toast.success('Pedido creado', undefined, 'documento');
         this.cancelar();
         this.cargarPedidos();
       },
@@ -987,6 +988,7 @@ export class PedidosComponent implements OnInit {
     const siguiente = this.siguienteEstadoLogistico(pedido.estadoActual?.idEstado);
     if (!siguiente) return;
     this.toast.confirm({
+      escena: 'estado',
       title: `¿Avanzar a "${siguiente.label}"?`,
       message: `Pedido ${pedido.correlativoPedido}`,
       confirmText: 'Sí, avanzar',
@@ -994,7 +996,7 @@ export class PedidosComponent implements OnInit {
       onConfirm: () => {
         this.pedidoService.cambiarEstadoLogistico(pedido.correlativoPedido, siguiente.idEstado).subscribe({
           next: (actualizado) => {
-            this.toast.success('Estado actualizado', siguiente.label);
+            this.toast.success('Estado actualizado', siguiente.label, 'estado');
             if (this.pedidoSeleccionado?.correlativoPedido === pedido.correlativoPedido) {
               this.pedidoSeleccionado = actualizado;
             }
@@ -1043,6 +1045,7 @@ export class PedidosComponent implements OnInit {
   cancelarPedido(pedido: Pedido): void {
     if (this.esPedidoCancelado(pedido)) { return; }
     this.toast.confirm({
+      escena: 'basurero',
       title: '¿Cancelar este pedido?',
       message: `El pedido ${pedido.correlativoPedido} pasará a "Evento cancelado".`,
       confirmText: 'Sí, cancelar pedido',
@@ -1054,7 +1057,7 @@ export class PedidosComponent implements OnInit {
               this.pedidoSeleccionado = actualizado;
             }
             this.cargarPedidos();
-            this.toast.success('Pedido cancelado', pedido.correlativoPedido);
+            this.toast.success('Pedido cancelado', pedido.correlativoPedido, 'basurero');
           },
           error: (err) => this.toast.error('Error', err?.error?.message ?? 'No se pudo cancelar el pedido')
         });
@@ -1130,7 +1133,7 @@ export class PedidosComponent implements OnInit {
 
     this.pedidoService.cambiarEstadoLogistico(pedido.correlativoPedido, nuevoIdEstado).subscribe({
       next: (actualizado) => {
-        this.toast.success('Estado actualizado', this.estadoLogisticoLabel(nuevoIdEstado));
+        this.toast.success('Estado actualizado', this.estadoLogisticoLabel(nuevoIdEstado), 'estado');
         if (this.pedidoSeleccionado?.correlativoPedido === pedido.correlativoPedido) {
           this.pedidoSeleccionado = actualizado;
         }
@@ -1170,7 +1173,7 @@ export class PedidosComponent implements OnInit {
 
     this.pagoService.registrarPago(payload).subscribe({
       next: () => {
-        this.toast.success('Pago registrado');
+        this.toast.success('Pago registrado', undefined, 'documento');
         this.formPago.reset();
         this.mostrarFormPago = false;
         if (this.pedidoSeleccionado) this.cargarPagos(this.pedidoSeleccionado.correlativoPedido);
@@ -1182,6 +1185,7 @@ export class PedidosComponent implements OnInit {
 
   anularPago(pago: PagoPedido): void {
     this.toast.confirm({
+      escena: 'basurero',
       title: '¿Anular pago?',
       message: `Q ${pago.montoPago.toFixed(2)} — ${pago.referenciaPago ?? 'sin referencia'}`,
       confirmText: 'Sí, anular',
@@ -1189,7 +1193,7 @@ export class PedidosComponent implements OnInit {
       onConfirm: () => {
         this.pagoService.anularPago(pago.idPago).subscribe({
           next: () => {
-            this.toast.success('Pago anulado');
+            this.toast.success('Pago anulado', undefined, 'basurero');
             if (this.pedidoSeleccionado) this.cargarPagos(this.pedidoSeleccionado.correlativoPedido);
             this.cargarPedidos();
           },
@@ -1294,7 +1298,7 @@ export class PedidosComponent implements OnInit {
 
     this.pedidoService.actualizarPedido(this.pedidoEditando.correlativoPedido, payload).subscribe({
       next: () => {
-        this.toast.success('Pedido actualizado');
+        this.toast.success('Pedido actualizado', undefined, 'documento');
         this.cerrarEditar();
         this.cargarPedidos();
       },

@@ -179,7 +179,8 @@
                            track blanco no se distingue, y una entrega al 0% se
                            veria como una barra vacia inexistente. -->
                       <div class="mt-1 h-2 rounded-full bg-brand-900/10 ring-1 ring-inset ring-brand-900/10 overflow-hidden">
-                        <div class="h-full rounded-full transition-all" [ngClass]="avanceColor(item)" [style.width.%]="avancePct(item)"></div>
+                        <div class="barra-relleno h-full rounded-full" [ngClass]="avanceColor(item)" [style.width.%]="avancePct(item)"
+                          [class.barra-activa]="avancePct(item) > 0 && avancePct(item) < 100"></div>
                       </div>
                     </div>
                   }

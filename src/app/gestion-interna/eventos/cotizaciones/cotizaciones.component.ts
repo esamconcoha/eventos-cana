@@ -580,7 +580,7 @@ export class CotizacionesComponent implements OnInit {
     this.cotizacionService.guardarCotizacion(payload).subscribe({
       next: (response) => {
         this.loading.hide();
-        this.toast.success('Cotización creada');
+        this.toast.success('Cotización creada', undefined, 'documento');
         this.cancelar();
         this.cargarCotizaciones();
 
@@ -632,7 +632,7 @@ export class CotizacionesComponent implements OnInit {
     this.cotizacionService.actualizarCotizacion(id, payload).subscribe({
       next: (response) => {
         this.loading.hide();
-        this.toast.success('Cotización actualizada', 'El documento se regeneró con los cambios');
+        this.toast.success('Cotización actualizada', 'El documento se regeneró con los cambios', 'documento');
         this.cancelar();
         this.cargarCotizaciones();
 
@@ -796,7 +796,7 @@ export class CotizacionesComponent implements OnInit {
 
     this.cotizacionService.confirmarCotizacion(this.cotizacionAConfirmar.idCotizacion, payload).subscribe({
       next: () => {
-        this.toast.success('Cotización confirmada');
+        this.toast.success('Cotización confirmada', 'Ya se creó su pedido', 'documento');
         this.cerrarConfirmar();
         this.cargarCotizaciones();
       },
@@ -807,13 +807,14 @@ export class CotizacionesComponent implements OnInit {
   // ─── Cancelar cotización ─────────────────────────────────
   cancelarCotizacion(cotizacion: Cotizacion): void {
     this.toast.confirm({
+      escena: 'basurero',
       title: '¿Cancelar cotización?',
       message: `Cotización ${cotizacion.codigoCotizacion} — ${cotizacion.nombreClienteCotizacion}`,
       confirmText: 'Sí, cancelar',
       cancelText: 'Volver',
       onConfirm: () => {
         this.cotizacionService.cancelarCotizacion(cotizacion.idCotizacion).subscribe({
-          next: () => { this.toast.success('Cotización cancelada'); this.cargarCotizaciones(); },
+          next: () => { this.toast.success('Cotización cancelada', undefined, 'basurero'); this.cargarCotizaciones(); },
           error: (err) => this.toast.error('Error', err?.error?.message ?? 'No se pudo cancelar')
         });
       }
@@ -823,13 +824,14 @@ export class CotizacionesComponent implements OnInit {
   // ─── Eliminar ────────────────────────────────────────────
   eliminar(cotizacion: Cotizacion): void {
     this.toast.confirm({
+      escena: 'basurero',
       title: '¿Eliminar cotización?',
       message: `¿Estás seguro de eliminar la cotización ${cotizacion.codigoCotizacion}?`,
       confirmText: 'Sí, eliminar',
       cancelText: 'Cancelar',
       onConfirm: () => {
         this.cotizacionService.eliminarCotizacion(cotizacion.idCotizacion).subscribe({
-          next: () => { this.toast.success('Cotización eliminada'); this.cargarCotizaciones(); },
+          next: () => { this.toast.success('Cotización eliminada', undefined, 'basurero'); this.cargarCotizaciones(); },
           error: (err) => this.toast.error('Error', err?.error?.message ?? 'No se pudo eliminar')
         });
       }

@@ -1,7 +1,10 @@
-<!-- Contenedor principal - centro superior, estilo Sonner -->
+<!-- Contenedor principal - centro superior, estilo Sonner.
+     En celular baja menos (top-3) y deja 12px por lado: con 16px + los 24px
+     del top la confirmación con ilustración quedaba muy abajo en pantallas
+     de 360-390px. -->
 <div
-  class="fixed top-6 left-1/2 -translate-x-1/2 z-[9999] flex flex-col gap-0 pointer-events-none"
-  style="width: 420px; max-width: calc(100vw - 2rem);">
+  class="fixed top-3 sm:top-6 left-1/2 -translate-x-1/2 z-[9999] flex flex-col gap-0 pointer-events-none"
+  style="width: 420px; max-width: calc(100vw - 1.5rem);">
 
   @for (toast of toasts$ | async; let i = $index; track trackById(i, toast)) {
 
@@ -13,9 +16,14 @@
         (click)="dismiss(toast)">
 
         <div
-          class="relative flex items-center gap-4 rounded-2xl pl-5 pr-10 py-5 shadow-[0_16px_40px_-8px_rgba(2,25,48,0.55)] overflow-hidden"
-          style="background: linear-gradient(160deg, rgba(15,30,51,0.82), rgba(2,25,48,0.88)); backdrop-filter: blur(24px) saturate(1.5); -webkit-backdrop-filter: blur(24px) saturate(1.5); border: 1px solid rgba(255,255,255,0.14); box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 16px 40px -8px rgba(2,25,48,0.55);">
+          class="relative flex items-center gap-3 sm:gap-4 rounded-2xl pl-4 sm:pl-5 pr-10 py-4 sm:py-5 shadow-[0_16px_40px_-8px_rgba(2,25,48,0.55)] overflow-hidden"          style="background: linear-gradient(160deg, rgba(15,30,51,0.82), rgba(2,25,48,0.88)); backdrop-filter: blur(24px) saturate(1.5); -webkit-backdrop-filter: blur(24px) saturate(1.5); border: 1px solid rgba(255,255,255,0.14); box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 16px 40px -8px rgba(2,25,48,0.55);">
 
+          @if (toast.escena) {
+          <!-- Éxito ilustrado: la acción se completa en la ilustración
+               (modo "listo") en lugar del ícono circular. -->
+          <app-ilustracion class="shrink-0 w-[68px] sm:w-[84px]"
+            [escena]="toast.escena" modo="listo"></app-ilustracion>
+          } @else {
           <!-- Ícono con insignia circular -->
           <div class="shrink-0 w-11 h-11 rounded-full flex items-center justify-center"
             [class.bg-amber-400]="toast.type === 'success' || toast.type === 'warning'"
@@ -34,6 +42,7 @@
               <span @fadeIn class="material-icons text-white text-[22px]">info</span>
             }
           </div>
+          }
 
           <!-- Texto -->
           <div class="flex-1 min-w-0">
@@ -77,32 +86,33 @@
           style="background: linear-gradient(160deg, rgba(15,30,51,0.82), rgba(2,25,48,0.88)); backdrop-filter: blur(24px) saturate(1.5); -webkit-backdrop-filter: blur(24px) saturate(1.5); border: 1px solid rgba(255,255,255,0.14); box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 16px 40px -8px rgba(2,25,48,0.55);">
 
           <!-- Contenido -->
-          <div class="px-6 pt-6 pb-5">
-            <div class="flex items-start gap-4 mb-5">
-              <div class="shrink-0 w-11 h-11 rounded-full flex items-center justify-center"
-                [class.bg-amber-400]="toast.type !== 'error'"
-                [class.bg-red-500]="toast.type === 'error'">
-                <span @pulseAnim class="material-icons text-white text-[22px]">priority_high</span>
-              </div>
-              <div>
-                <p class="font-serif italic text-[18px] text-white leading-snug">{{ toast.title }}</p>
-                @if (toast.message) {
-                  <p class="text-[13.5px] text-white/55 mt-1 leading-relaxed">{{ toast.message }}</p>
-                }
-              </div>
+          <div class="px-5 sm:px-6 pt-4 sm:pt-5 pb-5">
+            <!-- Ilustración de la escena en modo "pregunta" (ver
+                 IlustracionComponent). Más chica en celular para que la
+                 confirmación entera quepa sin scroll con el teclado cerrado. -->
+            <div class="flex justify-center mb-2 sm:mb-3">
+              <app-ilustracion class="w-[132px] sm:w-[168px]"
+                [escena]="toast.escena ?? 'documento'" modo="pregunta"></app-ilustracion>
+            </div>
+
+            <div class="text-center mb-5">
+              <p class="font-serif italic text-[18px] sm:text-[19px] text-white leading-snug">{{ toast.title }}</p>
+              @if (toast.message) {
+                <p class="text-[13.5px] text-white/55 mt-1 leading-relaxed">{{ toast.message }}</p>
+              }
             </div>
 
             <!-- Botones -->
             <div class="flex gap-2.5">
               <button
                 (click)="cancel(toast)"
-                class="flex-1 py-2.5 text-[14px] font-medium rounded-xl text-white/70 hover:text-white transition-colors duration-150"
+                class="flex-1 min-h-[44px] py-2.5 text-[14px] font-medium rounded-xl text-white/70 hover:text-white transition-colors duration-150"
                 style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1);">
                 {{ toast.cancelText }}
               </button>
               <button
                 (click)="confirm(toast)"
-                class="flex-1 py-2.5 text-[14px] font-bold rounded-xl transition-all duration-150 hover:opacity-90 active:scale-[0.98]"
+                class="flex-1 min-h-[44px] py-2.5 text-[14px] font-bold rounded-xl transition-all duration-150 hover:opacity-90 active:scale-[0.98]"
                 [class.bg-amber-400]="toast.type !== 'error' && toast.type !== 'warning'"
                 [class.text-gray-900]="toast.type !== 'error' && toast.type !== 'warning'"
                 [class.bg-red-500]="toast.type === 'error' || toast.type === 'warning'"

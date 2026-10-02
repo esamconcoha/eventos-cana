@@ -668,21 +668,24 @@
            `absolute` por debajo del campo y overflow-hidden lo recortaba (no se
            podian elegir dias mas alla de la primera fila). Mismo motivo por el
            que .modal-panel en styles.css tampoco lleva overflow. -->
-      <div class="pointer-events-auto w-full max-w-sm glass-strong rounded-[2rem] animate-modal-in"
+      <div class="pointer-events-auto relative w-full max-w-sm glass-strong rounded-[1.75rem] sm:rounded-[2rem] animate-modal-in"
         (click)="$event.stopPropagation()">
 
-        <div class="flex items-start justify-between px-6 pt-6">
-          <div>
-            <h2 class="font-serif italic text-2xl text-gray-900">Confirmar cotización</h2>
-            <p class="text-xs text-gray-400 mt-1">{{ cotizacionAConfirmar.codigoCotizacion }} — {{ cotizacionAConfirmar.nombreClienteCotizacion }}</p>
-          </div>
-          <button (click)="cerrarConfirmar()" title="Cerrar"
-            class="w-8 h-8 rounded-full bg-white/50 hover:bg-white/90 flex items-center justify-center text-gray-500 transition-colors shrink-0">
-            <span class="material-icons text-[18px]">close</span>
-          </button>
+        <button (click)="cerrarConfirmar()" title="Cerrar"
+          class="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/50 hover:bg-white/90 flex items-center justify-center text-gray-500 transition-colors">
+          <span class="material-icons text-[18px]">close</span>
+        </button>
+
+        <!-- Misma ilustración que las confirmaciones, en su versión para fondo
+             claro. Más chica en celular: el modal tiene que caber con el
+             calendario del date-picker abierto. -->
+        <div class="flex flex-col items-center text-center px-5 sm:px-6 pt-5 sm:pt-6">
+          <app-ilustracion class="sobre-claro w-[112px] sm:w-[140px]" escena="documento" modo="pregunta"></app-ilustracion>
+          <h2 class="font-serif italic text-[22px] sm:text-2xl text-gray-900 mt-1">Confirmar cotización</h2>
+          <p class="text-xs text-gray-400 mt-1">{{ cotizacionAConfirmar.codigoCotizacion }} — {{ cotizacionAConfirmar.nombreClienteCotizacion }}</p>
         </div>
 
-        <form [formGroup]="formConfirmar" (ngSubmit)="guardarConfirmacion()" class="px-6 pb-6 pt-4 space-y-4">
+        <form [formGroup]="formConfirmar" (ngSubmit)="guardarConfirmacion()" class="px-5 sm:px-6 pb-5 sm:pb-6 pt-4 space-y-4">
 
           @if (!confirmarLlevaItems) {
             <p class="text-sm text-gray-500">

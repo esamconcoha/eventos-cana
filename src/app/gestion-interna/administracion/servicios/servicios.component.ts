@@ -127,7 +127,7 @@ export class ServiciosComponent implements OnInit {
 
     req$.subscribe({
       next: () => {
-        this.toast.success(this.modoEdicion ? 'Servicio actualizado' : 'Servicio creado');
+        this.toast.success(this.modoEdicion ? 'Servicio actualizado' : 'Servicio creado', undefined, 'documento');
         this.cancelar();
         this.cargarServicios();
       },
@@ -145,13 +145,14 @@ export class ServiciosComponent implements OnInit {
   // ─── Inactivar ───────────────────────────────────────────
   confirmarInactivar(s: ServicioDecoracion): void {
     this.toast.confirm({
+      escena: 'basurero',
       title: '¿Inactivar servicio?',
       message: `¿Estás seguro de inactivar "${s.nombreServicio}"?`,
       confirmText: 'Sí, inactivar',
       cancelText: 'Cancelar',
       onConfirm: () => {
         this.servicioService.inactivarServicio(s.idServicio).subscribe({
-          next: () => { this.toast.success('Servicio inactivado'); this.cargarServicios(); },
+          next: () => { this.toast.success('Servicio inactivado', undefined, 'basurero'); this.cargarServicios(); },
           error: (err) => this.toast.error('Error', err?.error?.message ?? 'No se pudo inactivar')
         });
       }

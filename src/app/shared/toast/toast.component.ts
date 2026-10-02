@@ -4,11 +4,12 @@ import { trigger, transition, style, animate, keyframes } from '@angular/animati
 import { ToastService } from './toast.service';
 import { Toast } from './toast.model';
 import { Observable } from 'rxjs';
+import { IlustracionComponent } from '../ilustracion/ilustracion.component';
 
 @Component({
   selector: 'app-toast',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, IlustracionComponent],
   templateUrl: './toast.component.html',
   styleUrl: './toast.component.css',
   animations: [
@@ -28,14 +29,21 @@ import { Observable } from 'rxjs';
           })
         )
       ]),
+      // Al salir, además de desvanecerse, el toast se pliega (alto y margen a
+      // 0): el que venga debajo, típicamente el aviso de éxito de la acción
+      // recién confirmada, sube deslizándose a su lugar en vez de saltar.
+      // pointer-events none: un doble clic en "Sí, eliminar" mientras sale no
+      // debe disparar la acción otra vez.
+      // Una sola animación con fotogramas y no un group(): en un group Angular
+      // completa cada animación con las propiedades de las otras, así que la
+      // del alto traía opacity 1 y anulaba el desvanecido.
       transition(':leave', [
-        animate('200ms cubic-bezier(0.4, 0, 1, 1)', 
-          style({ 
-            opacity: 0, 
-            transform: 'translateY(-16px) scale(0.95)',
-            filter: 'blur(2px)'
-          })
-        )
+        style({ height: '*', overflow: 'hidden', pointerEvents: 'none' }),
+        animate('280ms cubic-bezier(0.4, 0, 0.2, 1)', keyframes([
+          style({ opacity: 1, transform: 'translateY(0) scale(1)', filter: 'blur(0px)', height: '*', marginBottom: '*', offset: 0 }),
+          style({ opacity: 0, transform: 'translateY(-12px) scale(0.95)', filter: 'blur(2px)', offset: 0.6 }),
+          style({ opacity: 0, transform: 'translateY(-12px) scale(0.95)', filter: 'blur(2px)', height: 0, marginBottom: 0, offset: 1 })
+        ]))
       ])
     ]),
 
@@ -120,14 +128,24 @@ export class ToastComponent {
     this.toastService.remove(toast.id);
   }
 
+  /** Confirmaciones ya respondidas: un segundo clic no repite la acción. */
+  private respondidas = new Set<string>();
+
+  // Primero se retira la confirmación y después se ejecuta la acción: así el
+  // aviso que dispare (éxito o error) entra cuando la confirmación ya va de
+  // salida, y no debajo de ella.
   confirm(toast: Toast): void {
-    toast.onConfirm?.();
+    if (this.respondidas.has(toast.id)) { return; }
+    this.respondidas.add(toast.id);
     this.toastService.remove(toast.id);
+    toast.onConfirm?.();
   }
 
   cancel(toast: Toast): void {
-    toast.onCancel?.();
+    if (this.respondidas.has(toast.id)) { return; }
+    this.respondidas.add(toast.id);
     this.toastService.remove(toast.id);
+    toast.onCancel?.();
   }
 
   trackById(_: number, t: Toast): string {

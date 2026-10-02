@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { Toast, ToastType } from './toast.model';
+import { EscenaIlustracion } from '../ilustracion/ilustracion.component';
 
 @Injectable({ providedIn: 'root' })
 export class ToastService {
@@ -12,8 +13,8 @@ export class ToastService {
     return Math.random().toString(36).slice(2, 9);
   }
 
-  private add(toast: Omit<Toast, 'id' | 'removing'>): void {
-    const t: Toast = { ...toast, id: this.uid(), removing: false };
+  private add(toast: Omit<Toast, 'id'>): void {
+    const t: Toast = { ...toast, id: this.uid() };
     this._toasts.next([...this._toasts.value, t]);
 
     if (!toast.confirm && (toast.duration ?? 3000) > 0) {
@@ -21,19 +22,25 @@ export class ToastService {
     }
   }
 
+  /**
+   * Se quita del arreglo en el acto: la salida la anima el trigger :leave de
+   * ToastComponent, que mantiene el elemento en pantalla mientras dura.
+   *
+   * Antes se esperaban 300ms con una bandera "removing" que la plantilla no
+   * usaba: la confirmación seguía entera en pantalla, el aviso de éxito de la
+   * acción entraba debajo y luego saltaba al irse la confirmación.
+   */
   remove(id: string): void {
-    // Marca como "removing" para disparar animación de salida
-    this._toasts.next(
-      this._toasts.value.map(t => t.id === id ? { ...t, removing: true } : t)
-    );
-    // Elimina del array después de que termine la animación (300ms)
-    setTimeout(() => {
-      this._toasts.next(this._toasts.value.filter(t => t.id !== id));
-    }, 300);
+    this._toasts.next(this._toasts.value.filter(t => t.id !== id));
   }
 
-  success(title: string, message?: string): void {
-    this.add({ type: 'success', title, message, duration: 3000 });
+  /**
+   * Con `escena`, el éxito muestra la ilustración en modo "listo" (la acción
+   * se completa en pantalla) en lugar del ícono, y dura un poco más para que
+   * la animación alcance a terminar.
+   */
+  success(title: string, message?: string, escena?: EscenaIlustracion): void {
+    this.add({ type: 'success', title, message, escena, duration: escena ? 3800 : 3000 });
   }
 
   error(title: string, message?: string): void {
@@ -55,9 +62,12 @@ export class ToastService {
     cancelText?: string;
     onConfirm: () => void;
     onCancel?: () => void;
+    /** documento (default): confirmar/finalizar · basurero: eliminar/inactivar/anular · estado: cambios de estado */
+    escena?: EscenaIlustracion;
   }): void {
     this.add({
       type: 'warning',
+      escena: options.escena ?? 'documento',
       title: options.title,
       message: options.message,
       confirm: true,
