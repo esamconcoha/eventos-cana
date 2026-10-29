@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ElementRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { CotizacionService } from '../../../services/cotizacion.service';
 import { ItemService } from '../../../services/item.service';
@@ -93,6 +93,10 @@ export class CotizacionesComponent implements OnInit {
   mostrarConfirmar = false;
   cotizacionAConfirmar: Cotizacion | null = null;
   formConfirmar: FormGroup;
+
+  // El formulario se pinta arriba del listado: al modificar desde una fila de
+  // abajo hay que llevar al usuario hasta él o parece que no pasó nada.
+  @ViewChild('formCotizacion') formCotizacion?: ElementRef<HTMLElement>;
 
   constructor(
     private fb: FormBuilder,
@@ -551,6 +555,11 @@ export class CotizacionesComponent implements OnInit {
         motivoDescuento: [s.motivoDescuento ?? '']
       }, { validators: validadorDescuentoLinea }));
     }
+
+    // Sin zone.js el @if no se pinta solo: se fuerza el render para que el
+    // ViewChild exista antes de desplazar.
+    this.cdr.detectChanges();
+    this.formCotizacion?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   // ─── Guardar ─────────────────────────────────────────────
