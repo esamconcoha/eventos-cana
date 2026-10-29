@@ -57,7 +57,8 @@ public enum ErrorEnum {
     I_ERROR_SUBIR_CONSTANCIA_FIRMADA        (4040, EstadoHttp.INTERNAL_SERVER_ERROR, "Ocurrio un error al guardar la constancia firmada"),
     DESCUENTO_TIPO_INVALIDO                 (4041, EstadoHttp.BAD_REQUEST, "El tipo de descuento no es valido"),
     DESCUENTO_VALOR_INVALIDO                (4042, EstadoHttp.BAD_REQUEST, "El descuento debe ser mayor a cero, y si es porcentaje no puede pasar de 100"),
-    PEDIDO_SIN_ITEMS                        (4043, EstadoHttp.BAD_REQUEST, "El pedido no tiene items: un pedido de solo servicios no lleva entrega");
+    PEDIDO_SIN_ITEMS                        (4043, EstadoHttp.BAD_REQUEST, "El pedido no tiene items: un pedido de solo servicios no lleva entrega"),
+    FECHA_COTIZACION_FUTURA                 (4044, EstadoHttp.BAD_REQUEST, "La fecha de la cotizacion no puede ser posterior a hoy");
 //______________________________________________________________________________
     /**
      * <p>Codigo de error.</p>

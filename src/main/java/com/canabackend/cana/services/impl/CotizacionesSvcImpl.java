@@ -54,11 +54,13 @@ public class CotizacionesSvcImpl implements CotizacionesSvc {
                 && cotizacion.getFechaHoraEvento().toLocalDate().isBefore(LocalDate.now())) {
             throw new MSCanaException(ErrorEnum.FECHA_EN_PASADO);
         }
+        validarFechaCotizacion(cotizacion.getFechaCotizacion());
         Cotizaciones cotizacionNueva = new Cotizaciones();
         cotizacionNueva.setNombreClienteCotizacion(cotizacion.getNombreClienteCotizacion());
         cotizacionNueva.setDireccionClienteCotizacion(cotizacion.getDireccionClienteCotizacion());
         cotizacionNueva.setTelefonoClienteCotizacion(cotizacion.getTelefonoClienteCotizacion());
-        cotizacionNueva.setFechaCotizacion(LocalDate.now());
+        cotizacionNueva.setFechaCotizacion(cotizacion.getFechaCotizacion() != null
+                ? cotizacion.getFechaCotizacion() : LocalDate.now());
         cotizacionNueva.setCotizacionConfirmada(Boolean.TRUE.equals(cotizacion.getCotizacionConfirmada()));
         cotizacionNueva.setDpiNitUsuarioCotizacion(cotizacion.getDpiNitUsuarioCotizacion());
         // El estado "Creada" se retira: toda cotizacion nueva arranca ya en
@@ -120,7 +122,11 @@ public class CotizacionesSvcImpl implements CotizacionesSvc {
                 && dto.getFechaHoraEvento().toLocalDate().isBefore(LocalDate.now())) {
             throw new MSCanaException(ErrorEnum.FECHA_EN_PASADO);
         }
+        validarFechaCotizacion(dto.getFechaCotizacion());
 
+        if (dto.getFechaCotizacion() != null) {
+            cotizacion.setFechaCotizacion(dto.getFechaCotizacion());
+        }
         if (dto.getNombreClienteCotizacion() != null) {
             cotizacion.setNombreClienteCotizacion(dto.getNombreClienteCotizacion());
         }
@@ -321,6 +327,16 @@ public class CotizacionesSvcImpl implements CotizacionesSvc {
                     h.getFechaHoraFin()));
         }
         return resultado;
+    }
+
+    /**
+     * La fecha de cotizacion es la de registro: puede corregirse hacia atras
+     * (cotizaciones hechas antes de capturarlas en el sistema), pero no a futuro.
+     */
+    private void validarFechaCotizacion(LocalDate fechaCotizacion) {
+        if (fechaCotizacion != null && fechaCotizacion.isAfter(LocalDate.now())) {
+            throw new MSCanaException(ErrorEnum.FECHA_COTIZACION_FUTURA);
+        }
     }
 
     private String generarCodigoCotizacion(Cotizaciones cot) {
