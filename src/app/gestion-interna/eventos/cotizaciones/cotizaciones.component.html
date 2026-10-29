@@ -76,7 +76,17 @@
               }
             </div>
 
-            <div class="flex flex-col gap-1 md:col-span-2">
+            <div class="flex flex-col gap-1">
+              <label class="field-label">Fecha de cotización <span class="text-red-500">*</span></label>
+              <app-date-picker formControlName="fechaCotizacion" modo="fecha" [fechaMaxima]="hoy"
+                placeholder="Selecciona la fecha de cotización"
+                [invalido]="campoInvalido('fechaCotizacion')"></app-date-picker>
+              @if (campoInvalido('fechaCotizacion')) {
+                <span class="text-xs text-red-500">Campo requerido</span>
+              }
+            </div>
+
+            <div class="flex flex-col gap-1">
               <label class="field-label">Tipo de evento <span class="text-red-500">*</span></label>
               <app-select formControlName="codTipoEvento"
                 [opciones]="tiposEvento" campoValor="codigo" campoEtiqueta="nombre"

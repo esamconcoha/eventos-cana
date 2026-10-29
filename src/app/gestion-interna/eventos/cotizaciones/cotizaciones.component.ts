@@ -13,7 +13,7 @@ import { ItemCana } from '../../../interfaces/item-cana';
 import { ServicioDecoracion } from '../../../interfaces/servicio';
 import { Catalogo } from '../../../interfaces/catalogo';
 import { TrazaEvento } from '../../../interfaces/trazabilidad';
-import { fechaHoraISOLocal } from '../../../shared/fecha.util';
+import { fechaHoraISOLocal, hoyISOLocal } from '../../../shared/fecha.util';
 import { TIPOS_DESCUENTO, etiquetaDescuento, montoDescuento, netoLinea,
          payloadDescuento, requiereValor, validadorDescuentoLinea } from '../../../shared/descuento.util';
 import { TipoDescuento } from '../../../interfaces/descuento';
@@ -109,6 +109,7 @@ export class CotizacionesComponent implements OnInit {
       nombreClienteCotizacion:    ['', [Validators.required, Validators.maxLength(100)]],
       direccionClienteCotizacion: ['', [Validators.required, Validators.maxLength(200)]],
       telefonoClienteCotizacion:  ['', [Validators.required, Validators.pattern('^[0-9]{8}$')]],
+      fechaCotizacion:            [hoyISOLocal(), Validators.required],
       fechaHoraEvento:            ['', Validators.required],
       codTipoEvento:              [null, Validators.required],
       detalles: this.fb.array([]),
@@ -397,6 +398,12 @@ export class CotizacionesComponent implements OnInit {
     return this.totalBrutoCotizacion - this.totalDescuentosCotizacion;
   }
 
+  // Tope del selector de fecha de cotización: se puede fechar hacia atrás,
+  // nunca a futuro (el backend valida lo mismo).
+  get hoy(): string {
+    return hoyISOLocal();
+  }
+
   // ─── Selector de fecha/hora del evento ────────────────────
   abrirCalendario(): void {
     this.calendarioAbierto = true;
@@ -507,6 +514,7 @@ export class CotizacionesComponent implements OnInit {
       direccionClienteCotizacion: cotizacion.direccionClienteCotizacion,
       telefonoClienteCotizacion: cotizacion.telefonoClienteCotizacion,
       codTipoEvento: cotizacion.codTipoEvento,
+      fechaCotizacion: (cotizacion.fechaCotizacion ?? '').slice(0, 10) || hoyISOLocal(),
       fechaHoraEvento: cotizacion.fechaHoraEvento
     });
 
@@ -558,6 +566,7 @@ export class CotizacionesComponent implements OnInit {
       nombreClienteCotizacion: this.form.value.nombreClienteCotizacion,
       direccionClienteCotizacion: this.form.value.direccionClienteCotizacion,
       telefonoClienteCotizacion: Number(this.form.value.telefonoClienteCotizacion),
+      fechaCotizacion: this.form.value.fechaCotizacion,
       fechaHoraEvento: this.form.value.fechaHoraEvento,
       cotizacionConfirmada: false,
       dpiNitUsuarioCotizacion: this.tokenService.getDpi(),
@@ -612,6 +621,7 @@ export class CotizacionesComponent implements OnInit {
       nombreClienteCotizacion: this.form.value.nombreClienteCotizacion,
       direccionClienteCotizacion: this.form.value.direccionClienteCotizacion,
       telefonoClienteCotizacion: Number(this.form.value.telefonoClienteCotizacion),
+      fechaCotizacion: this.form.value.fechaCotizacion,
       fechaHoraEvento: this.form.value.fechaHoraEvento,
       codTipoEvento: this.form.value.codTipoEvento,
       detalleCotizacion: this.detalles.value.map((d: any) => ({
@@ -748,7 +758,7 @@ export class CotizacionesComponent implements OnInit {
   }
 
   cancelar(): void {
-    this.form.reset();
+    this.form.reset({ fechaCotizacion: hoyISOLocal() });
     this.detalles.clear();
     this.detallesServicios.clear();
     this.resetCalendario();

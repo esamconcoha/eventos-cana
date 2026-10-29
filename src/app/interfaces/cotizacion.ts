@@ -24,6 +24,7 @@ export interface CrearCotizacion {
   nombreClienteCotizacion: string;
   direccionClienteCotizacion: string;
   telefonoClienteCotizacion: number;
+  fechaCotizacion?: string;           // 'yyyy-mm-dd'; si no viaje, el backend usa hoy
   fechaHoraEvento: string;            // ISO datetime del evento (lo captura el usuario)
   cotizacionConfirmada: boolean;      // siempre false al crear
   dpiNitUsuarioCotizacion: string;
@@ -47,6 +48,7 @@ export interface ActualizarCotizacion {
   nombreClienteCotizacion: string;
   direccionClienteCotizacion: string;
   telefonoClienteCotizacion: number;
+  fechaCotizacion?: string;           // 'yyyy-mm-dd'; si no viaja, se conserva la actual
   fechaHoraEvento: string;
   codTipoEvento: string;
   detalleCotizacion: DetalleCotizacion[];
@@ -65,7 +67,7 @@ export interface Cotizacion {
   nombreClienteCotizacion: string;
   direccionClienteCotizacion: string;
   telefonoClienteCotizacion: string;
-  fechaCotizacion: string;            // fecha de registro, la asigna el backend
+  fechaCotizacion: string;            // fecha de registro; hoy por defecto, editable
   fechaHoraEvento: string;
   estadoCotizacion: EstadoCotizacion;
   dpiNitUsuarioCotizacion: string;
